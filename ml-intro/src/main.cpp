@@ -1,8 +1,12 @@
 #include <GLFW/glfw3.h>
+#include "openWindow.h"
 
 int main(void)
 {
     GLFWwindow* window;
+
+    std::string filePath = "resources/example.html"; // Path to your HTML file
+    openWindow(filePath);
 
     /* Initialize the library */
     if (!glfwInit())
@@ -15,7 +19,6 @@ int main(void)
         glfwTerminate();
         return -1;
     }
-
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
