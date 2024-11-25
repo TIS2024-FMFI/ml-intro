@@ -71,7 +71,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)vendor\glad\include\;$(ProjectDir)vendor\glfw-3.4.bin.WIN64\include\;$(ProjectDir)vendor\glm-1.0.1;$(ProjectDir)vendor\ImGui;$(ProjectDir)vendor\ImGui\backends;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)vendor\glad\include\;$(ProjectDir)vendor\glfw-3.4.bin.WIN64\include\;$(ProjectDir)vendor\glm-1.0.1;$(ProjectDir)vendor\ImGui;$(ProjectDir)vendor\ImGui\misc;$(ProjectDir)vendor\ImGui\backends;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)vendor\glfw-3.4.bin.WIN64\lib-vc2022\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -141,6 +141,28 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="vendor\ImGui\backends\imgui_impl_dx10.cpp" />
+    <ClCompile Include="vendor\ImGui\backends\imgui_impl_glfw.cpp" />
+    <ClCompile Include="vendor\ImGui\backends\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="vendor\ImGui\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="vendor\ImGui\imgui.cpp" />
+    <ClCompile Include="vendor\ImGui\imgui_demo.cpp" />
+    <ClCompile Include="vendor\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="vendor\ImGui\imgui_tables.cpp" />
+    <ClCompile Include="vendor\ImGui\imgui_widgets.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="vendor\ImGui\backends\imgui_impl_dx10.h" />
+    <ClInclude Include="vendor\ImGui\backends\imgui_impl_glfw.h" />
+    <ClInclude Include="vendor\ImGui\backends\imgui_impl_opengl3.h" />
+    <ClInclude Include="vendor\ImGui\backends\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="vendor\ImGui\backends\imgui_impl_win32.h" />
+    <ClInclude Include="vendor\ImGui\imconfig.h" />
+    <ClInclude Include="vendor\ImGui\imgui.h" />
+    <ClInclude Include="vendor\ImGui\imgui_internal.h" />
+    <ClInclude Include="vendor\ImGui\imstb_rectpack.h" />
+    <ClInclude Include="vendor\ImGui\imstb_textedit.h" />
+    <ClInclude Include="vendor\ImGui\imstb_truetype.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
