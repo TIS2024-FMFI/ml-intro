@@ -140,6 +140,7 @@
     <None Include=".gitignore" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ImGuiApp.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\mainWindow.cpp" />
     <ClCompile Include="vendor\ImGui\backends\imgui_impl_dx10.cpp" />
@@ -153,6 +154,7 @@
     <ClCompile Include="vendor\ImGui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ImGuiApp.h" />
     <ClInclude Include="vendor\ImGui\backends\imgui_impl_dx10.h" />
     <ClInclude Include="vendor\ImGui\backends\imgui_impl_glfw.h" />
     <ClInclude Include="vendor\ImGui\backends\imgui_impl_opengl3.h" />

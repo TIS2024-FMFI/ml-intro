@@ -1,5 +1,7 @@
-#include <GLFW/glfw3.h>
+#include <Windows.h>
+#include <tchar.h>
 #include "mainWindow.cpp"
+#include "ImGuiApp.h"
 
 int blackWindow() {
     GLFWwindow* window;
@@ -39,5 +41,17 @@ int main(void)
 {
     //blackWindow();
 
-    renderImGuiDemo();
+    //renderImGuiDemo();
+
+    HINSTANCE hInstance = GetModuleHandle(nullptr);
+
+    ImGuiApp app(hInstance);
+    if (!app.Initialize()) {
+        MessageBox(nullptr, _T("Failed to initialize ImGui application"), _T("Error"), MB_OK | MB_ICONERROR);
+        return 1;
+    }
+
+    app.Run();
+
+    return 0;
 }
