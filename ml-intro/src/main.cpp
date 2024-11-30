@@ -1,6 +1,5 @@
 #include <Windows.h>
 #include <tchar.h>
-#include "mainWindow.cpp"
 #include "ImGuiApp.h"
 
 int blackWindow() {
