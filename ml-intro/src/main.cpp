@@ -1,5 +1,6 @@
 #include <GLFW/glfw3.h>
 #include "openWindow.h"
+#include "Perceptron.h"
 
 int main(void)
 {
@@ -36,5 +37,26 @@ int main(void)
     }
 
     glfwTerminate();
+
+    //Perceptron perceptron(2, 0.1);
+
+    // /*Training data for an AND gate*/
+    //std::vector<std::vector<double>> trainingData = {
+    //    {0, 0},
+    //    {0, 1},
+    //    {1, 0},
+    //    {1, 1}
+    //};
+    //std::vector<double> labels = { -1, -1, -1, 1 };
+
+    //perceptron.fit(trainingData, labels, 100);
+    //perceptron.printModel();
+
+    // /*Test the perceptron*/
+    //std::cout << "Predictions:\n";
+    //for (const auto& data : trainingData) {
+    //    std::cout << perceptron.guess(data) << std::endl;
+    //}
+
     return 0;
 }
