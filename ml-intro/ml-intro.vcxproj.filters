@@ -49,6 +49,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ImGuiApp.cpp">
+    <ClCompile Include="src\openWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -87,6 +88,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ImGuiApp.h">
+    <ClInclude Include="src\openWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <tchar.h>
 #include "ImGuiApp.h"
+#include "openWindow.h"
 
 int main(void)
 {
