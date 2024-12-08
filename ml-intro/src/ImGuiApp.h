@@ -9,7 +9,8 @@
 #include <Windows.h>
 #include <GLFW/glfw3.h>
 #include <tchar.h>
-#include "AppManager.h"
+
+class AppManager; // Forward declaration of AppManager
 
 struct WGL_WindowData { HDC hDC; };
 
