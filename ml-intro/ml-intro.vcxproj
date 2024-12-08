@@ -151,7 +151,9 @@
     <ClCompile Include="vendor\ImGui\imgui_draw.cpp" />
     <ClCompile Include="vendor\ImGui\imgui_tables.cpp" />
     <ClCompile Include="vendor\ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="src\NeuralNetwork.cpp" />
     <ClCompile Include="src\openWindow.cpp" />
+    <ClCompile Include="src\Perceptron.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ImGuiApp.h" />
@@ -167,6 +169,9 @@
     <ClInclude Include="vendor\ImGui\imstb_textedit.h" />
     <ClInclude Include="vendor\ImGui\imstb_truetype.h" />
     <ClInclude Include="src\openWindow.h" />    
+    <ClInclude Include="src\NeuralNetwork.h" />
+    <ClInclude Include="src\openWindow.h" />
+    <ClInclude Include="src\Perceptron.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

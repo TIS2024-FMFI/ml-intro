@@ -2,6 +2,7 @@
 #include <tchar.h>
 #include "ImGuiApp.h"
 #include "openWindow.h"
+#include "Perceptron.h"
 
 int main(void)
 {
