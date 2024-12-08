@@ -9,6 +9,7 @@
 #include <Windows.h>
 #include <GLFW/glfw3.h>
 #include <tchar.h>
+#include "functions.cpp"
 
 class AppManager; // Forward declaration of AppManager
 
@@ -25,13 +26,18 @@ public:
     void Run();
 
     int getCurrentScenrio() { return currentScenario; }
+    Function* getActivationFunction();
+    float getBias() { return bias; }
+    float getLearningRate() { return learningRate; }
+    ImVec4 getInput() { return color; }
+
 
 private:
     enum ActivationFunction
     {
-        ReLu,
-        Sigmoid,
-        Tanh
+        relu,
+        sigmoid,
+        tanh
     };
 
     HWND hwnd;
