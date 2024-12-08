@@ -170,7 +170,6 @@
     <ClInclude Include="vendor\ImGui\imstb_truetype.h" />
     <ClInclude Include="src\openWindow.h" />    
     <ClInclude Include="src\NeuralNetwork.h" />
-    <ClInclude Include="src\openWindow.h" />
     <ClInclude Include="src\Perceptron.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
