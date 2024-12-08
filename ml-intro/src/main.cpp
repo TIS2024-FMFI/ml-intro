@@ -1,9 +1,13 @@
 #include <Windows.h>
 #include <tchar.h>
 #include "ImGuiApp.h"
+#include "openWindow.h"
 
 int blackWindow() {
     GLFWwindow* window;
+
+    std::string filePath = "resources/example.html"; // Path to your HTML file
+    openWindow(filePath);
 
     /* Initialize the library */
     if (!glfwInit())
