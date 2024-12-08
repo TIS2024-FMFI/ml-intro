@@ -141,10 +141,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\NeuralNetwork.cpp" />
     <ClCompile Include="src\openWindow.cpp" />
+    <ClCompile Include="src\Perceptron.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\NeuralNetwork.h" />
     <ClInclude Include="src\openWindow.h" />
+    <ClInclude Include="src\Perceptron.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
