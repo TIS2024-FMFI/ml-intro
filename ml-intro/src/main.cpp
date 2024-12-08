@@ -1,12 +1,8 @@
-#include <Windows.h>
-#include <tchar.h>
-#include "ImGuiApp.h"
-#include "openWindow.h"
-#include "Perceptron.h"
+#include "AppManager.h"
 
 int main(void)
 {
-    HINSTANCE hInstance = GetModuleHandle(nullptr);
+   /* HINSTANCE hInstance = GetModuleHandle(nullptr);
 
     ImGuiApp app(hInstance);
     if (!app.Initialize()) {
@@ -16,5 +12,8 @@ int main(void)
 
     app.Run();
 
-    return 0;
+    return 0;*/
+
+    AppManager app = AppManager();
+    app.run();
 }

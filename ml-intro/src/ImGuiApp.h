@@ -9,6 +9,7 @@
 #include <Windows.h>
 #include <GLFW/glfw3.h>
 #include <tchar.h>
+#include "AppManager.h"
 
 struct WGL_WindowData { HDC hDC; };
 
@@ -17,10 +18,12 @@ static WGL_WindowData g_MainWindow = { nullptr };
 
 class ImGuiApp {
 public:
-    ImGuiApp(HINSTANCE hInstance);
+    ImGuiApp(AppManager& parent, HINSTANCE hInstance);
     ~ImGuiApp();
     bool Initialize();
     void Run();
+
+    int getCurrentScenrio() { return currentScenario; }
 
 private:
     enum ActivationFunction
@@ -34,6 +37,7 @@ private:
     WNDCLASSEX wc;
     HINSTANCE hInstance;
     
+    AppManager* parent;
     bool running;
     int currentScenario;
     ActivationFunction activationFunction;
