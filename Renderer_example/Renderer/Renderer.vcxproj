@@ -71,12 +71,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)vendor\glad\include\;$(ProjectDir)vendor\glfw-3.4.bin.WIN64\include\;$(ProjectDir)vendor\glm-1.0.1;$(ProjectDir)vendor\ImGui;$(ProjectDir)vendor\ImGui\backends;$(ProjectDir)vendor\nlohmann\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)vendor\glfw-3.4.bin.WIN64\lib-vc2022\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)vendor\glad\include\;$(ProjectDir)vendor\glfw-3.4.bin.WIN64\include\;$(ProjectDir)vendor\glm-1.0.1\;$(ProjectDir)vendor\ImGui\;$(ProjectDir)vendor\ImGui\backends\;$(ProjectDir)vendor\nlohmann\;$(ProjectDir)vendor\freetype-2.13.3\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)vendor\glfw-3.4.bin.WIN64\lib-vc2022\;$(ProjectDir)vendor\freetype-2.13.3\release static\vs2015-2022\win64\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)vendor\glad\include\;$(ProjectDir)vendor\glfw-3.4.bin.WIN64\include\;$(ProjectDir)vendor\glm-1.0.1;$(ProjectDir)vendor\ImGui;$(ProjectDir)vendor\ImGui\backends;$(ProjectDir)vendor\nlohmann\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)vendor\glfw-3.4.bin.WIN64\lib-vc2022\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)vendor\glad\include\;$(ProjectDir)vendor\glfw-3.4.bin.WIN64\include\;$(ProjectDir)vendor\glm-1.0.1\;$(ProjectDir)vendor\ImGui\;$(ProjectDir)vendor\ImGui\backends\;$(ProjectDir)vendor\nlohmann\;$(ProjectDir)vendor\freetype-2.13.3\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)vendor\glfw-3.4.bin.WIN64\lib-vc2022\;$(ProjectDir)vendor\freetype-2.13.3\release static\vs2015-2022\win64\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -116,7 +116,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;gdi32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -133,12 +133,13 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;gdi32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\FrameBuffer.cpp" />
     <ClCompile Include="src\GLWindow.cpp" />
+    <ClCompile Include="src\Label.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ModelData.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\FrameBuffer.h" />
     <ClInclude Include="src\GLWindow.h" />
+    <ClInclude Include="src\Label.h" />
     <ClInclude Include="src\ModelData.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="vendor\glad\include\glad\glad.h" />

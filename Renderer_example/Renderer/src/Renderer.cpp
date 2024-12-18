@@ -7,19 +7,63 @@ Renderer::Renderer(FrameBuffer *fb, Camera *cam)
 	: m_frameBuffer(fb), m_camera(cam) 
 {
 	setupFullscreenQuad();
-	loadNN(ModelData("examples/test/data.json"));
 	shaderProgram = createShaderProgram("resources/shaders/pointShader.vert", "resources/shaders/pointShader.frag");
+	edgeShaderProgram = createShaderProgram("resources/shaders/edgeShader.vert", "resources/shaders/edgeShader.frag");
 	screenShaderProgram = createShaderProgram("resources/shaders/screenShader.vert", "resources/shaders/screenShader.frag");
+
+	glGenVertexArrays(1, &vertVAO);
+	glGenBuffers(1, &vertVBO);
+
+	glGenVertexArrays(1, &edgeVAO);
+	glGenBuffers(1, &edgeVBO);
+
+	glPointSize(25.0f);
+	glLineWidth(5.0f);
+
+	loadNN(ModelData("examples/test/data.json"));
 }
 
 void Renderer::loadNN(ModelData model) {
-	nOfVerticies = model.numberOfVerticies();
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
+	layers = model.getActivations();
+	weights = model.getWeights();
 
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, nOfVerticies * sizeof(vec3), &model.getVerticiesPositions()[0], GL_STATIC_DRAW);
+	float layerSpacing = 2.0f, nodeSpacing = 0.5f;
+
+	vector<vec3> lastLayer = {};
+	for (int i = 0; i < layers.size(); ++i) {
+		vector<vec3> currentLayer = {};
+		for (size_t j = 0; j < layers[i].size(); ++j) {
+			vec3 nodePos = vec3((i - 1) * layerSpacing, j * nodeSpacing - layers[i].size() * nodeSpacing / 2.0f, 0.0f);
+			nodes.emplace_back(nodePos);
+			currentLayer.emplace_back(nodePos);
+			if (i > 0) {
+				for (size_t k = 0; k < layers[i - 1].size(); ++k) {
+					edges.emplace_back(lastLayer[k], currentLayer[j]);
+				}
+			}
+		}
+		lastLayer = currentLayer;
+	}
+
+	glBindVertexArray(vertVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, vertVBO);
+	glBufferData(GL_ARRAY_BUFFER, nodes.size() * sizeof(vec3), nodes.data(), GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	vector<vec3> edgeVertices;
+	for (const auto& edge : edges) {
+		edgeVertices.push_back(edge.first);
+		edgeVertices.push_back(edge.second);
+	}
+
+	glBindVertexArray(edgeVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, edgeVBO);
+	glBufferData(GL_ARRAY_BUFFER, edgeVertices.size() * sizeof(vec3), edgeVertices.data(), GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
 	glEnableVertexAttribArray(0);
@@ -28,13 +72,15 @@ void Renderer::loadNN(ModelData model) {
 	glBindVertexArray(0);
 }
 
+
 void Renderer::renderScene() {
 	test += 0.002;
-	m_camera->SetCameraView(vec3(sin(test) * 20., .0, cos(test) * 20.), vec3(.0));
+	m_camera->SetCameraView(vec3(sin(test) * 5., .0, cos(test) * 5.), vec3(.0));
 	m_camera->UpdateProjMatrix();
 
 
 	m_frameBuffer->Bind();
+
 
 	useShaderProgram();
 
@@ -44,27 +90,63 @@ void Renderer::renderScene() {
 }
 
 void Renderer::useShaderProgram() {
-	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
+	glDepthMask(GL_FALSE);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_PROGRAM_POINT_SIZE);
+	glDisable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	glUseProgram(edgeShaderProgram);
+
+	GLint viewLoc = glGetUniformLocation(edgeShaderProgram, "view");
+	GLint projLoc = glGetUniformLocation(edgeShaderProgram, "projection");
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(m_camera->GetViewMatrix()));
+	glUniformMatrix4fv(projLoc, 1, GL_FALSE, value_ptr(m_camera->GetProjMatrix()));
+
+	glBindVertexArray(edgeVAO);
+	for (size_t i = 0; i < edges.size(); ++i) {
+		vec4 color = weightToColor(getNthWeight(i, weights));
+		glUniform4fv(glGetUniformLocation(edgeShaderProgram, "color"), 1, value_ptr(color));
+		glDrawArrays(GL_LINES, i * 2, 2);
+	}
+	glBindVertexArray(0);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glDepthMask(GL_TRUE);
 
 	glUseProgram(shaderProgram);
+	glEnable(GL_PROGRAM_POINT_SIZE);
 
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, value_ptr(m_camera->GetViewMatrix()));
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, value_ptr(m_camera->GetProjMatrix()));
-	glUniform1f(glGetUniformLocation(shaderProgram, "pointSize"), 500.f);
-	glUniform3f(glGetUniformLocation(shaderProgram, "color"), 0.5f, 0.7f, 1.0f);
+	viewLoc = glGetUniformLocation(shaderProgram, "view");
+	projLoc = glGetUniformLocation(shaderProgram, "projection");
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(m_camera->GetViewMatrix()));
+	glUniformMatrix4fv(projLoc, 1, GL_FALSE, value_ptr(m_camera->GetProjMatrix()));
+	glUniform1f(glGetUniformLocation(shaderProgram, "pointSize"), 200.f);
 
-
-	glBindVertexArray(VAO);
-	glDrawArrays(GL_POINTS, 0, nOfVerticies);
+	glBindVertexArray(vertVAO);
+	for (size_t i = 0; i < nodes.size(); ++i) {
+		vec4 color = activationToColor(getNthActivation(i, layers));
+		glUniform4fv(glGetUniformLocation(shaderProgram, "color"), 1, value_ptr(color));
+		glDrawArrays(GL_POINTS, i, 1);
+	}
+	glDisable(GL_PROGRAM_POINT_SIZE);
 	glBindVertexArray(0);
+
+
+	for (size_t i = 0; i < edges.size(); ++i) {
+		vec3 labelPos = glm::mix(edges[i].first, edges[i].second, 0.25);
+		label.drawLabel(labelPos, getNthWeight(i, weights));
+	}
+	vec4 offset = m_camera->GetViewMatrix()* vec4(0., 0., 0.01, 0.);
+	for (size_t i = 0; i < nodes.size(); ++i) {
+		vec3 labelPos = nodes[i];
+		labelPos.z += offset.z;
+		label.drawLabel(labelPos, getNthActivation(i, layers));
+	}
 }
+
 
 std::string Renderer::loadShaderSource(const char* filePath) {
 	std::ifstream shaderFile(filePath);

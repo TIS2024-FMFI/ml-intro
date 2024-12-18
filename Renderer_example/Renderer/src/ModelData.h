@@ -14,7 +14,7 @@ using namespace glm;
 
 
 struct NN_DATA {
-	vector<uint8_t> layers;
+	vector<int> layers;
 	vector<vector<vector<double>>> weights;
 };
 
@@ -32,13 +32,20 @@ public:
 		return sum;
 	}
 	vector<vec3> getVerticiesPositions();
+	vector<tuple<vec3, vec3, double, double>> getEdges(); // vecA, vecB, weight, activation 
+
+
+
+	vector<vector<float>> getActivations() { return { {0.2f, -0.8f}, { 0.5f, -0.3f, 0.9f }, { 0.7f } }; }
+	vector<vector<float>> getWeights() { return { {1, -1}, {0.5, -0.75}, {0, -0.5}, {0.25, 0.5, -0.25} }; }
 
 private:
 	void jsonToStruct(const string& fileName);
+	int layerStart(int layer);
 	NN_DATA data;
 };
 
 inline void from_json(const nlohmann::json& j, NN_DATA& data) {
-	data.layers = j.at("layers").get<vector<uint8_t>>();
+	data.layers = j.at("layers").get<vector<int>>();
 	data.weights = j.at("weights").get<vector<vector<vector<double>>>>();
 }
