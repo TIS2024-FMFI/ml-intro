@@ -236,3 +236,24 @@ void Label::RenderLabels(Camera* cam) {
     glDrawArrays(GL_TRIANGLES, 0, rectVxCount);
     glBindVertexArray(0);
 }
+
+void Label::ClearLabels() {
+    labelData.clear();
+    rectData.clear();
+    vertexCount = 0;
+    rectVxCount = 0;
+}
+
+void Label::AddRectangle(vec2 tl, vec2 br, vec3 pos) {
+    rectData.insert(rectData.end(), {
+            tl.x, br.y, pos.x, pos.y, pos.z,
+            br.x, tl.y, pos.x, pos.y, pos.z,
+            tl.x, tl.y, pos.x, pos.y, pos.z,
+
+            tl.x, br.y, pos.x, pos.y, pos.z,
+            br.x, br.y, pos.x, pos.y, pos.z,
+            br.x, tl.y, pos.x, pos.y, pos.z
+        });
+
+    rectVxCount += 6;
+}
