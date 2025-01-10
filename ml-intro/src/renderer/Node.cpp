@@ -53,3 +53,10 @@ void Node::ClearNodes() {
     vertCount = 0;
     Label::ClearLabels();
 }
+
+void Node::UploadData() {
+    glBindBuffer(GL_ARRAY_BUFFER, nodeVBO);
+    glBufferData(GL_ARRAY_BUFFER, nodeData.size() * sizeof(float), nodeData.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    Label::UploadData();
+}
