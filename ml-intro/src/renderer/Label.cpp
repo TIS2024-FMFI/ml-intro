@@ -195,3 +195,12 @@ void Label::AddLabel(const Label& label) {
 
 
 }
+
+
+void Label::UploadData() {
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, labelData.size() * sizeof(float), labelData.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, rectVBO);
+    glBufferData(GL_ARRAY_BUFFER, rectData.size() * sizeof(float), rectData.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
