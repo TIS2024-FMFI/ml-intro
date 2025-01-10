@@ -204,3 +204,35 @@ void Label::UploadData() {
     glBufferData(GL_ARRAY_BUFFER, rectData.size() * sizeof(float), rectData.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
+
+
+void Label::RenderLabels(Camera* cam) {
+    if (!initialized) return;
+
+    glEnable(GL_DEPTH_TEST);
+
+    static GLuint shaderProgram = ShaderPrograms::getInstance().getTextShaderProgramId();
+    glUseProgram(shaderProgram);
+
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, value_ptr(cam->GetViewMatrix()));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, value_ptr(cam->GetProjMatrix()));
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, textAtlas);
+    glUniform1i(glGetUniformLocation(shaderProgram, "textureAtlas"), 1);
+
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+    glBindVertexArray(0);
+
+
+    static GLuint rect_shaderProgram = ShaderPrograms::getInstance().getRectShaderProgramId();
+    glUseProgram(rect_shaderProgram);
+
+    glUniformMatrix4fv(glGetUniformLocation(rect_shaderProgram, "view"), 1, GL_FALSE, value_ptr(cam->GetViewMatrix()));
+    glUniformMatrix4fv(glGetUniformLocation(rect_shaderProgram, "projection"), 1, GL_FALSE, value_ptr(cam->GetProjMatrix()));
+
+    glBindVertexArray(rectVAO);
+    glDrawArrays(GL_TRIANGLES, 0, rectVxCount);
+    glBindVertexArray(0);
+}
