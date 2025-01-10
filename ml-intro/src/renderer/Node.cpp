@@ -47,3 +47,9 @@ void Node::AddNode(const Node& node) {
 
     vertCount++;
 }
+
+void Node::ClearNodes() {
+    nodeData.clear();
+    vertCount = 0;
+    Label::ClearLabels();
+}
