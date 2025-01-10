@@ -72,3 +72,30 @@ void Edge::ClearEdges() {
     vertCount = 0;
     Label::ClearLabels();
 }
+
+void Edge::RenderEdges(Camera* cam) {
+    if (!initialized) return;
+
+    auto now = chrono::system_clock::now();
+    auto duration = now.time_since_epoch();
+    float t = (chrono::duration_cast<chrono::milliseconds>(duration).count() % 1000) / 1000.0f;
+
+    //cout << "time: " << t << endl;
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glUseProgram(shaderProgram);
+
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(cam->GetViewMatrix()));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(cam->GetProjMatrix()));
+    glUniform1f(glGetUniformLocation(shaderProgram, "t"), t);
+
+
+    glBindVertexArray(edgeVAO);
+    glDrawArrays(GL_LINES, 0, vertCount);
+    glBindVertexArray(0);
+
+
+    glDisable(GL_BLEND);
+}
