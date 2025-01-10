@@ -3,6 +3,9 @@
 #include <glm/glm.hpp>
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
+#include "Camera.h"
+#include "ShaderPrograms.h"
+#include "Label.h"
 #include <chrono>
 
 using namespace glm;
@@ -19,7 +22,7 @@ public:
     static void InitializeBuffers();
     static void AddEdge(const Edge& edge);
     static void UploadData();
-    static void RenderEdges(/*ToDo*/);
+    static void RenderEdges(Camera* camera);
     static void ClearEdges();
 
 private:

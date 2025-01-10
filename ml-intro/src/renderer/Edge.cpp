@@ -59,3 +59,10 @@ void Edge::AddEdge(const Edge& edge) {
 
     vertCount += 2;
 }
+
+void Edge::UploadData() {
+    glBindBuffer(GL_ARRAY_BUFFER, edgeVBO);
+    glBufferData(GL_ARRAY_BUFFER, edgeData.size() * sizeof(float), edgeData.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    Label::UploadData();
+}
