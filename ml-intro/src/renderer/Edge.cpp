@@ -42,3 +42,20 @@ void Edge::InitializeBuffers() {
 
     initialized = true;
 }
+
+
+void Edge::AddEdge(const Edge& edge) {
+    edgeData.push_back(edge.posA.x);
+    edgeData.push_back(edge.posA.y);
+    edgeData.push_back(edge.posA.z);
+    edgeData.push_back(edge.weight);
+    edgeData.push_back(0.0);
+
+    edgeData.push_back(edge.posB.x);
+    edgeData.push_back(edge.posB.y);
+    edgeData.push_back(edge.posB.z);
+    edgeData.push_back(edge.weight);
+    edgeData.push_back(1.0);
+
+    vertCount += 2;
+}
