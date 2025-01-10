@@ -66,3 +66,9 @@ void Edge::UploadData() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     Label::UploadData();
 }
+
+void Edge::ClearEdges() {
+    edgeData.clear();
+    vertCount = 0;
+    Label::ClearLabels();
+}
