@@ -1,4 +1,5 @@
 #include "ImGuiApp.h"
+#include <iostream>
 
 ImGuiApp::ImGuiApp(HINSTANCE hInstance) : hInstance(hInstance), hwnd(nullptr), running(true), currentScenario(1), bias(0), learningRate(0), activationFunction(ReLu), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)) {}
 
@@ -39,6 +40,7 @@ bool ImGuiApp::Initialize() {
         return false;
     }
 
+
     // Initialize OpenGL
     if (!CreateDeviceWGL(hwnd, &g_MainWindow))
     {
@@ -47,9 +49,16 @@ bool ImGuiApp::Initialize() {
         UnregisterClassW(wc.lpszClassName, wc.hInstance);
         return false;
     }
+
     wglMakeCurrent(g_MainWindow.hDC, g_hRC);
 
     if (!glfwInit()) {
+        return false;
+    }
+
+    // initialize GLAD
+    if (!gladLoadGL()) {
+        std::cerr << "Failed to initialize GLAD" << std::endl;
         return false;
     }
 
@@ -74,6 +83,10 @@ bool ImGuiApp::Initialize() {
 
     ShowWindow(hwnd, SW_SHOWDEFAULT);
     UpdateWindow(hwnd);
+
+
+    //frameBuffer = new FrameBuffer(rendererSize.x, rendererSize.y);
+    //renderer = new Renderer(frameBuffer, &camera);
 
     return true;
 }
@@ -221,9 +234,10 @@ void ImGuiApp::RenderMenuBar() {
 
 void ImGuiApp::RenderScenario_1() {
     // Renderer
-    ImGui::BeginChild("Renderer", ImVec2(150, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
+    RendererFrame();
+    /*ImGui::BeginChild("Renderer", ImVec2(150, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
     
-    ImGui::EndChild();
+    ImGui::EndChild();*/
 
     ImGui::SameLine();
 
@@ -363,6 +377,25 @@ void ImGuiApp::GradientColorPicker(const char* label, float* color) {
     float marker_x = cursor_pos.x + gradient_size.x * color[0];
     float marker_y = cursor_pos.y + gradient_size.y * color[1];
     draw_list->AddCircle(ImVec2(marker_x, marker_y), 5.0f, IM_COL32(255, 255, 255, 255), 12, 2.0f);
+}
+
+
+void ImGuiApp::RendererFrame() {
+    ImVec2 space = ImGui::GetContentRegionAvail();
+    ImGui::BeginChild("Renderer", ImVec2(space.x/2, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
+
+    ImVec2 rendererScale = ImGui::GetContentRegionAvail();
+    //frameBuffer->RescaleFrameBuffer(rendererScale.x, rendererScale.y);
+    //renderer->renderScene();
+
+    /*ImGui::Image(
+        (ImTextureID)renderer->getFrameTexture(),
+        rendererScale,
+        ImVec2(0, 1),
+        ImVec2(1, 0)
+    );*/
+
+    ImGui::EndChild();
 }
 
 //int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {

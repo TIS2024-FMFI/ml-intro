@@ -71,12 +71,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)vendor\glad\include\;$(ProjectDir)vendor\glfw-3.4.bin.WIN64\include\;$(ProjectDir)vendor\glm-1.0.1;$(ProjectDir)vendor\ImGui;$(ProjectDir)vendor\ImGui\misc;$(ProjectDir)vendor\ImGui\backends;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)vendor\glfw-3.4.bin.WIN64\lib-vc2022\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)vendor\glad\include\;$(ProjectDir)vendor\glfw-3.4.bin.WIN64\include\;$(ProjectDir)vendor\glm-1.0.1\;$(ProjectDir)vendor\ImGui\;$(ProjectDir)vendor\freetype-2.13.3\include\;$(ProjectDir)vendor\ImGui\misc;$(ProjectDir)vendor\ImGui\backends;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)vendor\glfw-3.4.bin.WIN64\lib-vc2022\;$(ProjectDir)vendor\freetype-2.13.3\release static\vs2015-2022\win64\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)vendor\glad\include\;$(ProjectDir)vendor\glfw-3.4.bin.WIN64\include\;$(ProjectDir)vendor\glm-1.0.1;$(ProjectDir)vendor\ImGui;$(ProjectDir)vendor\ImGui\backends;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)vendor\glfw-3.4.bin.WIN64\lib-vc2022\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)vendor\glad\include\;$(ProjectDir)vendor\glfw-3.4.bin.WIN64\include\;$(ProjectDir)vendor\glm-1.0.1\;$(ProjectDir)vendor\ImGui\;$(ProjectDir)vendor\freetype-2.13.3\include\;$(ProjectDir)vendor\ImGui\backends;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)vendor\glfw-3.4.bin.WIN64\lib-vc2022\;$(ProjectDir)vendor\freetype-2.13.3\release static\vs2015-2022\win64\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -110,13 +110,13 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FT2_BUILD_LIBRARY;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;gdi32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -125,7 +125,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FT2_BUILD_LIBRARY;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -133,7 +133,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;gdi32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -142,6 +142,7 @@
   <ItemGroup>
     <ClCompile Include="src\ImGuiApp.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="vendor\glad\src\glad.c" />
     <ClCompile Include="vendor\ImGui\backends\imgui_impl_dx10.cpp" />
     <ClCompile Include="vendor\ImGui\backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="vendor\ImGui\backends\imgui_impl_opengl3.cpp" />
@@ -157,6 +158,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ImGuiApp.h" />
+    <ClInclude Include="vendor\glad\include\glad\glad.h" />
+    <ClInclude Include="vendor\glad\include\KHR\khrplatform.h" />
     <ClInclude Include="vendor\ImGui\backends\imgui_impl_dx10.h" />
     <ClInclude Include="vendor\ImGui\backends\imgui_impl_glfw.h" />
     <ClInclude Include="vendor\ImGui\backends\imgui_impl_opengl3.h" />
@@ -168,7 +171,7 @@
     <ClInclude Include="vendor\ImGui\imstb_rectpack.h" />
     <ClInclude Include="vendor\ImGui\imstb_textedit.h" />
     <ClInclude Include="vendor\ImGui\imstb_truetype.h" />
-    <ClInclude Include="src\openWindow.h" />    
+    <ClInclude Include="src\openWindow.h" />
     <ClInclude Include="src\NeuralNetwork.h" />
     <ClInclude Include="src\Perceptron.h" />
   </ItemGroup>
