@@ -37,3 +37,13 @@ void Node::InitializeBuffers() {
 
     initialized = true;
 }
+
+void Node::AddNode(const Node& node) {
+
+    nodeData.push_back(node.pos.x);
+    nodeData.push_back(node.pos.y);
+    nodeData.push_back(node.pos.z);
+    nodeData.push_back(node.activation);
+
+    vertCount++;
+}
