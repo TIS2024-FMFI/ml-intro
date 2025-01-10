@@ -78,3 +78,68 @@ void Label::InitializeBuffers() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
+
+
+void Label::GenerateFontAtlas(const string& fontPath) {
+    FT_Library ft;
+    if (FT_Init_FreeType(&ft)) {
+        std::cerr << "ERROR::FREETYPE: Could not initialize FreeType Library" << std::endl;
+        return;
+    }
+
+    FT_Face face;
+    if (FT_New_Face(ft, fontPath.c_str(), 0, &face)) {
+        std::cerr << "ERROR::FREETYPE: Failed to load font" << std::endl;
+        FT_Done_FreeType(ft);
+        return;
+    }
+
+    FT_Set_Pixel_Sizes(face, 0, 48);
+
+
+    // Determine atlas dimensions
+    atlasSize = vec2(0, 0);
+    for (unsigned char c = 0; c < 128; c++) {
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+            std::cerr << "ERROR::FREETYPE: Failed to load Glyph " << c << std::endl;
+            continue;
+        }
+        atlasSize.x += face->glyph->bitmap.width;
+        atlasSize.y = std::max(atlasSize.y, (float)face->glyph->bitmap.rows);
+    }
+
+    glGenTextures(1, &textAtlas);
+    glBindTexture(GL_TEXTURE_2D, textAtlas);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, atlasSize.x, atlasSize.y, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    int xOffset = 0;
+    for (unsigned char c = 0; c < 128; c++) {
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+            std::cerr << "ERROR::FREETYPE: Failed to load Glyph " << c << std::endl;
+            continue;
+        }
+        auto bitmap = face->glyph->bitmap;
+        glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, 0, bitmap.width, bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, bitmap.buffer);
+
+        Character character = {
+            vec2(bitmap.width, bitmap.rows),
+            vec2(xOffset, 0),
+            vec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+            static_cast<unsigned int>(face->glyph->advance.x)
+        };
+        characters.insert(std::pair<char, Character>(c, character));
+
+        xOffset += face->glyph->bitmap.width;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    FT_Done_Face(face);
+    FT_Done_FreeType(ft);
+}
