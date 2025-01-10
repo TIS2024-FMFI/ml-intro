@@ -60,3 +60,25 @@ void Node::UploadData() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     Label::UploadData();
 }
+
+void Node::RenderNodes(Camera* cam) {
+
+    if (!initialized) return;
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    glEnable(GL_POINT_SPRITE);
+
+    glUseProgram(shaderProgram);
+
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, value_ptr(cam->GetViewMatrix()));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, value_ptr(cam->GetProjMatrix()));
+    glUniform1f(glGetUniformLocation(shaderProgram, "pointSize"), 400.0f);
+
+    glBindVertexArray(nodeVAO);
+    glDrawArrays(GL_POINTS, 0, vertCount);
+    glBindVertexArray(0);
+
+    glDisable(GL_PROGRAM_POINT_SIZE);
+    glDisable(GL_POINT_SPRITE);
+}
