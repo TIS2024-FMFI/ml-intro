@@ -6,6 +6,8 @@
 #include <glm/glm.hpp>
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
+#include "Camera.h"
+#include "ShaderPrograms.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -30,7 +32,7 @@ public:
     static void InitializeBuffers();
     static void AddLabel(const Label& label);
     static void UploadData();
-    static void RenderLabels(/*todo, add camera info*/);
+    static void RenderLabels(Camera* cam);
     static void ClearLabels();
 
 private:
