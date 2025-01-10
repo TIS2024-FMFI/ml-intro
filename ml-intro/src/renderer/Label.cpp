@@ -143,3 +143,55 @@ void Label::GenerateFontAtlas(const string& fontPath) {
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
 }
+
+
+void Label::AddLabel(const Label& label) {
+    float x = 0;
+    for (const char& c : label.text) {
+        Character ch = characters[c];
+
+        x -= (ch.advance >> 6) / 2. * scale;
+    }
+
+    vec3 pos = label.pos;
+    vec2 tl = vec2(0.);
+    vec2 br = vec2(0.);
+    for (int i = 0; i < label.text.length(); i++) {
+        char c = label.text[i];
+        Character ch = characters[c];
+
+        float xpos = x + ch.bearing.x * scale;
+        float ypos = 0 - (atlasSize.y / 2.0 + ch.textureSize.y - ch.bearing.y) * scale + 0.05;
+
+        float w = ch.textureSize.x * scale;
+        float h = ch.textureSize.y * scale;
+
+        if (i == 0) tl = vec2(xpos, ypos);
+        tl.t = std::min(tl.y, ypos);
+        br.y = std::max(br.y, ypos + h);
+        br.x = xpos + w;
+
+        vec2 texOffset = ch.textureOffset / atlasSize;
+        vec2 texSize = ch.textureSize / atlasSize;
+
+        labelData.insert(labelData.end(), {
+            xpos    , ypos + h, texOffset.x            , texOffset.y            , pos.x, pos.y, pos.z, label.weight,
+            xpos + w, ypos    , texOffset.x + texSize.x, texOffset.y + texSize.y, pos.x, pos.y, pos.z, label.weight,
+            xpos    , ypos    , texOffset.x            , texOffset.y + texSize.y, pos.x, pos.y, pos.z, label.weight,
+
+            xpos,     ypos + h, texOffset.x            , texOffset.y            , pos.x, pos.y, pos.z, label.weight,
+            xpos + w, ypos + h, texOffset.x + texSize.x, texOffset.y            , pos.x, pos.y, pos.z, label.weight,
+            xpos + w, ypos    , texOffset.x + texSize.x, texOffset.y + texSize.y, pos.x, pos.y, pos.z, label.weight
+            });
+
+        vertexCount += 6;
+        x += (ch.advance >> 6) * scale;
+    }
+
+    AddRectangle(tl, br, pos);
+
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+
+}
