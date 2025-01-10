@@ -2,6 +2,7 @@
 #include "FrameBuffer.h"
 #include "Camera.h"
 #include "Label.h"
+#include "Node.h"
 #include "Edge.h"
 #include "ShaderPrograms.h"
 #include <fstream>

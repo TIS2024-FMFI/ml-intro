@@ -2,12 +2,17 @@
 
 
 ShaderPrograms::ShaderPrograms() {
-	NodeShaderProgram = createShaderProgram("resources/shaders/testShader.vert", "resources/shaders/testShader.frag");
-	/*todo: other shaders*/
+	NodeShaderProgram = createShaderProgram("resources/shaders/nodeShader.vert", "resources/shaders/nodeShader.frag");
+	EdgeShaderProgram = createShaderProgram("resources/shaders/edgeShader.vert", "resources/shaders/edgeShader.frag");
+	RectShaderProgram = createShaderProgram("resources/shaders/rectShader.vert", "resources/shaders/rectShader.frag");
+	TextShaderProgram = createShaderProgram("resources/shaders/textShader.vert", "resources/shaders/textShader.frag");
 }
 
 ShaderPrograms::~ShaderPrograms() {
 	glDeleteProgram(NodeShaderProgram);
+	glDeleteProgram(EdgeShaderProgram);
+	glDeleteProgram(RectShaderProgram);
+	glDeleteProgram(TextShaderProgram);
 }
 
 
