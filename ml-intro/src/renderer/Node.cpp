@@ -12,3 +12,28 @@ Node::Node(vec3 position, float activation) : pos(position), activation(activati
     Node::AddNode(*this);
     Label(position, activation);
 }
+
+void Node::InitializeBuffers() {
+    if (initialized) return;
+
+    glGenVertexArrays(1, &nodeVAO);
+    glGenBuffers(1, &nodeVBO);
+
+    glBindVertexArray(nodeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, nodeVBO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0); // Position
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(3 * sizeof(float))); // activation
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    Node::shaderProgram = ShaderPrograms::getInstance().getNodeShaderProgramId();
+
+    Label::InitializeBuffers();
+
+    initialized = true;
+}
