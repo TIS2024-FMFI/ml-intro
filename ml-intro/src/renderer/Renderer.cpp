@@ -67,3 +67,28 @@ void Renderer::loadNN(/*todo: send the network data here*/) {
 
 	Edge::UploadData();
 }
+
+
+void Renderer::renderScene() {
+	test += 0.001;
+
+	m_camera->SetCameraView(vec3(sin(test) * 5., sin(test * 3.14159265) * 3., cos(test) * 5.), vec3(.0));
+	m_camera->UpdateProjMatrix();
+
+
+	m_frameBuffer->Bind();
+
+
+	useShaderProgram();
+
+	m_frameBuffer->Unbind();
+}
+
+void Renderer::useShaderProgram() {
+
+	Edge::RenderEdges(m_camera);
+
+	if (renderText) {
+		Label::RenderLabels(m_camera);
+	}
+}
