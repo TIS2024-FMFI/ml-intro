@@ -142,6 +142,11 @@
   <ItemGroup>
     <ClCompile Include="src\ImGuiApp.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\renderer\Edge.cpp" />
+    <ClCompile Include="src\renderer\FrameBuffer.cpp" />
+    <ClCompile Include="src\renderer\Label.cpp" />
+    <ClCompile Include="src\renderer\Node.cpp" />
+    <ClCompile Include="src\renderer\Renderer.cpp" />
     <ClCompile Include="src\renderer\ShaderPrograms.cpp" />
     <ClCompile Include="vendor\glad\src\glad.c" />
     <ClCompile Include="vendor\ImGui\backends\imgui_impl_dx10.cpp" />
@@ -159,6 +164,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ImGuiApp.h" />
+    <ClInclude Include="src\renderer\Camera.h" />
+    <ClInclude Include="src\renderer\Edge.h" />
+    <ClInclude Include="src\renderer\FrameBuffer.h" />
+    <ClInclude Include="src\renderer\Label.h" />
+    <ClInclude Include="src\renderer\Node.h" />
+    <ClInclude Include="src\renderer\Renderer.h" />
     <ClInclude Include="src\renderer\ShaderPrograms.h" />
     <ClInclude Include="vendor\glad\include\glad\glad.h" />
     <ClInclude Include="vendor\glad\include\KHR\khrplatform.h" />

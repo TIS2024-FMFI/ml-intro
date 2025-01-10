@@ -85,8 +85,8 @@ bool ImGuiApp::Initialize() {
     UpdateWindow(hwnd);
 
 
-    //frameBuffer = new FrameBuffer(rendererSize.x, rendererSize.y);
-    //renderer = new Renderer(frameBuffer, &camera);
+    frameBuffer = new FrameBuffer(rendererSize.x, rendererSize.y);
+    renderer = new Renderer(frameBuffer, &camera);
 
     return true;
 }
@@ -385,15 +385,15 @@ void ImGuiApp::RendererFrame() {
     ImGui::BeginChild("Renderer", ImVec2(space.x/2, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
 
     ImVec2 rendererScale = ImGui::GetContentRegionAvail();
-    //frameBuffer->RescaleFrameBuffer(rendererScale.x, rendererScale.y);
-    //renderer->renderScene();
+    frameBuffer->RescaleFrameBuffer(rendererScale.x, rendererScale.y);
+    renderer->renderScene();
 
-    /*ImGui::Image(
+    ImGui::Image(
         (ImTextureID)renderer->getFrameTexture(),
         rendererScale,
         ImVec2(0, 1),
         ImVec2(1, 0)
-    );*/
+    );
 
     ImGui::EndChild();
 }

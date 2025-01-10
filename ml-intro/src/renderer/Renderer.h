@@ -33,6 +33,12 @@ public:
 		}
 	}
 
+	static void SquareRender() { squareRender = true; };
+	static void PlaneRender() { squareRender = false; };
+
+	static void EnableText() { renderText = true; };
+	static void DisableText() { renderText = false; };
+
 private:
 	void useShaderProgram();
 
