@@ -40,5 +40,4 @@ public:
 };
 
 
-
 #endif //PERCEPTRON_H
