@@ -12,6 +12,7 @@ private:
     int hiddenSize;
     int outputSize;
     double learningRate;
+    double bias;
 
     // Layers of perceptrons
     std::vector<Perceptron> hiddenLayer;
@@ -42,6 +43,15 @@ public:
 
     // Print model information
     void printModel() const;
+
+    // Get and set bias for all perceptrons
+    double getBias() const;
+    void setBias(double newBias);
+
+    // Get and set learning rate for all perceptrons
+    double getLearningRate() const;
+    void setLearningRate(double newLearningRate);
+
 };
 
 

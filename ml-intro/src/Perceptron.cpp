@@ -78,3 +78,23 @@ void Perceptron::setActivationFunction(std::function<double(double)> activation,
     activationFn = activation;
     activationFnDerivative = activationDerivative;
 }
+
+// Getter for bias
+double Perceptron::getBias() const {
+    return bias;
+}
+
+// Setter for bias
+void Perceptron::setBias(double newBias) {
+    bias = newBias;
+}
+
+// Getter for learning rate
+double Perceptron::getLearningRate() const {
+    return learningRate;
+}
+
+// Setter for learning rate
+void Perceptron::setLearningRate(double newLearningRate) {
+    learningRate = newLearningRate;
+}
