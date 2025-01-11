@@ -1,23 +1,24 @@
 #include <glad/glad.h>
 #include <Windows.h>
 #include <tchar.h>
-#include "ImGuiApp.h"
-#include "openWindow.h"
-#include "Perceptron.h"
+#include "AppManager.h"
 
 int main(void)
 {
-    HINSTANCE hInstance = GetModuleHandle(nullptr);
+    /* HINSTANCE hInstance = GetModuleHandle(nullptr);
 
-    ImGuiApp app(hInstance);
-    if (!app.Initialize()) {
-        MessageBox(nullptr, _T("Failed to initialize ImGui application"), _T("Error"), MB_OK | MB_ICONERROR);
-        return 1;
-    }
+     ImGuiApp app(hInstance);
+     if (!app.Initialize()) {
+         MessageBox(nullptr, _T("Failed to initialize ImGui application"), _T("Error"), MB_OK | MB_ICONERROR);
+         return 1;
+     }
 
-    app.Run();
+     app.Run();
 
-    return 0;
+     return 0;*/
+
+    AppManager app = AppManager();
+    app.run();
 }
 
 //#include <ft2build.h>
