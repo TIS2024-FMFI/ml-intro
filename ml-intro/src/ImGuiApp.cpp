@@ -1,8 +1,7 @@
 #include "ImGuiApp.h"
 #include <iostream>
 
-ImGuiApp::ImGuiApp(HINSTANCE hInstance) : hInstance(hInstance), hwnd(nullptr), running(true), currentScenario(1), bias(0), learningRate(0), activationFunction(ReLu), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)) {}
-
+ImGuiApp::ImGuiApp(AppManager& parent, HINSTANCE hInstance) : parent(&parent),  hInstance(hInstance), hwnd(nullptr), running(true), currentScenario(1), bias(0), learningRate(0), activationFunction(ReLu), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)) {}
 ImGuiApp::~ImGuiApp() {
     if (ImGui::GetCurrentContext()) {
         ImGui_ImplOpenGL3_Shutdown();
