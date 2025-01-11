@@ -1,7 +1,7 @@
 #include "ImGuiApp.h"
 #include <iostream>
 
-ImGuiApp::ImGuiApp(HINSTANCE hInstance) : hInstance(hInstance), hwnd(nullptr), running(true), currentScenario(1), bias(0), learningRate(0), activationFunction(ReLu), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)) {}
+ImGuiApp::ImGuiApp(AppManager& parent, HINSTANCE hInstance) : parent(&parent), hInstance(hInstance), hwnd(nullptr), running(true), currentScenario(1), bias(0), learningRate(0), activationFunction(relu), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)) {}
 
 ImGuiApp::~ImGuiApp() {
     if (ImGui::GetCurrentContext()) {
@@ -262,17 +262,17 @@ void ImGuiApp::RenderScenario_1() {
 
     ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
     if (ImGui::CollapsingHeader("Activation Function")) {
-        ImGui::TreeNodeEx("ReLu", (activationFunction == ReLu) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        ImGui::TreeNodeEx("ReLu", (activationFunction == relu) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
         if (ImGui::IsItemClicked()) {
-            activationFunction = ReLu;
+            activationFunction = relu;
         }
-        ImGui::TreeNodeEx("Sigmoid", (activationFunction == Sigmoid) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        ImGui::TreeNodeEx("Sigmoid", (activationFunction == sigmoid) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
         if (ImGui::IsItemClicked()) {
-            activationFunction = Sigmoid;
+            activationFunction = sigmoid;
         }
-        ImGui::TreeNodeEx("Tanh", (activationFunction == Tanh) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        ImGui::TreeNodeEx("Tanh", (activationFunction == tanh) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
         if (ImGui::IsItemClicked()) {
-            activationFunction = Tanh;
+            activationFunction = tanh;
         }
     }
 
@@ -308,17 +308,17 @@ void ImGuiApp::RenderScenario_2() {
 
     ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
     if (ImGui::CollapsingHeader("Activation Function")) {
-        ImGui::TreeNodeEx("ReLu", (activationFunction == ReLu) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        ImGui::TreeNodeEx("ReLu", (activationFunction == relu) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
         if (ImGui::IsItemClicked()) {
-            activationFunction = ReLu;
+            activationFunction = relu;
         }
-        ImGui::TreeNodeEx("Sigmoid", (activationFunction == Sigmoid) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        ImGui::TreeNodeEx("Sigmoid", (activationFunction == sigmoid) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
         if (ImGui::IsItemClicked()) {
-            activationFunction = Sigmoid;
+            activationFunction = sigmoid;
         }
-        ImGui::TreeNodeEx("Tanh", (activationFunction == Tanh) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        ImGui::TreeNodeEx("Tanh", (activationFunction == tanh) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
         if (ImGui::IsItemClicked()) {
-            activationFunction = Tanh;
+            activationFunction = tanh;
         }
     }
 

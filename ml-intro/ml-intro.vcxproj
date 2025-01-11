@@ -140,6 +140,7 @@
     <None Include=".gitignore" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\functions.cpp" />
     <ClCompile Include="src\ImGuiApp.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\renderer\Edge.cpp" />

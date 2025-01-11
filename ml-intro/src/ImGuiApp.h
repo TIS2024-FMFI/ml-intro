@@ -12,6 +12,7 @@
 #include "imgui_impl_opengl3.h"
 
 #include "renderer/Renderer.h"
+#include "functions.cpp"
 
 struct WGL_WindowData { HDC hDC; };
 
@@ -20,17 +21,23 @@ static WGL_WindowData g_MainWindow = { nullptr };
 
 class ImGuiApp {
 public:
-    ImGuiApp(HINSTANCE hInstance);
+    ImGuiApp(AppManager& parent, HINSTANCE hInstance);
     ~ImGuiApp();
     bool Initialize();
     void Run();
 
+    int getCurrentScenrio() { return currentScenario; }
+    Function* getActivationFunction();
+    float getBias() { return bias; }
+    float getLearningRate() { return learningRate; }
+    ImVec4 getInput() { return color; }
+
 private:
     enum ActivationFunction
     {
-        ReLu,
-        Sigmoid,
-        Tanh
+        relu,
+        sigmoid,
+        tanh
     };
 
     HWND hwnd;
