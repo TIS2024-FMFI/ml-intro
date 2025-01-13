@@ -77,6 +77,7 @@ private:
     void GradientColorPicker(const char* label, float* color);
     void RendererFrame();
     void DrawBitmapEditor();
-
+    void RenderOuput_1();
+    void RenderOuput_2();
 };
 

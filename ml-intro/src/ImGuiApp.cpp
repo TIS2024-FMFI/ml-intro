@@ -253,6 +253,10 @@ void ImGuiApp::RenderScenario_1() {
         ImGui::ColorButton("##Preview", color);
     }
 
+    if (ImGui::CollapsingHeader("Output")) {
+        RenderOuput_1();
+    }
+
     if (ImGui::CollapsingHeader("Bias")) {
         ImGui::SliderFloat("bias", &bias, -1.0f, 1.0f);
     }
@@ -297,6 +301,10 @@ void ImGuiApp::RenderScenario_2() {
 
     if (ImGui::CollapsingHeader("Input")) {
         ImGui::ColorEdit3("input", (float*)&color);
+    }
+
+    if (ImGui::CollapsingHeader("Output")) {
+        RenderOuput_2();
     }
 
     if (ImGui::CollapsingHeader("Bias")) {
@@ -499,6 +507,61 @@ void ImGuiApp::DrawBitmapEditor() {
             }
         }
     }
+}
+
+void ImGuiApp::RenderOuput_1() {
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    const ImVec2 p = ImGui::GetCursorScreenPos();
+
+    float x = p.x + 4.0f;
+    float y = p.y + 4.0f;
+    float sz = 40.0f;
+    const float spacing = 10.0f;
+
+    ImVec4 colf;
+    ImU32 col;
+
+    // Red output circle
+    colf = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+    col = ImColor(colf);
+    draw_list->AddCircleFilled(ImVec2(x + sz * 0.5f, y + sz * 0.5f), sz * 0.5f, col);
+    x += sz + spacing;
+
+    // Green output circle
+    colf = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+    col = ImColor(colf);
+    draw_list->AddCircleFilled(ImVec2(x + sz * 0.5f, y + sz * 0.5f), sz * 0.5f, col);
+    x += sz + spacing;
+    
+
+    ImGui::Dummy(ImVec2((sz + spacing), (sz + spacing)));
+}
+
+void ImGuiApp::RenderOuput_2() {
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    const ImVec2 p = ImGui::GetCursorScreenPos();
+
+    float x = p.x + 4.0f;
+    float y = p.y + 4.0f;
+    float sz = 40.0f;
+    const float spacing = 10.0f;
+
+    ImVec4 red = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); 
+    ImVec4 magenta = ImVec4(1.0f, 0.0f, 1.0f, 1.0f); 
+    ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f); 
+    ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); 
+    ImVec4 blue = ImVec4(0.0f, 0.0f, 1.0f, 1.0f);
+    ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f); 
+    ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+    std::vector<ImVec4> colors = {red, magenta, yellow, white, blue, cyan, green};
+
+    for (ImVec4 color : colors) {
+        draw_list->AddCircleFilled(ImVec2(x + sz * 0.5f, y + sz * 0.5f), sz * 0.5f, ImColor(color));
+        x += sz + spacing;
+    }
+
+
+    ImGui::Dummy(ImVec2((sz + spacing), (sz + spacing)));
 }
 
 //int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
