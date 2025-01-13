@@ -37,6 +37,14 @@ public:
     // Set activation function and its derivative
     void setActivationFunction(std::function<double(double)> activation,
         std::function<double(double)> activationDerivative);
+
+    // Getter and setter for bias
+    double getBias() const;
+    void setBias(double newBias);
+
+    // Getter and setter for learning rate
+    double getLearningRate() const;
+    void setLearningRate(double newLearningRate);
 };
 
 

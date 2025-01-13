@@ -111,3 +111,35 @@ void NeuralNetwork::printModel() const {
         outputLayer[i].printModel();
     }
 }
+
+// Get the bias (assume all perceptrons share the same bias for simplicity)
+double NeuralNetwork::getBias() const {
+    return bias;
+}
+
+// Set the bias for all perceptrons in the network
+void NeuralNetwork::setBias(double newBias) {
+    bias = newBias;
+    for (auto& perceptron : hiddenLayer) {
+        perceptron.setBias(newBias);
+    }
+    for (auto& perceptron : outputLayer) {
+        perceptron.setBias(newBias);
+    }
+}
+
+// Get the learning rate (assume all perceptrons share the same learning rate for simplicity)
+double NeuralNetwork::getLearningRate() const {
+    return learningRate;
+}
+
+// Set the learning rate for all perceptrons in the network
+void NeuralNetwork::setLearningRate(double newLearningRate) {
+    learningRate = newLearningRate;
+    for (auto& perceptron : hiddenLayer) {
+        perceptron.setLearningRate(newLearningRate);
+    }
+    for (auto& perceptron : outputLayer) {
+        perceptron.setLearningRate(newLearningRate);
+    }
+}

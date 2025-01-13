@@ -140,6 +140,8 @@
     <None Include=".gitignore" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\AppManager.cpp" />
+    <ClCompile Include="src\functions.cpp" />
     <ClCompile Include="src\ImGuiApp.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\renderer\Edge.cpp" />
@@ -163,6 +165,7 @@
     <ClCompile Include="src\Perceptron.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\AppManager.h" />
     <ClInclude Include="src\ImGuiApp.h" />
     <ClInclude Include="src\renderer\Camera.h" />
     <ClInclude Include="src\renderer\Edge.h" />
