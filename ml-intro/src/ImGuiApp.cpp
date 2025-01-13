@@ -27,7 +27,7 @@ ImGuiApp::~ImGuiApp() {
         UnregisterClass(wc.lpszClassName, wc.hInstance); // Unregister class after destroying the window
     }
 
-    //CleanupDeviceWGL(hwnd, &g_MainWindow);
+    CleanupDeviceWGL(hwnd, &g_MainWindow);
 }
 
 bool ImGuiApp::Initialize() {
