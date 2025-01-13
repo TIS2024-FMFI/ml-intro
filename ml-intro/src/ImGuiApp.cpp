@@ -1,7 +1,8 @@
 #include "ImGuiApp.h"
 #include <iostream>
 
-ImGuiApp::ImGuiApp(AppManager& parent, HINSTANCE hInstance) : parent(&parent),  hInstance(hInstance), hwnd(nullptr), running(true), currentScenario(1), bias(0), learningRate(0), activationFunction(ReLu), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)) {}
+ImGuiApp::ImGuiApp(AppManager& parent, HINSTANCE hInstance) : parent(&parent),  hInstance(hInstance), hwnd(nullptr), running(true),
+    currentScenario(1), bias(0), learningRate(0), activationFunction(ReLu), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)), bitmap(canvasSize, std::vector<bool>(canvasSize, false)) {}
 
 ImGuiApp::~ImGuiApp() {
     if (ImGui::GetCurrentContext()) {
@@ -330,17 +331,60 @@ void ImGuiApp::RenderScenario_2() {
 }
 
 void ImGuiApp::RenderScenario_3() {
-    ImGui::Text("Scenario %d", currentScenario);
-    ImGui::Columns(2);
+    // Renderer
+    ImGui::BeginChild("Renderer", ImVec2(150, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
 
-    // Left part
-    ImGui::Text("Left part of Scenario %d", currentScenario);
-    ImGui::NextColumn();
+    ImGui::EndChild();
 
-    // Right part
-    ImGui::Text("Right part of Scenario %d", currentScenario);
+    ImGui::SameLine();
 
-    ImGui::Columns(1);
+    // Controls
+    ImGui::BeginChild("Controls", ImVec2(0, 0));
+
+    if (ImGui::CollapsingHeader("Input")) {
+        DrawBitmapEditor();
+    }
+
+    if (ImGui::CollapsingHeader("Tell Output")) {
+        for (size_t i = 0; i < 10; i++)
+        {
+            ImGui::Button(std::to_string(i).c_str());
+
+            if (i < 9) {
+                ImGui::SameLine();
+            }
+        }
+    }
+
+    if (ImGui::CollapsingHeader("Bias")) {
+        ImGui::SliderFloat("bias", &bias, -1.0f, 1.0f);
+    }
+
+    if (ImGui::CollapsingHeader("Learning Rate")) {
+        ImGui::SliderFloat("learning rate", &learningRate, 0.0f, 1.0f);
+    }
+
+    ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+    if (ImGui::CollapsingHeader("Activation Function")) {
+        ImGui::TreeNodeEx("ReLu", (activationFunction == ReLu) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        if (ImGui::IsItemClicked()) {
+            activationFunction = ReLu;
+        }
+        ImGui::TreeNodeEx("Sigmoid", (activationFunction == Sigmoid) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        if (ImGui::IsItemClicked()) {
+            activationFunction = Sigmoid;
+        }
+        ImGui::TreeNodeEx("Tanh", (activationFunction == Tanh) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        if (ImGui::IsItemClicked()) {
+            activationFunction = Tanh;
+        }
+    }
+
+    ImGui::Button("Run");
+    ImGui::Button("Load");
+    ImGui::Button("Save");
+
+    ImGui::EndChild();
 }
 
 void ImGuiApp::GradientColorPicker(const char* label, float* color) {
@@ -396,6 +440,65 @@ void ImGuiApp::RendererFrame() {
     );
 
     ImGui::EndChild();
+}
+
+void ImGuiApp::DrawBitmapEditor() {
+    // Reserve space for the canvas
+    ImVec2 canvasSizeInPixels = ImVec2(canvasSize * pixelSize, canvasSize * pixelSize);
+    ImVec2 canvasPos = ImGui::GetCursorScreenPos();
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+    // Draw the canvas
+    for (int y = 0; y < canvasSize; y++) {
+        for (int x = 0; x < canvasSize; x++) {
+            ImVec2 topLeft = ImVec2(canvasPos.x + x * pixelSize, canvasPos.y + y * pixelSize);
+            ImVec2 bottomRight = ImVec2(topLeft.x + pixelSize, topLeft.y + pixelSize);
+
+            // Draw the pixel
+            if (bitmap[y][x]) {
+                drawList->AddRectFilled(topLeft, bottomRight, IM_COL32(0, 0, 0, 255)); // Black
+            }
+            else {
+                drawList->AddRectFilled(topLeft, bottomRight, IM_COL32(255, 255, 255, 255)); // White
+            }
+
+            // Draw the grid
+            drawList->AddRect(topLeft, bottomRight, IM_COL32(200, 200, 200, 255));
+        }
+    }
+
+    // Handle mouse interaction
+    if (ImGui::IsMouseHoveringRect(canvasPos, ImVec2(canvasPos.x + canvasSizeInPixels.x, canvasPos.y + canvasSizeInPixels.y))) {
+        if (ImGui::IsMouseDown(0)) { // Left mouse button
+            ImVec2 mousePos = ImGui::GetMousePos();
+            int x = (mousePos.x - canvasPos.x) / pixelSize;
+            int y = (mousePos.y - canvasPos.y) / pixelSize;
+
+            if (x >= 0 && x < canvasSize && y >= 0 && y < canvasSize) {
+                bitmap[y][x] = true; // Set pixel "on"
+            }
+        }
+        if (ImGui::IsMouseDown(1)) { // Right mouse button
+            ImVec2 mousePos = ImGui::GetMousePos();
+            int x = (mousePos.x - canvasPos.x) / pixelSize;
+            int y = (mousePos.y - canvasPos.y) / pixelSize;
+
+            if (x >= 0 && x < canvasSize && y >= 0 && y < canvasSize) {
+                bitmap[y][x] = false; // Set pixel "off"
+            }
+        }
+    }
+
+    // Reserve space for the canvas so that other ImGui widgets are positioned below it
+    ImGui::Dummy(canvasSizeInPixels);
+
+    if (ImGui::Button("Clear")) {
+        for (int y = 0; y < canvasSize; y++) {
+            for (int x = 0; x < canvasSize; x++) {
+                bitmap[y][x] = false;
+            }
+        }
+    }
 }
 
 //int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {

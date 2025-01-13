@@ -3,6 +3,7 @@
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
+#include <vector>
 #include <glad/glad.h>
 #include <Windows.h>
 #include <tchar.h>
@@ -47,6 +48,10 @@ private:
     HWND hwnd;
     WNDCLASSEX wc;
     HINSTANCE hInstance;
+
+    const int canvasSize = 28;
+    const float pixelSize = 20.0f;
+    std::vector<std::vector<bool>> bitmap;
     
     AppManager* parent;
     bool running;
@@ -71,5 +76,7 @@ private:
     void RenderScenario_3();
     void GradientColorPicker(const char* label, float* color);
     void RendererFrame();
+    void DrawBitmapEditor();
+
 };
 
