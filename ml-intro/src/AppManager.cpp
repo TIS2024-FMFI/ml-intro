@@ -25,3 +25,40 @@ void AppManager::run()
 
 	gui->Run();
 }
+
+// TODO
+void AppManager::runNetwork()
+{
+}
+
+// TODO
+void AppManager::saveNetwork()
+{
+}
+
+// TODO
+void AppManager::loadNetwork()
+{
+}
+
+// TODO
+void AppManager::setNetworkInput()
+{
+}
+
+void AppManager::setNetworkBias(float bias)
+{
+	neuralNetwork->setBias(bias);
+}
+
+void AppManager::setNetworkLearningRate(float learningRate)
+{
+	neuralNetwork->setLearningRate(learningRate);
+}
+
+void AppManager::setNetworkActivationFunction(Function activationFunction)
+{
+	std::function<double(double)> func = [&activationFunction](double x) { return activationFunction.function(x); };
+	std::function<double(double)> deriv = [&activationFunction](double x) { return activationFunction.derivative(x); };
+	neuralNetwork->setActivationFunction(func, deriv);
+}

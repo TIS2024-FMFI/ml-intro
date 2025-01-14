@@ -1,16 +1,20 @@
 #include <cmath>
+#include <string>
 
-class Function
+struct Function
 {
 public:
+    const std::string name = "func";
     double function(double x) {};
     double derivative(double x) {};
     double error_term(double x, double error) {};
 };
 
-class ReLu : public Function
+struct ReLu : public Function
 {
 public:
+    const std::string name = "ReLu";
+
     double function(double x) {
         return (x > 0) ? x : 0;
     }
@@ -24,9 +28,11 @@ public:
     }
 };
 
-class Sigmoid : public Function
+struct Sigmoid : public Function
 {
 public:
+    const std::string name = "Sigmoid";
+
     double function(double x) {
         return 1.0 / (1.0 + exp(-x));
     }
@@ -41,9 +47,11 @@ public:
     }
 };
 
-class Tanh : public Function
+struct Tanh : public Function
 {
 public:
+    const std::string name = "Tanh";
+
     double function(double x) {
         return tanh(x);
     }

@@ -1,7 +1,9 @@
 #include "ImGuiApp.h"
 #include <iostream>
+#include "AppManager.h"
 
-ImGuiApp::ImGuiApp(AppManager& parent, HINSTANCE hInstance) : parent(&parent),  hInstance(hInstance), hwnd(nullptr), running(true), currentScenario(1), bias(0), learningRate(0), activationFunction(ReLu), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)) {}
+ImGuiApp::ImGuiApp(AppManager& appManager, HINSTANCE hInstance) : appManager(&appManager),  hInstance(hInstance), hwnd(nullptr), running(true),
+    currentScenario(1), bias(0), learningRate(0), activationFunctionName(), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)), bitmap(canvasSize, std::vector<bool>(canvasSize, false)) {}
 
 ImGuiApp::~ImGuiApp() {
     if (ImGui::GetCurrentContext()) {
@@ -118,6 +120,23 @@ void ImGuiApp::Run() {
     }
 }
 
+Function ImGuiApp::getActivationFunction()
+{
+    if (activationFunctionName == "ReLu") {
+        return ReLu();
+
+    } else if (activationFunctionName == "Sigmoid") {
+        return Sigmoid();
+         
+    } else if (activationFunctionName == "Tanh") {
+        return Tanh();
+
+    } else {
+        return Function();
+    }
+   
+}
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 LRESULT WINAPI ImGuiApp::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -209,7 +228,7 @@ void ImGuiApp::Render() {
         break;
     }
 
-    ImGui::End();    
+    ImGui::End();
 }
 
 void ImGuiApp::RenderMenuBar() {
@@ -229,6 +248,49 @@ void ImGuiApp::RenderMenuBar() {
         }
 
         ImGui::EndMenuBar();
+    }
+}
+
+void ImGuiApp::RenderRunButton() {
+    if (ImGui::Button("Run")) {
+       appManager->setNetworkBias(bias);
+        appManager->setNetworkLearningRate(learningRate);
+        appManager->setNetworkActivationFunction(getActivationFunction());
+
+        appManager->runNetwork();
+    }
+}
+
+void ImGuiApp::RenderSaveButton()
+{
+    if (ImGui::Button("Save")) {
+        appManager->saveNetwork();
+    }
+}
+
+void ImGuiApp::RenderLoadButton()
+{
+    if (ImGui::Button("Load")) {
+        appManager->loadNetwork();
+    }
+}
+
+void ImGuiApp::RenderActivationFunctions()
+{
+    ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+    if (ImGui::CollapsingHeader("Activation Function")) {
+        ImGui::TreeNodeEx("ReLu", (activationFunctionName == "ReLu") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        if (ImGui::IsItemClicked()) {
+            activationFunctionName = "ReLu";
+        }
+        ImGui::TreeNodeEx("Sigmoid", (activationFunctionName == "Sigmoid") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        if (ImGui::IsItemClicked()) {
+            activationFunctionName = "Sigmoid";
+        }
+        ImGui::TreeNodeEx("Tanh", (activationFunctionName == "Tanh") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        if (ImGui::IsItemClicked()) {
+            activationFunctionName = "Tanh";
+        }
     }
 }
 
@@ -252,6 +314,10 @@ void ImGuiApp::RenderScenario_1() {
         ImGui::ColorButton("##Preview", color);
     }
 
+    if (ImGui::CollapsingHeader("Output")) {
+        RenderOuput_1();
+    }
+
     if (ImGui::CollapsingHeader("Bias")) {
         ImGui::SliderFloat("bias", &bias, -1.0f, 1.0f);
     }
@@ -260,25 +326,11 @@ void ImGuiApp::RenderScenario_1() {
         ImGui::SliderFloat("learning rate", &learningRate, 0.0f, 1.0f);
     }
 
-    ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-    if (ImGui::CollapsingHeader("Activation Function")) {
-        ImGui::TreeNodeEx("ReLu", (activationFunction == ReLu) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
-        if (ImGui::IsItemClicked()) {
-            activationFunction = ReLu;
-        }
-        ImGui::TreeNodeEx("Sigmoid", (activationFunction == Sigmoid) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
-        if (ImGui::IsItemClicked()) {
-            activationFunction = Sigmoid;
-        }
-        ImGui::TreeNodeEx("Tanh", (activationFunction == Tanh) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
-        if (ImGui::IsItemClicked()) {
-            activationFunction = Tanh;
-        }
-    }
+    RenderActivationFunctions();
 
-    ImGui::Button("Run");
-    ImGui::Button("Load");
-    ImGui::Button("Save");
+    RenderRunButton();
+    RenderLoadButton();
+    RenderSaveButton();
 
     ImGui::EndChild();
 }
@@ -298,6 +350,10 @@ void ImGuiApp::RenderScenario_2() {
         ImGui::ColorEdit3("input", (float*)&color);
     }
 
+    if (ImGui::CollapsingHeader("Output")) {
+        RenderOuput_2();
+    }
+
     if (ImGui::CollapsingHeader("Bias")) {
         ImGui::SliderFloat("bias", &bias, -1.0f, 1.0f);
     }
@@ -306,41 +362,56 @@ void ImGuiApp::RenderScenario_2() {
         ImGui::SliderFloat("learning rate", &learningRate, 0.0f, 1.0f);
     }
 
-    ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-    if (ImGui::CollapsingHeader("Activation Function")) {
-        ImGui::TreeNodeEx("ReLu", (activationFunction == ReLu) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
-        if (ImGui::IsItemClicked()) {
-            activationFunction = ReLu;
-        }
-        ImGui::TreeNodeEx("Sigmoid", (activationFunction == Sigmoid) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
-        if (ImGui::IsItemClicked()) {
-            activationFunction = Sigmoid;
-        }
-        ImGui::TreeNodeEx("Tanh", (activationFunction == Tanh) ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
-        if (ImGui::IsItemClicked()) {
-            activationFunction = Tanh;
-        }
-    }
+    RenderActivationFunctions();
 
-    ImGui::Button("Run");
-    ImGui::Button("Load");
-    ImGui::Button("Save");
+    RenderRunButton();
+    RenderLoadButton();
+    RenderSaveButton();
 
     ImGui::EndChild();
 }
 
 void ImGuiApp::RenderScenario_3() {
-    ImGui::Text("Scenario %d", currentScenario);
-    ImGui::Columns(2);
+    // Renderer
+    ImGui::BeginChild("Renderer", ImVec2(150, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
 
-    // Left part
-    ImGui::Text("Left part of Scenario %d", currentScenario);
-    ImGui::NextColumn();
+    ImGui::EndChild();
 
-    // Right part
-    ImGui::Text("Right part of Scenario %d", currentScenario);
+    ImGui::SameLine();
 
-    ImGui::Columns(1);
+    // Controls
+    ImGui::BeginChild("Controls", ImVec2(0, 0));
+
+    if (ImGui::CollapsingHeader("Input")) {
+        DrawBitmapEditor();
+    }
+
+    if (ImGui::CollapsingHeader("Tell Output")) {
+        for (size_t i = 0; i < 10; i++)
+        {
+            ImGui::Button(std::to_string(i).c_str());
+
+            if (i < 9) {
+                ImGui::SameLine();
+            }
+        }
+    }
+
+    if (ImGui::CollapsingHeader("Bias")) {
+        ImGui::SliderFloat("bias", &bias, -1.0f, 1.0f);
+    }
+
+    if (ImGui::CollapsingHeader("Learning Rate")) {
+        ImGui::SliderFloat("learning rate", &learningRate, 0.0f, 1.0f);
+    }
+
+    RenderActivationFunctions();
+
+    RenderRunButton();
+    RenderLoadButton();
+    RenderSaveButton();
+
+    ImGui::EndChild();
 }
 
 void ImGuiApp::GradientColorPicker(const char* label, float* color) {
@@ -396,6 +467,120 @@ void ImGuiApp::RendererFrame() {
     );
 
     ImGui::EndChild();
+}
+
+void ImGuiApp::DrawBitmapEditor() {
+    // Reserve space for the canvas
+    ImVec2 canvasSizeInPixels = ImVec2(canvasSize * pixelSize, canvasSize * pixelSize);
+    ImVec2 canvasPos = ImGui::GetCursorScreenPos();
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+    // Draw the canvas
+    for (int y = 0; y < canvasSize; y++) {
+        for (int x = 0; x < canvasSize; x++) {
+            ImVec2 topLeft = ImVec2(canvasPos.x + x * pixelSize, canvasPos.y + y * pixelSize);
+            ImVec2 bottomRight = ImVec2(topLeft.x + pixelSize, topLeft.y + pixelSize);
+
+            // Draw the pixel
+            if (bitmap[y][x]) {
+                drawList->AddRectFilled(topLeft, bottomRight, IM_COL32(0, 0, 0, 255)); // Black
+            }
+            else {
+                drawList->AddRectFilled(topLeft, bottomRight, IM_COL32(255, 255, 255, 255)); // White
+            }
+
+            // Draw the grid
+            drawList->AddRect(topLeft, bottomRight, IM_COL32(200, 200, 200, 255));
+        }
+    }
+
+    // Handle mouse interaction
+    if (ImGui::IsMouseHoveringRect(canvasPos, ImVec2(canvasPos.x + canvasSizeInPixels.x, canvasPos.y + canvasSizeInPixels.y))) {
+        if (ImGui::IsMouseDown(0)) { // Left mouse button
+            ImVec2 mousePos = ImGui::GetMousePos();
+            int x = (mousePos.x - canvasPos.x) / pixelSize;
+            int y = (mousePos.y - canvasPos.y) / pixelSize;
+
+            if (x >= 0 && x < canvasSize && y >= 0 && y < canvasSize) {
+                bitmap[y][x] = true; // Set pixel "on"
+            }
+        }
+        if (ImGui::IsMouseDown(1)) { // Right mouse button
+            ImVec2 mousePos = ImGui::GetMousePos();
+            int x = (mousePos.x - canvasPos.x) / pixelSize;
+            int y = (mousePos.y - canvasPos.y) / pixelSize;
+
+            if (x >= 0 && x < canvasSize && y >= 0 && y < canvasSize) {
+                bitmap[y][x] = false; // Set pixel "off"
+            }
+        }
+    }
+
+    // Reserve space for the canvas so that other ImGui widgets are positioned below it
+    ImGui::Dummy(canvasSizeInPixels);
+
+    if (ImGui::Button("Clear")) {
+        for (int y = 0; y < canvasSize; y++) {
+            for (int x = 0; x < canvasSize; x++) {
+                bitmap[y][x] = false;
+            }
+        }
+    }
+}
+
+void ImGuiApp::RenderOuput_1() {
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    const ImVec2 p = ImGui::GetCursorScreenPos();
+
+    float x = p.x + 4.0f;
+    float y = p.y + 4.0f;
+    float sz = 40.0f;
+    const float spacing = 10.0f;
+
+    ImVec4 colf;
+    ImU32 col;
+
+    // Red output circle
+    colf = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+    col = ImColor(colf);
+    draw_list->AddCircleFilled(ImVec2(x + sz * 0.5f, y + sz * 0.5f), sz * 0.5f, col);
+    x += sz + spacing;
+
+    // Green output circle
+    colf = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+    col = ImColor(colf);
+    draw_list->AddCircleFilled(ImVec2(x + sz * 0.5f, y + sz * 0.5f), sz * 0.5f, col);
+    x += sz + spacing;
+    
+
+    ImGui::Dummy(ImVec2((sz + spacing), (sz + spacing)));
+}
+
+void ImGuiApp::RenderOuput_2() {
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    const ImVec2 p = ImGui::GetCursorScreenPos();
+
+    float x = p.x + 4.0f;
+    float y = p.y + 4.0f;
+    float sz = 40.0f;
+    const float spacing = 10.0f;
+
+    ImVec4 red = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); 
+    ImVec4 magenta = ImVec4(1.0f, 0.0f, 1.0f, 1.0f); 
+    ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f); 
+    ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); 
+    ImVec4 blue = ImVec4(0.0f, 0.0f, 1.0f, 1.0f);
+    ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f); 
+    ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+    std::vector<ImVec4> colors = {red, magenta, yellow, white, blue, cyan, green};
+
+    for (ImVec4 color : colors) {
+        draw_list->AddCircleFilled(ImVec2(x + sz * 0.5f, y + sz * 0.5f), sz * 0.5f, ImColor(color));
+        x += sz + spacing;
+    }
+
+
+    ImGui::Dummy(ImVec2((sz + spacing), (sz + spacing)));
 }
 
 //int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
