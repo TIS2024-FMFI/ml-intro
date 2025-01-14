@@ -2,7 +2,7 @@
 
 AppManager::AppManager() : gui(nullptr), neuralNetwork(nullptr)
 {
-
+	testing = new NeuralNetwork(3, 2, 1, 0.01, [](double x) { return 0; }, [](double x) { return 0; }); // Example configuration
 }
 
 AppManager::~AppManager()
@@ -34,6 +34,7 @@ void AppManager::runNetwork()
 // TODO
 void AppManager::saveNetwork()
 {
+	testing->saveNetwork("xdddddd");
 }
 
 // TODO

@@ -1,9 +1,6 @@
 #include "Perceptron.h"
 
-#include <iostream>
-#include <vector>
-#include <random>
-#include <cmath>
+
 
 // Constructor
 Perceptron::Perceptron(int numInputs, double learningRate,
@@ -21,10 +18,10 @@ Perceptron::Perceptron(int numInputs, double learningRate,
 
     // Default to step activation if none provided
     if (!activationFn) {
-        activationFn = [](double x) { return x >= 0 ? 1 : -1; };
+        activationFn = [](double x) { return (x > 0) ? x : 0; };
     }
     if (!activationFnDerivative) {
-        activationFnDerivative = [](double) { return 1; }; // Placeholder for step activation
+        activationFnDerivative = [](double x) { return (x > 0) ? 1 : 0; }; // Placeholder for step activation
     }
 }
 
@@ -97,4 +94,8 @@ double Perceptron::getLearningRate() const {
 // Setter for learning rate
 void Perceptron::setLearningRate(double newLearningRate) {
     learningRate = newLearningRate;
+}
+
+std::vector<double> Perceptron::getWeights() const {
+    return weights;
 }

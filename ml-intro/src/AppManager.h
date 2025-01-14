@@ -8,6 +8,7 @@ class AppManager
 private:
 	ImGuiApp* gui;
 	NeuralNetwork* neuralNetwork;
+	NeuralNetwork* testing;
 
 public:
 	AppManager();

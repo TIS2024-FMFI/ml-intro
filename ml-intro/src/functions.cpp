@@ -1,3 +1,4 @@
+#pragma once
 #include <cmath>
 #include <string>
 
@@ -5,9 +6,9 @@ struct Function
 {
 public:
     const std::string name = "func";
-    double function(double x) {};
-    double derivative(double x) {};
-    double error_term(double x, double error) {};
+    double function(double x) { return 0; };
+    double derivative(double x) { return 0; };
+    double error_term(double x, double error) { return 0; };
 };
 
 struct ReLu : public Function

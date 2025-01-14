@@ -5,6 +5,10 @@
 #include "Perceptron.h"
 #include <vector>
 #include <functional>
+#include "json.hpp"
+#include <fstream>
+#include "functions.cpp"
+
 
 class NeuralNetwork {
 private:
@@ -51,6 +55,8 @@ public:
     // Get and set learning rate for all perceptrons
     double getLearningRate() const;
     void setLearningRate(double newLearningRate);
+
+    void saveNetwork(const std::string& filename);
 
 };
 

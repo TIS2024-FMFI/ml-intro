@@ -4,7 +4,12 @@
 
 #include <vector>
 #include <iostream>
+#include <iostream>
+#include <vector>
+#include <random>
+#include <cmath>
 #include <functional> // For std::function
+#include "functions.cpp"
 
 class Perceptron {
 private:
@@ -45,6 +50,7 @@ public:
     // Getter and setter for learning rate
     double getLearningRate() const;
     void setLearningRate(double newLearningRate);
+    std::vector<double> getWeights() const;
 };
 
 

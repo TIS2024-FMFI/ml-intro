@@ -143,3 +143,50 @@ void NeuralNetwork::setLearningRate(double newLearningRate) {
         perceptron.setLearningRate(newLearningRate);
     }
 }
+
+
+using json = nlohmann::json;
+
+void NeuralNetwork::saveNetwork(const std::string& filename) {
+    json networkJson;
+
+    // Add general network properties
+    networkJson["activationFunction"] = "ReLu"; // You can set this dynamically if needed
+    networkJson["learningRate"] = learningRate;
+    networkJson["bias"] = bias;
+    networkJson["inputSize"] = inputSize;
+    networkJson["hiddenSize"] = hiddenSize;
+    networkJson["outputSize"] = outputSize;
+
+    // Add layers
+    networkJson["layers"] = json::array();
+
+    // Save hidden layer weights
+    json hiddenLayerJson = json::array();
+    for (const auto& perceptron : hiddenLayer) {
+        json perceptronJson;
+        perceptronJson["weights"] = perceptron.getWeights(); // Implement getWeights() in Perceptron
+        hiddenLayerJson.push_back(perceptronJson);
+    }
+    networkJson["layers"].push_back(hiddenLayerJson);
+
+    // Save output layer weights
+    json outputLayerJson = json::array();
+    for (const auto& perceptron : outputLayer) {
+        json perceptronJson;
+        perceptronJson["weights"] = perceptron.getWeights(); // Implement getWeights() in Perceptron
+        outputLayerJson.push_back(perceptronJson);
+    }
+    networkJson["layers"].push_back(outputLayerJson);
+
+    // Save to file
+    std::ofstream file(filename);
+    if (file.is_open()) {
+        file << networkJson.dump(4); // Pretty print with 4 spaces
+        file.close();
+        std::cout << "Neural network saved to " << filename << std::endl;
+    }
+    else {
+        std::cerr << "Failed to open file for writing!" << std::endl;
+    }
+}
