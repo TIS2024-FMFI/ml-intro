@@ -64,6 +64,8 @@ private:
     void Render();
     void RenderMenuBar();
     void RenderRunButton();
+    void RenderSaveButton();
+    void RenderLoadButton();
     void RenderActivationFunctions();
     void RenderScenario_1();
     void RenderScenario_2();

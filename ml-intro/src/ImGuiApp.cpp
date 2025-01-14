@@ -3,7 +3,7 @@
 #include "AppManager.h"
 
 ImGuiApp::ImGuiApp(AppManager& appManager, HINSTANCE hInstance) : appManager(&appManager),  hInstance(hInstance), hwnd(nullptr), running(true),
-    currentScenario(1), bias(0), learningRate(0), activationFunction(), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)), bitmap(canvasSize, std::vector<bool>(canvasSize, false)) {}
+    currentScenario(1), bias(0), learningRate(0), activationFunctionName(), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)), bitmap(canvasSize, std::vector<bool>(canvasSize, false)) {}
 
 ImGuiApp::~ImGuiApp() {
     if (ImGui::GetCurrentContext()) {
@@ -253,11 +253,25 @@ void ImGuiApp::RenderMenuBar() {
 
 void ImGuiApp::RenderRunButton() {
     if (ImGui::Button("Run")) {
-        appManager->setNetworkBias(bias);
+       appManager->setNetworkBias(bias);
         appManager->setNetworkLearningRate(learningRate);
         appManager->setNetworkActivationFunction(getActivationFunction());
 
         appManager->runNetwork();
+    }
+}
+
+void ImGuiApp::RenderSaveButton()
+{
+    if (ImGui::Button("Save")) {
+        appManager->saveNetwork();
+    }
+}
+
+void ImGuiApp::RenderLoadButton()
+{
+    if (ImGui::Button("Load")) {
+        appManager->loadNetwork();
     }
 }
 
@@ -315,8 +329,8 @@ void ImGuiApp::RenderScenario_1() {
     RenderActivationFunctions();
 
     RenderRunButton();
-    ImGui::Button("Load");
-    ImGui::Button("Save");
+    RenderLoadButton();
+    RenderSaveButton();
 
     ImGui::EndChild();
 }
@@ -351,8 +365,8 @@ void ImGuiApp::RenderScenario_2() {
     RenderActivationFunctions();
 
     RenderRunButton();
-    ImGui::Button("Load");
-    ImGui::Button("Save");
+    RenderLoadButton();
+    RenderSaveButton();
 
     ImGui::EndChild();
 }
@@ -394,8 +408,8 @@ void ImGuiApp::RenderScenario_3() {
     RenderActivationFunctions();
 
     RenderRunButton();
-    ImGui::Button("Load");
-    ImGui::Button("Save");
+    RenderLoadButton();
+    RenderSaveButton();
 
     ImGui::EndChild();
 }
