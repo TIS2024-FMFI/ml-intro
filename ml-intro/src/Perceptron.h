@@ -23,7 +23,7 @@ private:
 
 public:
     // Constructor
-    Perceptron(int numInputs, double learningRate = 0.01,
+    Perceptron(int numInputs,
         std::function<double(double)> activation = nullptr,
         std::function<double(double)> activationDerivative = nullptr);
 

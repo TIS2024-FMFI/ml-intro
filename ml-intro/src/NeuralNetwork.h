@@ -22,14 +22,23 @@ private:
     std::vector<Perceptron> hiddenLayer;
     std::vector<Perceptron> outputLayer;
 
+    std::function<double(double)> hiddenActivationFn;
+    std::function<double(double)> hiddenActivationFnDerivative;
+    std::function<double(double)> outputActivationFn;
+    std::function<double(double)> outputActivationFnDerivative;
+
+
+
     // Helper to compute layer outputs
-    std::vector<double> computeLayerOutput(const std::vector<Perceptron>& layer, const std::vector<double>& inputs);
+    std::vector<double> computeLayerOutput(const std::vector<Perceptron>& layer, const std::vector<double>& inputs, bool isOutputLayer);
 
 public:
     // Constructor
-    NeuralNetwork(int inputSize, int hiddenSize, int outputSize, double learningRate = 0.01,
-        std::function<double(double)> activation = nullptr,
-        std::function<double(double)> activationDerivative = nullptr);
+    NeuralNetwork(int inputSize, int hiddenSize, int outputSize,
+        std::function<double(double)> hiddenActivationFn = nullptr,
+    std::function<double(double)> hiddenActivationFnDerivative = nullptr,
+    std::function<double(double)> outputActivationFn = nullptr,
+    std::function<double(double)> outputActivationFnDerivative = nullptr);
 
     // Predict output for given inputs
     std::vector<double> predict(const std::vector<double>& inputs);
@@ -42,7 +51,9 @@ public:
         const std::vector<std::vector<double>>& targets,
         int num_epochs);
 
-    void setActivationFunction(std::function<double(double)> activation,
+    void setHiddenActivationFunction(std::function<double(double)> activation,
+        std::function<double(double)> activationDerivative);
+    void setOutputActivationFunction(std::function<double(double)> activation,
         std::function<double(double)> activationDerivative);
 
     // Print model information
@@ -59,7 +70,19 @@ public:
     void saveNetwork(const std::string& filename);
     void loadNetwork(const std::string& filename);
 
+    std::vector<double> softmax(const std::vector<double>& logits);
+
+
 };
 
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
+    os << "[ ";
+    for (const T& element : vec) {
+        os << element << " ";
+    }
+    os << "]";
+    return os;
+}
 
 #endif //NEURALNETWORK_H

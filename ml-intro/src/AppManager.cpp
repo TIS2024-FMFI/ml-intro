@@ -3,7 +3,9 @@
 
 AppManager::AppManager() : gui(nullptr)
 {
-	testing = new NeuralNetwork(3, 2, 1, 0.01, [](double x) { return 0; }, [](double x) { return 0; }); // Example configuration
+	testing = new NeuralNetwork(3, 2, 1, [](double x) { return 0; }, [](double x) { return 0; }); // Example configuration
+	nN1 = new NeuralNetwork(2, 0, 1,nullptr, nullptr, [](double x) { return Sigmoid().function(x); }, [](double x) { return Sigmoid().derivative(x); });
+	nN2 = new NeuralNetwork(3, 5, 7,[](double x) { return ReLu().function(x); }, [](double x) { return ReLu().derivative(x); });
 }
 
 AppManager::~AppManager()
@@ -116,13 +118,13 @@ void AppManager::setNetworkActivationFunction(Function activationFunction)
 	int currScenario = gui->getCurrentScenrio();
 	switch (currScenario) {
 	case 1:
-		nN1->setActivationFunction(func, deriv);
+		nN1->setHiddenActivationFunction(func, deriv);
 		break;
 	case 2:
-		nN2->setActivationFunction(func, deriv);
+		nN2->setHiddenActivationFunction(func, deriv);
 		break;
 	case 3:
-		nN3->setActivationFunction(func, deriv);
+		nN3->setHiddenActivationFunction(func, deriv);
 		break;
 
 	default:
