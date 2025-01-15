@@ -57,6 +57,7 @@ public:
     void setLearningRate(double newLearningRate);
 
     void saveNetwork(const std::string& filename);
+    void loadNetwork(const std::string& filename);
 
 };
 

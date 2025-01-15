@@ -190,3 +190,45 @@ void NeuralNetwork::saveNetwork(const std::string& filename) {
         std::cerr << "Failed to open file for writing!" << std::endl;
     }
 }
+
+void NeuralNetwork::loadNetwork(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open the file: " + filename);
+    }
+
+    json networkJson;
+    file >> networkJson; // Parse the JSON file
+    file.close();
+
+    // Validate the JSON structure
+    if (!networkJson.contains("learningRate") ||
+        !networkJson.contains("bias") ||
+        !networkJson.contains("layers")) {
+        throw std::runtime_error("Invalid JSON format for NeuralNetwork.");
+    }
+
+    // Update learningRate and bias
+    learningRate = networkJson["learningRate"].get<double>();
+    bias = networkJson["bias"].get<double>();
+
+    // Update weights for hidden layer
+    const auto& hiddenLayerJson = networkJson["layers"][0];
+    if (hiddenLayerJson.size() != hiddenLayer.size()) {
+        throw std::runtime_error("Mismatch in hidden layer size.");
+    }
+    for (size_t i = 0; i < hiddenLayer.size(); ++i) {
+        hiddenLayer[i].setWeights(hiddenLayerJson[i]["weights"].get<std::vector<double>>());
+    }
+
+    // Update weights for output layer
+    const auto& outputLayerJson = networkJson["layers"][1];
+    if (outputLayerJson.size() != outputLayer.size()) {
+        throw std::runtime_error("Mismatch in output layer size.");
+    }
+    for (size_t i = 0; i < outputLayer.size(); ++i) {
+        outputLayer[i].setWeights(outputLayerJson[i]["weights"].get<std::vector<double>>());
+    }
+
+    std::cout << "Neural network successfully loaded from " << filename << std::endl;
+}

@@ -2,12 +2,15 @@
 
 #include "NeuralNetwork.h"
 #include "ImGuiApp.h"
+#include "FileDialog.h"
 
 class AppManager
 {
 private:
 	ImGuiApp* gui;
-	NeuralNetwork* neuralNetwork;
+	NeuralNetwork* nN1;
+	NeuralNetwork* nN2;
+	NeuralNetwork* nN3;
 	NeuralNetwork* testing;
 
 public:

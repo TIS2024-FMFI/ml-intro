@@ -51,6 +51,7 @@ public:
     double getLearningRate() const;
     void setLearningRate(double newLearningRate);
     std::vector<double> getWeights() const;
+    void setWeights(const std::vector<double>& newWeights);
 };
 
 

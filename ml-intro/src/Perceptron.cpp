@@ -99,3 +99,10 @@ void Perceptron::setLearningRate(double newLearningRate) {
 std::vector<double> Perceptron::getWeights() const {
     return weights;
 }
+
+void Perceptron::setWeights(const std::vector<double>& newWeights) {
+    if (newWeights.size() != weights.size()) {
+        throw std::invalid_argument("Mismatch in weights size.");
+    }
+    weights = newWeights;
+}
