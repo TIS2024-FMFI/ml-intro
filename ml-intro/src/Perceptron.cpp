@@ -1,42 +1,34 @@
 #include "Perceptron.h"
 
-#include <iostream>
-#include <vector>
-#include <random>
-#include <cmath>
+
 
 // Constructor
-Perceptron::Perceptron(int numInputs, double learningRate,
+Perceptron::Perceptron(int numInputs,
     std::function<double(double)> activation,
     std::function<double(double)> activationDerivative)
-    : learningRate(learningRate), activationFn(activation), activationFnDerivative(activationDerivative) {
+    : learningRate(0.05), activationFn(activation), activationFnDerivative(activationDerivative), bias(1.0) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dist(-1.0, 1.0);
 
-    for (int i = 0; i < numInputs; ++i) {
+    for (int i = 0; i < numInputs+1; ++i) {
         weights.push_back(dist(gen));
     }
-    bias = dist(gen);
 
-    // Default to step activation if none provided
-    if (!activationFn) {
-        activationFn = [](double x) { return x >= 0 ? 1 : -1; };
-    }
-    if (!activationFnDerivative) {
-        activationFnDerivative = [](double) { return 1; }; // Placeholder for step activation
-    }
 }
 
 // Predict output
 double Perceptron::guess(const std::vector<double>& inputs) const {
-    if (inputs.size() != weights.size()) {
+    if (inputs.size() + 1 != weights.size()) {
         throw std::invalid_argument("Input size does not match the number of weights.");
     }
-
-    double weightedSum = bias;
+    double weightedSum = 0.0;
     for (size_t i = 0; i < inputs.size(); ++i) {
         weightedSum += inputs[i] * weights[i];
+    }
+    weightedSum += bias * weights.back();
+    if (activationFn == nullptr) {
+        return weightedSum;
     }
     return activationFn(weightedSum);
 }
@@ -45,13 +37,18 @@ double Perceptron::guess(const std::vector<double>& inputs) const {
 void Perceptron::train(const std::vector<double>& trainingData, double target) {
     double prediction = guess(trainingData);
     double error = target - prediction;
-
+    double delta;
     // Update weights using the derivative of the activation function
-    double delta = error * activationFnDerivative(prediction);
-    for (size_t i = 0; i < weights.size(); ++i) {
+    if (activationFn == nullptr) {
+        delta = error;
+    }
+    else {
+        delta = error * activationFnDerivative(prediction);
+    }
+    for (size_t i = 0; i < trainingData.size(); ++i) {
         weights[i] += learningRate * delta * trainingData[i];
     }
-    bias += learningRate * delta;
+    weights.back() += learningRate * delta * bias;
 }
 
 // Fit on a dataset
@@ -97,4 +94,15 @@ double Perceptron::getLearningRate() const {
 // Setter for learning rate
 void Perceptron::setLearningRate(double newLearningRate) {
     learningRate = newLearningRate;
+}
+
+std::vector<double> Perceptron::getWeights() const {
+    return weights;
+}
+
+void Perceptron::setWeights(const std::vector<double>& newWeights) {
+    if (newWeights.size() != weights.size()) {
+        throw std::invalid_argument("Mismatch in weights size.");
+    }
+    weights = newWeights;
 }

@@ -4,7 +4,12 @@
 
 #include <vector>
 #include <iostream>
+#include <iostream>
+#include <vector>
+#include <random>
+#include <cmath>
 #include <functional> // For std::function
+#include "functions.cpp"
 
 class Perceptron {
 private:
@@ -18,7 +23,7 @@ private:
 
 public:
     // Constructor
-    Perceptron(int numInputs, double learningRate = 0.01,
+    Perceptron(int numInputs,
         std::function<double(double)> activation = nullptr,
         std::function<double(double)> activationDerivative = nullptr);
 
@@ -45,6 +50,8 @@ public:
     // Getter and setter for learning rate
     double getLearningRate() const;
     void setLearningRate(double newLearningRate);
+    std::vector<double> getWeights() const;
+    void setWeights(const std::vector<double>& newWeights);
 };
 
 
