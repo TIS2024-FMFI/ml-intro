@@ -48,7 +48,8 @@ private:
     AppManager* appManager;
     bool running;
     int currentScenario;
-    std::string activationFunctionName;
+    std::string activationFunctionNameOuput;
+    std::string activationFunctionNameHidden;
     float bias;
     float learningRate;
     ImVec4 color;
@@ -63,10 +64,12 @@ private:
     static void CleanupDeviceWGL(HWND hWnd, WGL_WindowData* data);
     void Render();
     void RenderMenuBar();
+    bool CustomButton(const char* label, ImVec4 color);
     void RenderRunButton();
     void RenderSaveButton();
     void RenderLoadButton();
-    void RenderActivationFunctions();
+    void RenderActivationFunctionsOuput();
+    void RenderActivationFunctionsHidden();
     void RenderScenario_1();
     void RenderScenario_2();
     void RenderScenario_3();
@@ -75,5 +78,6 @@ private:
     void DrawBitmapEditor();
     void RenderOuput_1();
     void RenderOuput_2();
+    void RenderTellOuput_2();
 };
 
