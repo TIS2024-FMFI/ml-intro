@@ -4,9 +4,8 @@
 
 // Constructor
 Perceptron::Perceptron(int numInputs,
-    std::function<double(double)> activation,
-    std::function<double(double)> activationDerivative)
-    : learningRate(0.05), activationFn(activation), activationFnDerivative(activationDerivative), bias(1.0) {
+    std::shared_ptr<Function> activationFunc)
+    : learningRate(0.05), activationFunction(activationFunc), bias(1.0) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dist(-1.0, 1.0);
@@ -27,23 +26,20 @@ double Perceptron::guess(const std::vector<double>& inputs) const {
         weightedSum += inputs[i] * weights[i];
     }
     weightedSum += bias * weights.back();
-    if (activationFn == nullptr) {
-        return weightedSum;
+    if (activationFunction) {
+        return activationFunction->function(weightedSum);
     }
-    return activationFn(weightedSum);
+    return weightedSum;
 }
 
 // Train the perceptron
 void Perceptron::train(const std::vector<double>& trainingData, double target) {
     double prediction = guess(trainingData);
     double error = target - prediction;
-    double delta;
-    // Update weights using the derivative of the activation function
-    if (activationFn == nullptr) {
-        delta = error;
-    }
-    else {
-        delta = error * activationFnDerivative(prediction);
+    double delta = error;
+
+    if (activationFunction) {
+        delta = error * activationFunction->derivative(prediction);
     }
     for (size_t i = 0; i < trainingData.size(); ++i) {
         weights[i] += learningRate * delta * trainingData[i];
@@ -70,10 +66,8 @@ void Perceptron::printModel() const {
 }
 
 // Set activation function and its derivative
-void Perceptron::setActivationFunction(std::function<double(double)> activation,
-    std::function<double(double)> activationDerivative) {
-    activationFn = activation;
-    activationFnDerivative = activationDerivative;
+void Perceptron::setActivationFunction(std::shared_ptr<Function> newActivationFunction) {
+    activationFunction = newActivationFunction;
 }
 
 // Getter for bias

@@ -3,6 +3,7 @@
 #include "NeuralNetwork.h"
 #include "ImGuiApp.h"
 #include "FileDialog.h"
+#include "trainingSet.h"
 
 class AppManager
 {
@@ -25,7 +26,7 @@ public:
 	void setNetworkInput();
 	void setNetworkBias(float bias);
 	void setNetworkLearningRate(float learningRate);
-	void setNetworkActivationFunction(Function activationFunction);
+	void setNetworkActivationFunction(std::shared_ptr<Function> activationFunctionHidden, std::shared_ptr<Function> activationFunctionOutput);
 
 };
 

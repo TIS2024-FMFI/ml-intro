@@ -16,16 +16,14 @@ private:
     std::vector<double> weights;
     double bias;
     double learningRate;
+    std::shared_ptr<Function> activationFunction;
 
-    // Activation function and its derivative
-    std::function<double(double)> activationFn;
-    std::function<double(double)> activationFnDerivative;
+
 
 public:
     // Constructor
     Perceptron(int numInputs,
-        std::function<double(double)> activation = nullptr,
-        std::function<double(double)> activationDerivative = nullptr);
+        std::shared_ptr<Function> activationFunc);
 
     // Predict output
     double guess(const std::vector<double>& inputs) const;
@@ -40,8 +38,7 @@ public:
     void printModel() const;
 
     // Set activation function and its derivative
-    void setActivationFunction(std::function<double(double)> activation,
-        std::function<double(double)> activationDerivative);
+    void setActivationFunction(std::shared_ptr<Function> newActivationFunction);
 
     // Getter and setter for bias
     double getBias() const;
