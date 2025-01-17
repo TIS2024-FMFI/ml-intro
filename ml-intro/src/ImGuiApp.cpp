@@ -269,6 +269,12 @@ void ImGuiApp::RenderMenuBar() {
             ImGui::EndMenu();
         }
 
+        if (ImGui::BeginMenu("Render Text")) {
+            if (ImGui::MenuItem("Enable##TextRender", nullptr, Renderer::isEnabled())) Renderer::EnableText();
+            if (ImGui::MenuItem("Disable##TextRender", nullptr, !Renderer::isEnabled())) Renderer::DisableText();
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMenuBar();
     }
 }
@@ -549,6 +555,7 @@ void ImGuiApp::RendererFrame() {
     ImGui::BeginChild("Renderer", ImVec2(space.x / 2, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
 
     ImVec2 rendererScale = ImGui::GetContentRegionAvail();
+    MouseDeltaHandeler();
     frameBuffer->RescaleFrameBuffer(rendererScale.x, rendererScale.y);
     renderer->renderScene();
 
@@ -703,6 +710,48 @@ void ImGuiApp::RenderTellOuput_2() {
 
     ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
     CustomButton("Green", green);
+}
+
+void ImGuiApp::MouseDeltaHandeler()
+{
+    static bool isDragging = false;
+    static POINT dragStartPos;
+
+    ImVec2 framePos = ImGui::GetCursorScreenPos();
+    ImVec2 frameSize = ImGui::GetContentRegionAvail();
+    ImVec2 bottomLeft = ImVec2(framePos.x + frameSize.x, framePos.y + frameSize.y);
+    ImVec2 mid = ImVec2(250, 250);
+
+    POINT mousePos;
+    if (!GetCursorPos(&mousePos)) {
+        mousePos.x = mousePos.y = 0;
+    }
+
+    if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
+    {
+        if (!isDragging && ImGui::IsMouseHoveringRect(framePos, bottomLeft))
+        {
+            ShowCursor(FALSE);
+            dragStartPos = mousePos;
+            isDragging = true;
+            SetCursorPos(mid.x, mid.y);
+        }
+        else if (isDragging){
+            camera.MoveCamera(vec2(mousePos.x - mid.x, mousePos.y - mid.y)*.05f);
+            SetCursorPos(mid.x, mid.y);
+        }
+    }
+    else if (isDragging)
+    {
+        SetCursorPos(dragStartPos.x, dragStartPos.y);
+        isDragging = false; 
+        ShowCursor(TRUE);
+    }
+
+    //mouseScrollHandeler
+    if (ImGui::IsMouseHoveringRect(framePos, bottomLeft)) {
+        camera.ProcessMouseScroll(ImGui::GetIO().MouseWheel);
+    }
 }
 
 //int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {

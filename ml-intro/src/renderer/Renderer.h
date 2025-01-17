@@ -38,6 +38,7 @@ public:
 
 	static void EnableText() { renderText = true; };
 	static void DisableText() { renderText = false; };
+	static bool isEnabled() { return renderText; }
 
 private:
 	void useShaderProgram();

@@ -57,54 +57,20 @@ public:
         UpdateViewMatrix();
     }
 
-    void ArcBallCamera(float deltaX, float deltaY)
-    {
-        glm::vec4 position(GetEye().x, GetEye().y, GetEye().z, 1);
-        glm::vec4 pivot(GetLookAt().x, GetLookAt().y, GetLookAt().z, 1);
-        float deltaAngleX = (2 * PI / *m_width);
-        float deltaAngleY = (PI / *m_height);
-        float xAngle = deltaX * deltaAngleX;
-        float yAngle = deltaY * deltaAngleY;
+    void MoveCamera(glm::vec2 delta) {
+        glm::vec3 eye = m_eye - GetRightVector() * delta.x;
+        eye += GetUpVector() * delta.y;
+        
+        eye = glm::normalize(eye) * distToTarget;
 
-        xAngleSub += xAngle;
-        yAngleSub += yAngle;
-
-        std::cout << xAngleSub * (180 / PI) << " " << yAngleSub * (180 / PI) << std::endl;
-
-        float cosAngle = glm::dot(GetViewDir(), m_upVector);
-        if (cosAngle * glm::sign(yAngle) > 0.99f)
-            yAngle = 0;
-
-        glm::mat4x4 rotationMatrixX(1.0f);
-        rotationMatrixX = glm::rotate(rotationMatrixX, xAngle, m_upVector);
-        position = (rotationMatrixX * (position - pivot)) + pivot;
-
-        glm::mat4x4 rotationMatrixY(1.0f);
-        rotationMatrixY = glm::rotate(rotationMatrixY, yAngle, GetRightVector());
-        glm::vec3 finalPosition = (rotationMatrixY * (position - pivot)) + pivot;
-
-        SetCameraView(finalPosition, GetLookAt());
+        SetCameraView(eye, glm::vec3(0));
     }
 
-    void PanCamera(glm::vec2 deltaMouse)
-    {
-        float xSub = deltaMouse.x * glm::sin(yAngleSub);
-        float ySub = deltaMouse.x;
-        float zSub = deltaMouse.y * glm::cos(xAngleSub);
+    void ProcessMouseScroll(float y) {
+        distToTarget -= y * 0.1;
+        distToTarget = glm::clamp(distToTarget, 1.0f, 25.0f);
 
-        m_eye = glm::vec3(m_eye.x + xSub, m_eye.y + ySub, m_eye.z + zSub);
-        m_lookAt = glm::vec3(m_lookAt.x + xSub, m_lookAt.y + ySub, m_lookAt.z + zSub);
-
-        UpdateViewMatrix();
-    }
-
-    void ProcessMouseScroll(float yoffset)
-    {
-        m_fov -= (float)yoffset;
-        if (m_fov < 1.0f)
-            m_fov = 1.0f;
-        if (m_fov > 45.0f)
-            m_fov = 45.0f;
+        SetCameraView(glm::normalize(m_eye) * distToTarget, glm::vec3(0));
     }
 
 private:
@@ -118,7 +84,5 @@ private:
     float* m_height;
     float m_fov = 45;
     float pan_speed = .5f;
-
-    float xAngleSub = 0.0;
-    float yAngleSub = 0.0;
+    float distToTarget = 5;
 };
