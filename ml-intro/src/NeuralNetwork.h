@@ -64,7 +64,10 @@ public:
     void loadNetwork(const std::string& filename);
 
     // Utility function for softmax
-    Eigen::VectorXd softmax(const Eigen::VectorXd& logits);
+    Eigen::VectorXd softmax(const Eigen::VectorXd& logits) const;
+
+    std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> extractNetworkData(const Eigen::VectorXd& input) const;
+
 };
 
 #endif // NEURALNETWORK_H

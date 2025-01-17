@@ -157,7 +157,7 @@ void NeuralNetwork::setLearningRate(double newLearningRate) {
 }
 
 // Apply the softmax function to a vector
-Eigen::VectorXd NeuralNetwork::softmax(const Eigen::VectorXd& logits) {
+Eigen::VectorXd NeuralNetwork::softmax(const Eigen::VectorXd& logits) const{
     Eigen::VectorXd expLogits = (logits.array() - logits.maxCoeff()).exp(); // For numerical stability
     return expLogits / expLogits.sum(); // Normalize by the sum of exponents
 }
@@ -301,3 +301,53 @@ std::string NeuralNetwork::getActivationFuncName() {
     }
     return outputActivationFunction->name();
 }
+std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> NeuralNetwork::extractNetworkData(const Eigen::VectorXd& input) const {
+    std::vector<std::vector<float>> layers;  // Store activations
+    std::vector<std::vector<float>> weights; // Store weights
+
+    // Input layer activations
+    std::vector<float> inputActivations(input.data(), input.data() + input.size());
+    layers.emplace_back(inputActivations);
+
+    Eigen::VectorXd hiddenOutput;
+    if (hiddenSize > 0) {
+        // Hidden layer: compute activations
+        Eigen::VectorXd hiddenInput = hiddenWeights * input + Eigen::VectorXd::Constant(hiddenSize, bias);
+        hiddenOutput = hiddenInput.unaryExpr([this](double x) {
+            return hiddenActivationFunction->function(x);
+            });
+
+        std::vector<float> hiddenActivations(hiddenOutput.data(), hiddenOutput.data() + hiddenOutput.size());
+        layers.emplace_back(hiddenActivations);
+    }
+
+    // Output layer: compute activations
+    Eigen::VectorXd outputInput = (hiddenSize > 0 ? outputWeights * hiddenOutput : outputWeights * input) + Eigen::VectorXd::Constant(outputSize, bias);
+    Eigen::VectorXd finalOutput = outputInput.unaryExpr([this](double x) {
+        return outputActivationFunction ? outputActivationFunction->function(x) : x;
+        });
+
+    if (!outputActivationFunction) {
+        finalOutput = softmax(finalOutput);
+    }
+
+    std::vector<float> outputActivations(finalOutput.data(), finalOutput.data() + finalOutput.size());
+    layers.emplace_back(outputActivations);
+
+    // Convert hidden weights
+    if (hiddenSize > 0) {
+        for (int i = 0; i < hiddenWeights.rows(); ++i) {
+            std::vector<float> row(hiddenWeights.row(i).data(), hiddenWeights.row(i).data() + hiddenWeights.cols());
+            weights.emplace_back(row);
+        }
+    }
+
+    // Convert output weights
+    for (int i = 0; i < outputWeights.rows(); ++i) {
+        std::vector<float> row(outputWeights.row(i).data(), outputWeights.row(i).data() + outputWeights.cols());
+        weights.emplace_back(row);
+    }
+
+    return { layers, weights };
+}
+

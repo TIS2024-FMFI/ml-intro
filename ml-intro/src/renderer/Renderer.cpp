@@ -1,6 +1,6 @@
 #include "Renderer.h"
 
-bool Renderer::renderText = true;
+bool Renderer::renderText = false;
 bool Renderer::squareRender = true;
 
 Renderer::Renderer(FrameBuffer* fb, Camera* cam)
@@ -72,9 +72,9 @@ void Renderer::loadNN(/*todo: send the network data here*/) {
 
 
 void Renderer::renderScene() {
-	test += 0.001;
+	//test += 0.001;
 
-	m_camera->SetCameraView(vec3(sin(test) * 5., sin(test*3.14159265)*3., cos(test) * 5.), vec3(.0));
+	//m_camera->SetCameraView(vec3(sin(test) * 5., sin(test*3.14159265)*3., cos(test) * 5.), vec3(.0));
 	m_camera->UpdateProjMatrix();
 
 

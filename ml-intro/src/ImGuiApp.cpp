@@ -268,6 +268,11 @@ void ImGuiApp::RenderMenuBar() {
             if (ImGui::MenuItem("Material 3")) {}
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Render Text")) {
+            if (ImGui::MenuItem("Enable##TextRender", nullptr, Renderer::isEnabled())) Renderer::EnableText();
+            if (ImGui::MenuItem("Disable##TextRender", nullptr, !Renderer::isEnabled())) Renderer::DisableText();
+            ImGui::EndMenu();
+        }
 
         ImGui::EndMenuBar();
     }
@@ -557,6 +562,7 @@ void ImGuiApp::RendererFrame() {
     ImGui::BeginChild("Renderer", ImVec2(space.x / 2, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
 
     ImVec2 rendererScale = ImGui::GetContentRegionAvail();
+    MouseDeltaHandeler();
     frameBuffer->RescaleFrameBuffer(rendererScale.x, rendererScale.y);
     renderer->renderScene();
 
@@ -727,6 +733,49 @@ void ImGuiApp::RenderTellOuput_2() {
     }
 }
 
+void ImGuiApp::MouseDeltaHandeler()
+{
+    static bool isDragging = false;
+    static POINT dragStartPos;
+
+    ImVec2 framePos = ImGui::GetCursorScreenPos();
+    ImVec2 frameSize = ImGui::GetContentRegionAvail();
+    ImVec2 bottomLeft = ImVec2(framePos.x + frameSize.x, framePos.y + frameSize.y);
+    ImVec2 mid = ImVec2(250, 250);
+
+    POINT mousePos;
+    if (!GetCursorPos(&mousePos)) {
+        mousePos.x = mousePos.y = 0;
+    }
+
+    if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
+    {
+        if (!isDragging && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
+        {
+            ShowCursor(FALSE);
+            dragStartPos = mousePos;
+            isDragging = true;
+            //SetCursorPos(mid.x, mid.y);
+        }
+        else if (isDragging) {
+            camera.MoveCamera(vec2(mousePos.x - dragStartPos.x, mousePos.y - dragStartPos.y) * .05f);
+            SetCursorPos(dragStartPos.x, dragStartPos.y);
+        }
+    }
+    else if (isDragging)
+    {
+        SetCursorPos(dragStartPos.x, dragStartPos.y);
+        isDragging = false;
+        ShowCursor(TRUE);
+    }
+
+    //mouseScrollHandeler
+    if (isDragging || ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) {
+        camera.ProcessMouseScroll(ImGui::GetIO().MouseWheel);
+    }
+}
+
+
 //int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 //    ImGuiApp app(hInstance);
 //    if (!app.Initialize())
@@ -734,3 +783,9 @@ void ImGuiApp::RenderTellOuput_2() {
 //    app.Run();
 //    return 0;
 //}
+
+void sendRendererData(std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> data) {
+    
+}
+
+

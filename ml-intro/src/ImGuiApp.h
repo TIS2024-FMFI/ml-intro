@@ -56,7 +56,7 @@ private:
     ImVec4 color;
 
     ImVec2 rendererSize = ImVec2(500, 500);
-    Camera camera = Camera(glm::vec3(5, 0, 0), glm::vec3(0, 0, 0), &rendererSize.x, &rendererSize.y);
+    Camera camera = Camera(glm::vec3(0, 0, 5), glm::vec3(0, 0, 0), &rendererSize.x, &rendererSize.y);
     FrameBuffer* frameBuffer = nullptr;
     Renderer* renderer = nullptr;
 
@@ -80,5 +80,7 @@ private:
     void RenderOuput_1();
     void RenderOuput_2();
     void RenderTellOuput_2();
+    void MouseDeltaHandeler();
+    void sendRendererData(std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> data);
 };
 
