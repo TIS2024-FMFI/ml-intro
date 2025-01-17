@@ -37,7 +37,6 @@ public:
     float getLearningRate() { return learningRate; }
     ImVec4 getInput() { return color; }
 
-    void MouseDeltaHandeler();
 
 private:
     HWND hwnd;
@@ -82,5 +81,6 @@ private:
     void RenderOuput_1();
     void RenderOuput_2();
     void RenderTellOuput_2();
+    void MouseDeltaHandeler();
 };
 
