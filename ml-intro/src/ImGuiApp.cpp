@@ -727,7 +727,7 @@ void ImGuiApp::MouseDeltaHandeler()
         mousePos.x = mousePos.y = 0;
     }
 
-    if (ImGui::IsMouseDown(ImGuiMouseButton_Middle))
+    if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
     {
         if (!isDragging && ImGui::IsMouseHoveringRect(framePos, bottomLeft))
         {
