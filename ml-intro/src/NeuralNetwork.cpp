@@ -1,356 +1,353 @@
 #include "NeuralNetwork.h"
 #include <iostream>
+#include <cmath>
+#include <numeric>
 
 // Constructor
 NeuralNetwork::NeuralNetwork(int inputSize, int hiddenSize, int outputSize,
     std::shared_ptr<Function> outputActivationFunction,
-std::shared_ptr<Function> hiddenActivationFunction)
-    : inputSize(inputSize), hiddenSize(hiddenSize), outputSize(outputSize), learningRate(0.05), bias(1.0), outputActivationFunction(outputActivationFunction), hiddenActivationFunction(hiddenActivationFunction){
-    // Initialize hidden layer perceptrons
-    for (int i = 0; i < hiddenSize; ++i) {
-        hiddenLayer.emplace_back(inputSize, hiddenActivationFunction);
-    }
+    std::shared_ptr<Function> hiddenActivationFunction)
+    : inputSize(inputSize), hiddenSize(hiddenSize), outputSize(outputSize),
+    learningRate(0.05), bias(1.0),
+    outputActivationFunction(outputActivationFunction),
+    hiddenActivationFunction(hiddenActivationFunction) {
 
-    // Initialize output layer perceptrons
-    for (int i = 0; i < outputSize; ++i) {
-        if (hiddenSize <= 0) {
-            outputLayer.emplace_back(inputSize, outputActivationFunction);
-        }
-        else {
-            outputLayer.emplace_back(hiddenSize, outputActivationFunction);
-        }
-        
+    // Initialize weights for the hidden layer
+    if (hiddenSize > 0) {
+        // Inicializácia váh pre skrytú a výstupnú vrstvu
+        hiddenWeights = Eigen::MatrixXd::Random(hiddenSize, inputSize);
+        outputWeights = Eigen::MatrixXd::Random(outputSize, hiddenSize);
     }
-}
-
-// Helper to compute layer outputs
-std::vector<double> NeuralNetwork::computeLayerOutput(const std::vector<Perceptron>& layer, const std::vector<double>& inputs, bool isOutput) {
-    std::vector<double> outputs;
-    for (const auto& perceptron : layer) {
-        outputs.push_back(perceptron.guess(inputs));
+    else {
+        // Ak hiddenSize = 0, výstupná vrstva priamo spracováva vstupy
+        outputWeights = Eigen::MatrixXd::Random(outputSize, inputSize);
     }
-    if (isOutput && outputActivationFunction == nullptr) {
-        return softmax(outputs);
-    }
-    return outputs;
 }
 
 // Predict output for given inputs
-std::vector<double> NeuralNetwork::predict(const std::vector<double>& inputs) {
-    if (inputs.size() != inputSize) {
-        std::cout << inputs << "\n";
-        std::cout << inputSize << "\n";
-        throw std::invalid_argument("Input size does not match the network's input layer size.");
-    }
+Eigen::VectorXd NeuralNetwork::predict(const Eigen::VectorXd& inputs) {
+    Eigen::VectorXd finalOutput;
 
-    std::vector<double> hiddenOutputs;
     if (hiddenSize > 0) {
-        hiddenOutputs = computeLayerOutput(hiddenLayer, inputs, false);
-    }
+        Eigen::VectorXd hiddenInput = hiddenWeights * inputs + Eigen::VectorXd::Constant(hiddenSize, bias);
+        Eigen::VectorXd hiddenOutput = hiddenInput.unaryExpr([this](double x) {
+            return hiddenActivationFunction->function(x);
+            });
 
-    // Pass through the hidden layer
-
-
-    // Pass through the output layer
-    return computeLayerOutput(outputLayer, hiddenSize > 0 ? hiddenOutputs : inputs, true);
-}
-
-
-
-// Train the neural network
-void NeuralNetwork::train(const std::vector<double>& inputs, const std::vector<double>& targets) {
-    if (inputs.size() != inputSize || targets.size() != outputSize) {
-        throw std::invalid_argument("Input or target size does not match the network's configuration.");
-    }
-
-    // Forward pass
-    std::vector<double> finalOutputs;
-    std::vector<double> hiddenOutputs;
-    if (hiddenSize > 0) {
-        hiddenOutputs = computeLayerOutput(hiddenLayer, inputs, false);
-        finalOutputs = computeLayerOutput(outputLayer, hiddenOutputs, true);
+        Eigen::VectorXd outputInput = outputWeights * hiddenOutput + Eigen::VectorXd::Constant(outputSize, bias);
+        finalOutput = outputInput.unaryExpr([this](double x) {
+            return outputActivationFunction ? outputActivationFunction->function(x) : x;
+            });
     }
     else {
-        finalOutputs = computeLayerOutput(outputLayer, inputs, true);
+        Eigen::VectorXd outputInput = outputWeights * inputs + Eigen::VectorXd::Constant(outputSize, bias);
+        finalOutput = outputInput.unaryExpr([this](double x) {
+            return outputActivationFunction ? outputActivationFunction->function(x) : x;
+            });
     }
 
-    // Calculate errors for output layer
-    std::vector<double> outputErrors(outputLayer.size());
-    for (size_t i = 0; i < outputLayer.size(); ++i) {
-        outputErrors[i] = targets[i] - finalOutputs[i];
-    }
-    // Update output layer weights
-    for (size_t i = 0; i < outputLayer.size(); ++i) {
-        outputLayer[i].train(hiddenSize > 0 ? hiddenOutputs : inputs, targets[i]);
+    if (!outputActivationFunction) {
+        finalOutput = softmax(finalOutput);
     }
 
-    // Skip hidden layer weight updates if hiddenSize == 0
+    return finalOutput;
+}
+
+
+void NeuralNetwork::train(const Eigen::VectorXd& inputs, const Eigen::VectorXd& targets) {
+    Eigen::VectorXd finalOutput;
+    Eigen::VectorXd hiddenOutput;
+
     if (hiddenSize > 0) {
-        // Calculate errors for hidden layer
-        std::vector<double> hiddenErrors(hiddenLayer.size(), 0.0);
-        for (size_t i = 0; i < hiddenLayer.size(); ++i) {
-            for (size_t j = 0; j < outputLayer.size(); ++j) {
-                hiddenErrors[i] += outputErrors[j] * outputLayer[j].guess(hiddenOutputs); // Backpropagate error
-            }
-        }
+        Eigen::VectorXd hiddenInput = hiddenWeights * inputs + Eigen::VectorXd::Constant(hiddenSize, bias);
+        hiddenOutput = hiddenInput.unaryExpr([this](double x) {
+            return hiddenActivationFunction->function(x);
+            });
+    }
 
-        // Update hidden layer weights
-        for (size_t i = 0; i < hiddenLayer.size(); ++i) {
-            hiddenLayer[i].train(inputs, hiddenErrors[i]);
-        }
+    Eigen::VectorXd outputInput = (hiddenSize > 0 ? outputWeights * hiddenOutput : outputWeights * inputs) +
+        Eigen::VectorXd::Constant(outputSize, bias);
+    finalOutput = outputInput.unaryExpr([this](double x) {
+        return outputActivationFunction ? outputActivationFunction->function(x) : x;
+        });
+
+    if (!outputActivationFunction) {
+        finalOutput = softmax(finalOutput);
+    }
+
+    Eigen::VectorXd outputErrors = finalOutput - targets;
+    if (outputActivationFunction) {
+        outputErrors = outputErrors.array() * outputInput.unaryExpr([this](double x) {
+            return outputActivationFunction->derivative(x);
+            }).array();
+    }
+
+    if (hiddenSize > 0) {
+        outputWeights -= learningRate * (outputErrors * hiddenOutput.transpose());
+    }
+    else {
+        outputWeights -= learningRate * (outputErrors * inputs.transpose());
+    }
+
+    if (hiddenSize > 0) {
+        Eigen::VectorXd hiddenErrors = outputWeights.transpose() * outputErrors;
+        hiddenErrors = hiddenErrors.array() * hiddenOutput.unaryExpr([this](double x) {
+            return hiddenActivationFunction->derivative(x);
+            }).array();
+            hiddenWeights -= learningRate * (hiddenErrors * inputs.transpose());
     }
 }
 
 
-
-// Fit on a dataset
-void NeuralNetwork::fit(const std::vector<std::vector<double>>& trainingData,
-    const std::vector<std::vector<double>>& targets,
+// Fit the neural network on a dataset
+void NeuralNetwork::fit(const std::vector<Eigen::VectorXd>& trainingData,
+    const std::vector<Eigen::VectorXd>& targets,
     int num_epochs) {
-    std::vector<double> errorRates; // Uchovava chybovost za poslednych 10 epoch
 
     for (int epoch = 0; epoch < num_epochs; ++epoch) {
         int correctPredictions = 0;
-
         for (size_t i = 0; i < trainingData.size(); ++i) {
- 
             train(trainingData[i], targets[i]);
 
-   
-            std::vector<double> prediction = predict(trainingData[i]);
+            // Check prediction accuracy
+            Eigen::VectorXd prediction = predict(trainingData[i]);
 
-            if ((prediction[0] >= 0.5 && targets[i][0] == 1) ||  
-                (prediction[0] < 0.5 && targets[i][0] == 0)) {   
+            size_t predictedClass = std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + prediction.size()));
+            size_t targetClass = std::distance(targets[i].data(), std::max_element(targets[i].data(), targets[i].data() + targets[i].size()));
+
+            if (predictedClass == targetClass) {
                 correctPredictions++;
             }
         }
-        if (epoch % 10 == 0) {
-            printModel();
-        }
 
+        // Print accuracy for each epoch
         double accuracy = (static_cast<double>(correctPredictions) / trainingData.size()) * 100.0;
-        errorRates.push_back(100.0 - accuracy); // Chybovost = 100% - uspesnost
-
-        if (errorRates.size() > 10) {
-            errorRates.erase(errorRates.begin());
-        }
-
-        if ((epoch + 1) % 10 == 0 || epoch == num_epochs - 1) {
-            double averageErrorRate = std::accumulate(errorRates.begin(), errorRates.end(), 0.0) / errorRates.size();
-            std::cout << "Epoch " << epoch + 1 << ": Average Error Rate (last 10 epochs): " << averageErrorRate << "%" << std::endl;
-            std::cout << "Epoch " << epoch + 1 << ": Accuracy: " << accuracy << "%" << std::endl;
-        }
+        std::cout << "Epoch " << epoch + 1 << ": Accuracy: " << accuracy << "%" << std::endl;
     }
 }
 
-
-// Fit on a dataset
-//void NeuralNetwork::fit(const std::vector<std::vector<double>>& trainingData,
-//    const std::vector<std::vector<double>>& targets,
-//    int num_epochs) {
-//    std::vector<double> errorRates; 
-//
-//    for (int epoch = 0; epoch < num_epochs; ++epoch) {
-//        int correctPredictions = 0; 
-//
-//        for (size_t i = 0; i < trainingData.size(); ++i) {
-//            train(trainingData[i], targets[i]);
-//
-//            std::vector<double> prediction = predict(trainingData[i]);
-//
-//            size_t predictedClass = std::distance(prediction.begin(), std::max_element(prediction.begin(), prediction.end()));
-//            size_t targetClass = std::distance(targets[i].begin(), std::max_element(targets[i].begin(), targets[i].end()));
-//
-//            if (predictedClass == targetClass) {
-//                correctPredictions++;
-//            }
-//        }
-//
-//        double accuracy = (static_cast<double>(correctPredictions) / trainingData.size()) * 100.0;
-//        errorRates.push_back(100.0 - accuracy); // Chybovost = 100% - uspesnost
-//
-//        if (errorRates.size() > 10) {
-//            errorRates.erase(errorRates.begin());
-//        }
-//
-//        if ((epoch + 1) % 10 == 0 || epoch == num_epochs - 1) {
-//            double averageErrorRate = std::accumulate(errorRates.begin(), errorRates.end(), 0.0) / errorRates.size();
-//            std::cout << "Epoch " << epoch + 1 << ": Average Error Rate (last 10 epochs): " << averageErrorRate << "%" << std::endl;
-//            std::cout << "Epoch " << epoch + 1 << ": Accuracy: " << accuracy << "%" << std::endl;
-//        }
-//    }
-//}
-
-
-
-
-
-
-// Set activation function for all perceptrons in the hidden layer
+// Set the activation function for the hidden layer
 void NeuralNetwork::setHiddenActivationFunction(std::shared_ptr<Function> activationFunction) {
     hiddenActivationFunction = activationFunction;
-    for (auto& perceptron : hiddenLayer) {
-        perceptron.setActivationFunction(activationFunction);
-    }
-
-
 }
-// Set activation function for all perceptrons in the output layer
+
+// Set the activation function for the output layer
 void NeuralNetwork::setOutputActivationFunction(std::shared_ptr<Function> activationFunction) {
     outputActivationFunction = activationFunction;
-
-    for (auto& perceptron : outputLayer) {
-        perceptron.setActivationFunction(activationFunction);
-    }
 }
 
-// Print model information
-void NeuralNetwork::printModel() const {
-    std::cout << "Hidden Layer:" << std::endl;
-    for (size_t i = 0; i < hiddenLayer.size(); ++i) {
-        std::cout << "Perceptron " << i + 1 << ": ";
-        hiddenLayer[i].printModel();
-    }
-
-    std::cout << "Output Layer:" << std::endl;
-    for (size_t i = 0; i < outputLayer.size(); ++i) {
-        std::cout << "Perceptron " << i + 1 << ": ";
-        outputLayer[i].printModel();
-    }
-}
-
-// Get the bias (assume all perceptrons share the same bias for simplicity)
+// Get the current bias value
 double NeuralNetwork::getBias() const {
     return bias;
 }
 
-// Set the bias for all perceptrons in the network
+// Set a new bias value for the network
 void NeuralNetwork::setBias(double newBias) {
     bias = newBias;
-    for (auto& perceptron : hiddenLayer) {
-        perceptron.setBias(newBias);
-    }
-    for (auto& perceptron : outputLayer) {
-        perceptron.setBias(newBias);
-    }
 }
 
-// Get the learning rate (assume all perceptrons share the same learning rate for simplicity)
+// Get the current learning rate
 double NeuralNetwork::getLearningRate() const {
     return learningRate;
 }
 
-// Set the learning rate for all perceptrons in the network
+// Set a new learning rate for the network
 void NeuralNetwork::setLearningRate(double newLearningRate) {
     learningRate = newLearningRate;
-    for (auto& perceptron : hiddenLayer) {
-        perceptron.setLearningRate(newLearningRate);
-    }
-    for (auto& perceptron : outputLayer) {
-        perceptron.setLearningRate(newLearningRate);
-    }
 }
 
-
-using json = nlohmann::json;
+// Apply the softmax function to a vector
+Eigen::VectorXd NeuralNetwork::softmax(const Eigen::VectorXd& logits) const{
+    Eigen::VectorXd expLogits = (logits.array() - logits.maxCoeff()).exp(); // For numerical stability
+    return expLogits / expLogits.sum(); // Normalize by the sum of exponents
+}
 
 void NeuralNetwork::saveNetwork(const std::string& filename) {
-    json networkJson;
+    nlohmann::json networkJson;
 
-    // Add general network properties
-    networkJson["activationFunction"] = "ReLu"; // You can set this dynamically if needed
-    networkJson["learningRate"] = learningRate;
-    networkJson["bias"] = bias;
+    // Save general network properties
     networkJson["inputSize"] = inputSize;
     networkJson["hiddenSize"] = hiddenSize;
     networkJson["outputSize"] = outputSize;
+    networkJson["learningRate"] = learningRate;
+    networkJson["bias"] = bias;
 
-    // Add layers
-    networkJson["layers"] = json::array();
+    // Save activation function names
+    networkJson["hiddenActivationFunction"] = hiddenActivationFunction ? hiddenActivationFunction->name() : "None";
+    networkJson["outputActivationFunction"] = getActivationFuncName();
 
     // Save hidden layer weights
-    json hiddenLayerJson = json::array();
-    for (const auto& perceptron : hiddenLayer) {
-        json perceptronJson;
-        perceptronJson["weights"] = perceptron.getWeights(); // Implement getWeights() in Perceptron
-        hiddenLayerJson.push_back(perceptronJson);
+    if (hiddenSize > 0) {
+        networkJson["hiddenWeights"] = std::vector<std::vector<double>>(hiddenWeights.rows());
+        for (int i = 0; i < hiddenWeights.rows(); ++i) {
+            networkJson["hiddenWeights"][i] = std::vector<double>(hiddenWeights.row(i).data(), hiddenWeights.row(i).data() + hiddenWeights.cols());
+        }
     }
-    networkJson["layers"].push_back(hiddenLayerJson);
 
     // Save output layer weights
-    json outputLayerJson = json::array();
-    for (const auto& perceptron : outputLayer) {
-        json perceptronJson;
-        perceptronJson["weights"] = perceptron.getWeights(); // Implement getWeights() in Perceptron
-        outputLayerJson.push_back(perceptronJson);
+    networkJson["outputWeights"] = std::vector<std::vector<double>>(outputWeights.rows());
+    for (int i = 0; i < outputWeights.rows(); ++i) {
+        networkJson["outputWeights"][i] = std::vector<double>(outputWeights.row(i).data(), outputWeights.row(i).data() + outputWeights.cols());
     }
-    networkJson["layers"].push_back(outputLayerJson);
 
-    // Save to file
+    // Save to a file
     std::ofstream file(filename);
-    if (file.is_open()) {
-        file << networkJson.dump(4); // Pretty print with 4 spaces
-        file.close();
-        std::cout << "Neural network saved to " << filename << std::endl;
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open file for saving: " + filename);
     }
-    else {
-        std::cerr << "Failed to open file for writing!" << std::endl;
-    }
+    file << networkJson.dump(4); // Pretty print with 4 spaces
+    file.close();
+    std::cout << "Network saved to " << filename << "\n";
 }
 
 void NeuralNetwork::loadNetwork(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
-        throw std::runtime_error("Failed to open the file: " + filename);
+        throw std::runtime_error("Failed to open file for loading: " + filename);
     }
 
-    json networkJson;
-    file >> networkJson; // Parse the JSON file
+    nlohmann::json networkJson;
+    file >> networkJson;
     file.close();
 
     // Validate the JSON structure
-    if (!networkJson.contains("learningRate") ||
+    if (!networkJson.contains("inputSize") ||
+        !networkJson.contains("hiddenSize") ||
+        !networkJson.contains("outputSize") ||
+        !networkJson.contains("learningRate") ||
         !networkJson.contains("bias") ||
-        !networkJson.contains("layers")) {
-        throw std::runtime_error("Invalid JSON format for NeuralNetwork.");
+        !networkJson.contains("outputWeights") ||
+        !networkJson.contains("hiddenActivationFunction") ||
+        !networkJson.contains("outputActivationFunction")) {
+        throw std::runtime_error("Invalid network JSON structure.");
     }
 
-    // Update learningRate and bias
-    learningRate = networkJson["learningRate"].get<double>();
-    bias = networkJson["bias"].get<double>();
+    // Validate dimensions
+    int fileInputSize = networkJson["inputSize"];
+    int fileHiddenSize = networkJson["hiddenSize"];
+    int fileOutputSize = networkJson["outputSize"];
 
-    // Update weights for hidden layer
-    const auto& hiddenLayerJson = networkJson["layers"][0];
-    if (hiddenLayerJson.size() != hiddenLayer.size()) {
-        throw std::runtime_error("Mismatch in hidden layer size.");
-    }
-    for (size_t i = 0; i < hiddenLayer.size(); ++i) {
-        hiddenLayer[i].setWeights(hiddenLayerJson[i]["weights"].get<std::vector<double>>());
-    }
-
-    // Update weights for output layer
-    const auto& outputLayerJson = networkJson["layers"][1];
-    if (outputLayerJson.size() != outputLayer.size()) {
-        throw std::runtime_error("Mismatch in output layer size.");
-    }
-    for (size_t i = 0; i < outputLayer.size(); ++i) {
-        outputLayer[i].setWeights(outputLayerJson[i]["weights"].get<std::vector<double>>());
+    if (fileInputSize != inputSize || fileHiddenSize != hiddenSize || fileOutputSize != outputSize) {
+        std::cerr << "Error: Network dimensions do not match.\n"
+            << "Expected (Input: " << inputSize << ", Hidden: " << hiddenSize << ", Output: " << outputSize << ")\n"
+            << "Got (Input: " << fileInputSize << ", Hidden: " << fileHiddenSize << ", Output: " << fileOutputSize << ")\n";
+        return; // Exit without loading
     }
 
-    std::cout << "Neural network successfully loaded from " << filename << std::endl;
+    // Load general properties
+    learningRate = networkJson["learningRate"];
+    bias = networkJson["bias"];
+
+    // Load activation functions
+    std::string hiddenActivationName = networkJson["hiddenActivationFunction"];
+    std::string outputActivationName = networkJson["outputActivationFunction"];
+
+    if (hiddenActivationName == "ReLu") {
+        hiddenActivationFunction = std::make_shared<ReLu>();
+    }
+    else if (hiddenActivationName == "Sigmoid") {
+        hiddenActivationFunction = std::make_shared<Sigmoid>();
+    }
+    else if (hiddenActivationName == "Tanh") {
+        hiddenActivationFunction = std::make_shared<Tanh>();
+    }
+    else {
+        hiddenActivationFunction = std::make_shared<ReLu>();
+    }
+
+    if (outputActivationName == "ReLu") {
+        outputActivationFunction = std::make_shared<ReLu>();
+    }
+    else if (outputActivationName == "Sigmoid") {
+        outputActivationFunction = std::make_shared<Sigmoid>();
+    }
+    else if (outputActivationName == "Tanh") {
+        outputActivationFunction = std::make_shared<Tanh>();
+    }
+    else if (outputActivationName == "SoftMax") {
+        outputActivationFunction = nullptr;
+    }
+    else {
+        outputActivationFunction = std::make_shared<ReLu>();
+    }
+
+    // Load hidden layer weights
+    if (hiddenSize > 0 && networkJson.contains("hiddenWeights")) {
+        hiddenWeights = Eigen::MatrixXd(hiddenSize, inputSize);
+        for (int i = 0; i < hiddenSize; ++i) {
+            std::vector<double> row = networkJson["hiddenWeights"][i];
+            for (int j = 0; j < inputSize; ++j) {
+                hiddenWeights(i, j) = row[j];
+            }
+        }
+    }
+
+    // Load output layer weights
+    outputWeights = Eigen::MatrixXd(outputSize, hiddenSize > 0 ? hiddenSize : inputSize);
+    for (int i = 0; i < outputSize; ++i) {
+        std::vector<double> row = networkJson["outputWeights"][i];
+        for (int j = 0; j < (hiddenSize > 0 ? hiddenSize : inputSize); ++j) {
+            outputWeights(i, j) = row[j];
+        }
+    }
+
+    std::cout << "Network successfully loaded from " << filename << "\n";
 }
 
-std::vector<double> NeuralNetwork::softmax(const std::vector<double>& logits) {
-    std::vector<double> probabilities(logits.size());
-    double maxLogit = *std::max_element(logits.begin(), logits.end()); // Pre numerickú stabilitu
-    double sum = 0.0;
 
-    for (size_t i = 0; i < logits.size(); ++i) {
-        probabilities[i] = std::exp(logits[i] - maxLogit);
-        sum += probabilities[i];
+std::string NeuralNetwork::getActivationFuncName() {
+    if (outputActivationFunction == nullptr) {
+        return "SoftMax";
     }
-    for (size_t i = 0; i < probabilities.size(); ++i) {
-        probabilities[i] /= sum;
-    }
-    return probabilities;
+    return outputActivationFunction->name();
 }
+std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> NeuralNetwork::extractNetworkData(const Eigen::VectorXd& input) const {
+    std::vector<std::vector<float>> layers;  // Store activations
+    std::vector<std::vector<float>> weights; // Store weights
+
+    // Input layer activations
+    std::vector<float> inputActivations(input.data(), input.data() + input.size());
+    layers.emplace_back(inputActivations);
+
+    Eigen::VectorXd hiddenOutput;
+    if (hiddenSize > 0) {
+        // Hidden layer: compute activations
+        Eigen::VectorXd hiddenInput = hiddenWeights * input + Eigen::VectorXd::Constant(hiddenSize, bias);
+        hiddenOutput = hiddenInput.unaryExpr([this](double x) {
+            return hiddenActivationFunction->function(x);
+            });
+
+        std::vector<float> hiddenActivations(hiddenOutput.data(), hiddenOutput.data() + hiddenOutput.size());
+        layers.emplace_back(hiddenActivations);
+    }
+
+    // Output layer: compute activations
+    Eigen::VectorXd outputInput = (hiddenSize > 0 ? outputWeights * hiddenOutput : outputWeights * input) + Eigen::VectorXd::Constant(outputSize, bias);
+    Eigen::VectorXd finalOutput = outputInput.unaryExpr([this](double x) {
+        return outputActivationFunction ? outputActivationFunction->function(x) : x;
+        });
+
+    if (!outputActivationFunction) {
+        finalOutput = softmax(finalOutput);
+    }
+
+    std::vector<float> outputActivations(finalOutput.data(), finalOutput.data() + finalOutput.size());
+    layers.emplace_back(outputActivations);
+
+    // Convert hidden weights
+    if (hiddenSize > 0) {
+        for (int i = 0; i < hiddenWeights.rows(); ++i) {
+            std::vector<float> row(hiddenWeights.row(i).data(), hiddenWeights.row(i).data() + hiddenWeights.cols());
+            weights.emplace_back(row);
+        }
+    }
+
+    // Convert output weights
+    for (int i = 0; i < outputWeights.rows(); ++i) {
+        std::vector<float> row(outputWeights.row(i).data(), outputWeights.row(i).data() + outputWeights.cols());
+        weights.emplace_back(row);
+    }
+
+    return { layers, weights };
+}
+

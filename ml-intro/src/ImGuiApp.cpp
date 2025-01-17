@@ -3,7 +3,7 @@
 #include "AppManager.h"
 
 ImGuiApp::ImGuiApp(AppManager& appManager, HINSTANCE hInstance) : appManager(&appManager), hInstance(hInstance), hwnd(nullptr), running(true),
-currentScenario(1), bias(0), learningRate(0), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)), bitmap(canvasSize, std::vector<bool>(canvasSize, false)) {}
+currentScenario(1), bias(1.0), learningRate(0.05), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)), bitmap(canvasSize, std::vector<bool>(canvasSize, false)) {}
 
 ImGuiApp::~ImGuiApp() {
     if (ImGui::GetCurrentContext()) {
@@ -268,6 +268,11 @@ void ImGuiApp::RenderMenuBar() {
             if (ImGui::MenuItem("Material 3")) {}
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Render Text")) {
+            if (ImGui::MenuItem("Enable##TextRender", nullptr, Renderer::isEnabled())) Renderer::EnableText();
+            if (ImGui::MenuItem("Disable##TextRender", nullptr, !Renderer::isEnabled())) Renderer::DisableText();
+            ImGui::EndMenu();
+        }
 
         if (ImGui::BeginMenu("Render Text")) {
             if (ImGui::MenuItem("Enable##TextRender", nullptr, Renderer::isEnabled())) Renderer::EnableText();
@@ -330,19 +335,19 @@ void ImGuiApp::RenderActivationFunctionsOuput()
 {
     ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
     if (ImGui::CollapsingHeader("Activation Function (output layer)")) {
-        ImGui::TreeNodeEx("ReLu", (activationFunctionNameOutput == "ReLu") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        ImGui::TreeNodeEx("ReLu ##output", (activationFunctionNameOutput == "ReLu") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
         if (ImGui::IsItemClicked()) {
             activationFunctionNameOutput = "ReLu";
         }
-        ImGui::TreeNodeEx("Sigmoid", (activationFunctionNameOutput == "Sigmoid") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        ImGui::TreeNodeEx("Sigmoid ##output", (activationFunctionNameOutput == "Sigmoid") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
         if (ImGui::IsItemClicked()) {
             activationFunctionNameOutput = "Sigmoid";
         }
-        ImGui::TreeNodeEx("Tanh", (activationFunctionNameOutput == "Tanh") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        ImGui::TreeNodeEx("Tanh ##output", (activationFunctionNameOutput == "Tanh") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
         if (ImGui::IsItemClicked()) {
             activationFunctionNameOutput = "Tanh";
         }
-        ImGui::TreeNodeEx("SoftMax", (activationFunctionNameOutput == "SoftMax") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        ImGui::TreeNodeEx("SoftMax ##output", (activationFunctionNameOutput == "SoftMax") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
         if (ImGui::IsItemClicked()) {
             activationFunctionNameOutput = "SoftMax";
         }
@@ -354,15 +359,15 @@ void ImGuiApp::RenderActivationFunctionsHidden()
 {
     ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
     if (ImGui::CollapsingHeader("Activation Function (hidden layer)")) {
-        ImGui::TreeNodeEx("ReLu", (activationFunctionNameHidden == "ReLu") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        ImGui::TreeNodeEx("ReLu ##hidden", (activationFunctionNameHidden == "ReLu") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
         if (ImGui::IsItemClicked()) {
             activationFunctionNameHidden = "ReLu";
         }
-        ImGui::TreeNodeEx("Sigmoid", (activationFunctionNameHidden == "Sigmoid") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        ImGui::TreeNodeEx("Sigmoid ##hidden", (activationFunctionNameHidden == "Sigmoid") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
         if (ImGui::IsItemClicked()) {
             activationFunctionNameHidden = "Sigmoid";
         }
-        ImGui::TreeNodeEx("Tanh", (activationFunctionNameHidden == "Tanh") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        ImGui::TreeNodeEx("Tanh ##hidden", (activationFunctionNameHidden == "Tanh") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
         if (ImGui::IsItemClicked()) {
             activationFunctionNameHidden = "Tanh";
         }
@@ -394,9 +399,15 @@ void ImGuiApp::RenderScenario_1() {
     }
 
     if (ImGui::CollapsingHeader("Tell Output")) {
-        CustomButton("Red", ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+        if (CustomButton("Red", ImVec4(1.0f, 0.0f, 0.0f, 1.0f))){
+            appManager->tellOutput(0);
+        }
+
         ImGui::SameLine();
-        CustomButton("Green", ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
+
+        if (CustomButton("Green", ImVec4(0.0f, 1.0f, 0.0f, 1.0f))) {
+            appManager->tellOutput(1);
+        }
     }
 
     if (ImGui::CollapsingHeader("Bias")) {
@@ -487,7 +498,9 @@ void ImGuiApp::RenderScenario_3() {
     if (ImGui::CollapsingHeader("Tell Output")) {
         for (size_t i = 0; i < 10; i++)
         {
-            ImGui::Button(std::to_string(i).c_str());
+            if (ImGui::Button(std::to_string(i).c_str())) {
+                appManager->tellOutput(i);
+            }
 
             if (i < 9) {
                 ImGui::SameLine();
@@ -685,37 +698,56 @@ void ImGuiApp::RenderOuput_2() {
 
 void ImGuiApp::RenderTellOuput_2() {
     ImVec4 red = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
-    CustomButton("Red", red);
+    if (CustomButton("Red", red)) {
+        appManager->tellOutput(0);
+    }
     ImGui::SameLine();
 
     ImVec4 magenta = ImVec4(1.0f, 0.0f, 1.0f, 1.0f);
-    CustomButton("Magenta", magenta);
+    if (CustomButton("Magenta", magenta)) {
+        appManager->tellOutput(1);
+    }
     ImGui::SameLine();
 
     ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
-    CustomButton("Yellow", yellow);
+    if (CustomButton("Yellow", yellow)) {
+        appManager->tellOutput(2);
+    }
     ImGui::SameLine();
 
     ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-    CustomButton("White", white);
+    if (CustomButton("White", white)) {
+        appManager->tellOutput(3);
+    }
     ImGui::SameLine();
 
     ImVec4 blue = ImVec4(0.0f, 0.0f, 1.0f, 1.0f);
-    CustomButton("Blue", blue);
+    if (CustomButton("Blue", blue)) {
+        appManager->tellOutput(4);
+    }
     ImGui::SameLine();
 
     ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
-    CustomButton("Cyan", cyan);
+    if (CustomButton("Cyan", cyan)) {
+        appManager->tellOutput(5);
+    }
     ImGui::SameLine();
 
     ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-    CustomButton("Green", green);
+    if (CustomButton("Green", green)) {
+        appManager->tellOutput(6);
+    }
 }
 
 void ImGuiApp::MouseDeltaHandeler()
 {
     static bool isDragging = false;
     static POINT dragStartPos;
+
+    ImVec2 framePos = ImGui::GetCursorScreenPos();
+    ImVec2 frameSize = ImGui::GetContentRegionAvail();
+    ImVec2 bottomLeft = ImVec2(framePos.x + frameSize.x, framePos.y + frameSize.y);
+    ImVec2 mid = ImVec2(250, 250);
 
     POINT mousePos;
     if (!GetCursorPos(&mousePos)) {
@@ -731,15 +763,16 @@ void ImGuiApp::MouseDeltaHandeler()
             isDragging = true;
             //SetCursorPos(mid.x, mid.y);
         }
-        else if (isDragging){
-            camera.MoveCamera(vec2(mousePos.x - dragStartPos.x, mousePos.y - dragStartPos.y)*.05f);
+        else if (isDragging) {
+            camera.MoveCamera(vec2(mousePos.x - dragStartPos.x, mousePos.y - dragStartPos.y) * .05f);
+
             SetCursorPos(dragStartPos.x, dragStartPos.y);
         }
     }
     else if (isDragging)
     {
         SetCursorPos(dragStartPos.x, dragStartPos.y);
-        isDragging = false; 
+        isDragging = false;
         ShowCursor(TRUE);
     }
 
@@ -756,3 +789,9 @@ void ImGuiApp::MouseDeltaHandeler()
 //    app.Run();
 //    return 0;
 //}
+
+void sendRendererData(std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> data) {
+    
+}
+
+

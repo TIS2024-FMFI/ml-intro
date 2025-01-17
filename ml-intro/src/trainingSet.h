@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Eigen/Dense>
 #include <vector>
 #include <random>
 #include <cmath>
@@ -8,12 +9,10 @@
 
 
 
-std::vector<std::vector<double>> generateTrainingSet1(int n);
-std::vector<std::vector<double>> generateTargets1(std::vector<std::vector<double>> trainingSet);
-std::vector<std::vector<double>> generateTrainingSet2(int n);
-std::vector<std::vector<double>> generateTargets2(std::vector<std::vector<double>> trainingSet);
+std::vector<Eigen::VectorXd> generateTrainingSet1(int n);
+std::vector<Eigen::VectorXd> generateTargets1(const std::vector<Eigen::VectorXd>& trainingSet);
+std::vector<Eigen::VectorXd> generateTrainingSet2(int n);
+std::vector<Eigen::VectorXd> generateTargets2(const std::vector<Eigen::VectorXd>& trainingSet);
 std::vector<std::vector<double>> generateTrainingSet3(int n);
-std::vector<std::vector<double>> generateTargets3(std::vector<std::vector<double>> trainingSet);
+std::vector<std::vector<double>> generateTargets3(const std::vector<Eigen::VectorXd>& trainingSet);
 
-double calculateDistance(const std::vector<double>& a, const std::vector<double>& b);
-std::vector<double> determineTarget(const std::vector<double>& input, std::vector<std::vector<double>> colorTargets);

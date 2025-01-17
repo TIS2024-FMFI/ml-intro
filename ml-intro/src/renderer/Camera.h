@@ -60,16 +60,13 @@ public:
     void MoveCamera(glm::vec2 delta) {
         glm::vec3 eye = m_eye - GetRightVector() * delta.x;
         eye += GetUpVector() * delta.y;
-        
         eye = glm::normalize(eye) * distToTarget;
-
         SetCameraView(eye, glm::vec3(0));
     }
 
     void ProcessMouseScroll(float y) {
         distToTarget -= y * 0.1;
         distToTarget = glm::clamp(distToTarget, 1.0f, 25.0f);
-
         SetCameraView(glm::normalize(m_eye) * distToTarget, glm::vec3(0));
     }
 
@@ -84,5 +81,9 @@ private:
     float* m_height;
     float m_fov = 45;
     float pan_speed = .5f;
+
+    float xAngleSub = 0.0;
+    float yAngleSub = 0.0;
+
     float distToTarget = 5;
 };

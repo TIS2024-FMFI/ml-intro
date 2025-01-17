@@ -1,9 +1,8 @@
 #include "AppManager.h"
-
+#include <iomanip>
 
 AppManager::AppManager() : gui(nullptr)
 {
-	testing = new NeuralNetwork(3, 2, 1, nullptr, nullptr); // No activation functions provided (default setup)
 
 	nN1 = new NeuralNetwork(
 		2,
@@ -48,44 +47,68 @@ void AppManager::run()
 // TODO
 void AppManager::runNetwork()
 {
-	std::vector<std::vector<double>> trainingData;
-	std::vector<std::vector<double>> targets;
+	std::vector<Eigen::VectorXd> trainingData;
+	std::vector<Eigen::VectorXd> targets;
 	int currScenario = gui->getCurrentScenrio();
+
 	switch (currScenario) {
 	case 1:
-		trainingData = generateTrainingSet1(10);
+		trainingData = generateTrainingSet1(20);
 		targets = generateTargets1(trainingData);
-		std::cout << "Input: " << trainingData << " Target: " << targets << "\n";
-		std::cout << "====================================================================== " << "\n";
+
+		std::cout << "======================================================================\n";
 		std::cout << "Predictions before training:\n";
+
 		for (size_t i = 0; i < trainingData.size(); ++i) {
-			std::vector<double> prediction = nN1->predict(trainingData[i]);
-			std::cout << "Input: " << trainingData[i] << " Prediction: " << prediction << " Target: " << targets[i] << "\n";
+			Eigen::VectorXd prediction = nN1->predict(trainingData[i]);
+			double normalizedPrediction = prediction[0];
+			if (nN1->getActivationFuncName() == "Tanh") {
+				normalizedPrediction = (prediction[0] + 1.0) / 2.0; // Pre Tanh normalizácia na [0, 1]
+			}
+			std::cout << std::fixed << std::setprecision(3);
+			std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose() << "NORMALIZED: " << normalizedPrediction
+				<< " Target: " << targets[i].transpose() << "\n";
 		}
+
 		nN1->fit(trainingData, targets, 100);
-		std::cout << "Predictions After training:\n";
+
+		std::cout << "Predictions after training:\n";
 		for (size_t i = 0; i < trainingData.size(); ++i) {
-			std::vector<double> prediction = nN1->predict(trainingData[i]);
-			std::cout << "Input: " << trainingData[i] << " Prediction: " << prediction << " Target: " << targets[i] << "\n";
+			Eigen::VectorXd prediction = nN1->predict(trainingData[i]);
+			double normalizedPrediction = prediction[0];
+			if (nN1->getActivationFuncName() == "Tanh") {
+				normalizedPrediction = (prediction[0] + 1.0) / 2.0; // Pre Tanh normalizácia na [0, 1]
+			}
+			std::cout << std::fixed << std::setprecision(3);
+			std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose() << " NORMALIZED: " << normalizedPrediction
+				<< std::setprecision(0) <<  " Target: " << targets[i].transpose() << "\n";
 		}
 		break;
+
 	case 2:
-		trainingData = generateTrainingSet2(10);
+		trainingData = generateTrainingSet2(20);
 		targets = generateTargets2(trainingData);
-		std::cout << "Input: " << trainingData << " Target: " << targets << "\n";
-		std::cout << "====================================================================== " << "\n";
+
+		std::cout << "======================================================================\n";
 		std::cout << "Predictions before training:\n";
+
 		for (size_t i = 0; i < trainingData.size(); ++i) {
-			std::vector<double> prediction = nN2->predict(trainingData[i]);
-			std::cout << "Input: " << trainingData[i] << " Prediction: " << prediction << " Target: " << targets[i] << "\n";
+			Eigen::VectorXd prediction = nN2->predict(trainingData[i]);
+
+			std::cout << std::fixed << std::setprecision(3);
+			std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose()
+				<< std::setprecision(0)  << " Target: " << targets[i].transpose() << "\n";
 		}
-		nN2->fit(trainingData, targets, 1000);
-		std::cout << "Predictions After training:\n";
+
+		nN2->fit(trainingData, targets, 100);
+
+		std::cout << "Predictions after training:\n";
 		for (size_t i = 0; i < trainingData.size(); ++i) {
-			std::vector<double> prediction = nN2->predict(trainingData[i]);
-			std::cout << "Input: " << trainingData[i] << " Prediction: " << prediction << " Target: " << targets[i] << "\n";
+			Eigen::VectorXd prediction = nN2->predict(trainingData[i]);
+			std::cout << std::fixed << std::setprecision(3);
+			std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose()
+				<< std::setprecision(0) <<  " Target: " << targets[i].transpose() << "\n";
 		}
-		break;
 		break;
 
 	default:
@@ -96,34 +119,80 @@ void AppManager::runNetwork()
 // TODO
 void AppManager::saveNetwork()
 {
-	testing->saveNetwork("saving3.json");
+	int currScenario = gui->getCurrentScenrio();
+
+
+	switch (currScenario) {
+	case 1: {
+		nN1->saveNetwork("xd1");
+		break;
+	}
+
+	case 2: {
+		nN2->saveNetwork("xd2");
+		break;
+	}
+
+	default:
+		nN3->saveNetwork("xd3");
+		break;
+	}
 }
 
 // TODO
 void AppManager::loadNetwork()
 {
-	testing->loadNetwork(openFileDialog());
+	int currScenario = gui->getCurrentScenrio();
+
+
+	switch (currScenario) {
+	case 1: {
+		nN1->loadNetwork(openFileDialog());
+		break;
+	}
+
+	case 2: {
+		nN2->loadNetwork(openFileDialog());
+		break;
+	}
+
+	default:
+		nN3->loadNetwork(openFileDialog());
+		break;
+	}
 }
 
 // TODO
-void AppManager::setNetworkInput()
+Eigen::VectorXd AppManager::setNetworkInput()
 {
 	int currScenario = gui->getCurrentScenrio();
-	std::vector<double> inputs;
-	switch (currScenario) {
-	case 1:
-		inputs.push_back(gui->getInput().x);
-		inputs.push_back(gui->getInput().y);
-		break;
-	case 2:
-		inputs.push_back(gui->getInput().x);
-		inputs.push_back(gui->getInput().y);
-		inputs.push_back(gui->getInput().z);
-		break;
+	Eigen::VectorXd inputs;
 
-	default:
+	switch (currScenario) {
+	case 1: {
+		// Create a vector of size 2 for scenario 1
+		inputs = Eigen::VectorXd(2);
+		inputs(0) = gui->getInput().x;
+		inputs(1) = gui->getInput().y;
 		break;
 	}
+
+	case 2: {
+		// Create a vector of size 3 for scenario 2
+		inputs = Eigen::VectorXd(3);
+		inputs(0) = gui->getInput().x;
+		inputs(1) = gui->getInput().y;
+		inputs(2) = gui->getInput().z;
+		break;
+	}
+
+	default:
+		// Return an empty vector in case of an unsupported scenario
+		inputs = Eigen::VectorXd(0);
+		break;
+	}
+
+	return inputs;
 }
 
 void AppManager::setNetworkBias(float bias)
@@ -193,4 +262,53 @@ void AppManager::setNetworkActivationFunction(std::shared_ptr<Function> activati
 	default:
 		break;
 	}
+}
+
+int AppManager::tellOutput(int output)
+{
+	Eigen::VectorXd inputs = setNetworkInput();
+	int currScenario = gui->getCurrentScenrio();
+	int result = 0;
+
+	switch (currScenario) {
+	case 1: {
+		double outputValue = static_cast<double>(output);
+		Eigen::VectorXd prediction = nN1->predict(inputs);
+		nN1->train(inputs, Eigen::VectorXd::Constant(1, outputValue));
+		double normalizedPrediction = prediction[0];
+		if (nN1->getActivationFuncName() == "Tanh") {
+			normalizedPrediction = (prediction[0] + 1.0) / 2.0; // Pre Tanh normalizácia na [0, 1]
+		}
+		result = static_cast<int>(std::round(normalizedPrediction));
+		if (result > 1) {
+			result = 1;
+		}
+		std::cout << std::fixed << std::setprecision(3);
+		std::cout << "INPUTS: " << inputs.transpose() << "\n";
+		std::cout << "PREDICTION: " << prediction.transpose() << "\n";
+		std::cout << std::setprecision(0) <<  "RESULT: " << result << " TOLD: " << output << "\n";
+		break;
+	}
+
+	case 2: {
+		Eigen::VectorXd outputVector = Eigen::VectorXd::Zero(7);
+		if (output >= 0 && output < 7) {
+			outputVector[output] = 1.0;
+		}
+		Eigen::VectorXd prediction = nN2->predict(inputs);
+		nN2->train(inputs, outputVector);
+
+		result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + 7)));
+
+		std::cout << std::fixed << std::setprecision(3);
+		std::cout << "INPUTS: " << inputs.transpose() << "\n";
+		std::cout << "PREDICTION: " << prediction.transpose() << "\n";
+		std::cout << std::setprecision(0) << "RESULT: " << result << " TOLD: " << output << "\n";
+		break;
+	}
+
+	default:
+		break;
+	}
+	return result;
 }
