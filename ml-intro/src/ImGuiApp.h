@@ -37,6 +37,7 @@ public:
     float getLearningRate() { return learningRate; }
     ImVec4 getInput() { return color; }
 
+
 private:
     HWND hwnd;
     WNDCLASSEX wc;
@@ -82,5 +83,6 @@ private:
     void RenderTellOuput_2();
     void MouseDeltaHandeler();
     void sendRendererData(std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> data);
+
 };
 

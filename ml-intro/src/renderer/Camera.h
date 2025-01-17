@@ -60,25 +60,11 @@ public:
     void MoveCamera(glm::vec2 delta) {
         glm::vec3 eye = m_eye - GetRightVector() * delta.x;
         eye += GetUpVector() * delta.y;
-
         eye = glm::normalize(eye) * distToTarget;
         SetCameraView(eye, glm::vec3(0));
     }
 
-    void PanCamera(glm::vec2 deltaMouse)
-    {
-        float xSub = deltaMouse.x * glm::sin(yAngleSub);
-        float ySub = deltaMouse.x;
-        float zSub = deltaMouse.y * glm::cos(xAngleSub);
-
-        m_eye = glm::vec3(m_eye.x + xSub, m_eye.y + ySub, m_eye.z + zSub);
-        m_lookAt = glm::vec3(m_lookAt.x + xSub, m_lookAt.y + ySub, m_lookAt.z + zSub);
-
-        UpdateViewMatrix();
-    }
-
-    void ProcessMouseScroll(float y)
-    {
+    void ProcessMouseScroll(float y) {
         distToTarget -= y * 0.1;
         distToTarget = glm::clamp(distToTarget, 1.0f, 25.0f);
         SetCameraView(glm::normalize(m_eye) * distToTarget, glm::vec3(0));
@@ -98,5 +84,6 @@ private:
 
     float xAngleSub = 0.0;
     float yAngleSub = 0.0;
+
     float distToTarget = 5;
 };

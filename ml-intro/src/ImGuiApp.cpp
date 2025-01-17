@@ -274,6 +274,12 @@ void ImGuiApp::RenderMenuBar() {
             ImGui::EndMenu();
         }
 
+        if (ImGui::BeginMenu("Render Text")) {
+            if (ImGui::MenuItem("Enable##TextRender", nullptr, Renderer::isEnabled())) Renderer::EnableText();
+            if (ImGui::MenuItem("Disable##TextRender", nullptr, !Renderer::isEnabled())) Renderer::DisableText();
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMenuBar();
     }
 }
@@ -759,6 +765,7 @@ void ImGuiApp::MouseDeltaHandeler()
         }
         else if (isDragging) {
             camera.MoveCamera(vec2(mousePos.x - dragStartPos.x, mousePos.y - dragStartPos.y) * .05f);
+
             SetCursorPos(dragStartPos.x, dragStartPos.y);
         }
     }
@@ -774,7 +781,6 @@ void ImGuiApp::MouseDeltaHandeler()
         camera.ProcessMouseScroll(ImGui::GetIO().MouseWheel);
     }
 }
-
 
 //int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 //    ImGuiApp app(hInstance);
