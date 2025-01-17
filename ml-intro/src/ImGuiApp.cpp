@@ -717,11 +717,6 @@ void ImGuiApp::MouseDeltaHandeler()
     static bool isDragging = false;
     static POINT dragStartPos;
 
-    ImVec2 framePos = ImGui::GetCursorScreenPos();
-    ImVec2 frameSize = ImGui::GetContentRegionAvail();
-    ImVec2 bottomLeft = ImVec2(framePos.x + frameSize.x, framePos.y + frameSize.y);
-    ImVec2 mid = ImVec2(250, 250);
-
     POINT mousePos;
     if (!GetCursorPos(&mousePos)) {
         mousePos.x = mousePos.y = 0;
@@ -729,16 +724,16 @@ void ImGuiApp::MouseDeltaHandeler()
 
     if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
     {
-        if (!isDragging && ImGui::IsMouseHoveringRect(framePos, bottomLeft))
+        if (!isDragging && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
         {
             ShowCursor(FALSE);
             dragStartPos = mousePos;
             isDragging = true;
-            SetCursorPos(mid.x, mid.y);
+            //SetCursorPos(mid.x, mid.y);
         }
         else if (isDragging){
-            camera.MoveCamera(vec2(mousePos.x - mid.x, mousePos.y - mid.y)*.05f);
-            SetCursorPos(mid.x, mid.y);
+            camera.MoveCamera(vec2(mousePos.x - dragStartPos.x, mousePos.y - dragStartPos.y)*.05f);
+            SetCursorPos(dragStartPos.x, dragStartPos.y);
         }
     }
     else if (isDragging)
@@ -749,7 +744,7 @@ void ImGuiApp::MouseDeltaHandeler()
     }
 
     //mouseScrollHandeler
-    if (ImGui::IsMouseHoveringRect(framePos, bottomLeft)) {
+    if (isDragging || ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) {
         camera.ProcessMouseScroll(ImGui::GetIO().MouseWheel);
     }
 }
