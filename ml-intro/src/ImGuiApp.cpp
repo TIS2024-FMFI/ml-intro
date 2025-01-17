@@ -269,6 +269,12 @@ void ImGuiApp::RenderMenuBar() {
             ImGui::EndMenu();
         }
 
+        if (ImGui::BeginMenu("Render Text")) {
+            if (ImGui::MenuItem("Enable##TextRender", nullptr, Renderer::isEnabled())) Renderer::EnableText();
+            if (ImGui::MenuItem("Disable##TextRender", nullptr, !Renderer::isEnabled())) Renderer::DisableText();
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMenuBar();
     }
 }

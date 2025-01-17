@@ -1,6 +1,6 @@
 #include "Renderer.h"
 
-bool Renderer::renderText = true;
+bool Renderer::renderText = false;
 bool Renderer::squareRender = true;
 
 Renderer::Renderer(FrameBuffer* fb, Camera* cam)
