@@ -194,3 +194,8 @@ void AppManager::setNetworkActivationFunction(std::shared_ptr<Function> activati
 		break;
 	}
 }
+
+int AppManager::tellOutput(int output)
+{
+	return output;
+}
