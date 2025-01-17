@@ -3,9 +3,23 @@
 
 AppManager::AppManager() : gui(nullptr)
 {
-	testing = new NeuralNetwork(3, 2, 1, [](double x) { return 0; }, [](double x) { return 0; }); // Example configuration
-	nN1 = new NeuralNetwork(2, 0, 1,nullptr, nullptr, [](double x) { return Sigmoid().function(x); }, [](double x) { return Sigmoid().derivative(x); });
-	nN2 = new NeuralNetwork(3, 5, 7,[](double x) { return ReLu().function(x); }, [](double x) { return ReLu().derivative(x); });
+	testing = new NeuralNetwork(3, 2, 1, nullptr, nullptr); // No activation functions provided (default setup)
+
+	nN1 = new NeuralNetwork(
+		2,
+		0,
+		1,
+		nullptr, // No hidden activation function
+		nullptr // Sigmoid activation function for the output layer
+	);
+
+	nN2 = new NeuralNetwork(
+		3,
+		5,
+		7,
+		nullptr, // ReLU activation function for the hidden layer
+		nullptr // ReLU activation function for the output layer
+	);
 }
 
 AppManager::~AppManager()
@@ -34,6 +48,49 @@ void AppManager::run()
 // TODO
 void AppManager::runNetwork()
 {
+	std::vector<std::vector<double>> trainingData;
+	std::vector<std::vector<double>> targets;
+	int currScenario = gui->getCurrentScenrio();
+	switch (currScenario) {
+	case 1:
+		trainingData = generateTrainingSet1(10);
+		targets = generateTargets1(trainingData);
+		std::cout << "Input: " << trainingData << " Target: " << targets << "\n";
+		std::cout << "====================================================================== " << "\n";
+		std::cout << "Predictions before training:\n";
+		for (size_t i = 0; i < trainingData.size(); ++i) {
+			std::vector<double> prediction = nN1->predict(trainingData[i]);
+			std::cout << "Input: " << trainingData[i] << " Prediction: " << prediction << " Target: " << targets[i] << "\n";
+		}
+		nN1->fit(trainingData, targets, 100);
+		std::cout << "Predictions After training:\n";
+		for (size_t i = 0; i < trainingData.size(); ++i) {
+			std::vector<double> prediction = nN1->predict(trainingData[i]);
+			std::cout << "Input: " << trainingData[i] << " Prediction: " << prediction << " Target: " << targets[i] << "\n";
+		}
+		break;
+	case 2:
+		trainingData = generateTrainingSet2(10);
+		targets = generateTargets2(trainingData);
+		std::cout << "Input: " << trainingData << " Target: " << targets << "\n";
+		std::cout << "====================================================================== " << "\n";
+		std::cout << "Predictions before training:\n";
+		for (size_t i = 0; i < trainingData.size(); ++i) {
+			std::vector<double> prediction = nN2->predict(trainingData[i]);
+			std::cout << "Input: " << trainingData[i] << " Prediction: " << prediction << " Target: " << targets[i] << "\n";
+		}
+		nN2->fit(trainingData, targets, 1000);
+		std::cout << "Predictions After training:\n";
+		for (size_t i = 0; i < trainingData.size(); ++i) {
+			std::vector<double> prediction = nN2->predict(trainingData[i]);
+			std::cout << "Input: " << trainingData[i] << " Prediction: " << prediction << " Target: " << targets[i] << "\n";
+		}
+		break;
+		break;
+
+	default:
+		break;
+	}
 }
 
 // TODO
@@ -110,21 +167,27 @@ void AppManager::setNetworkLearningRate(float learningRate)
 	
 }
 
-void AppManager::setNetworkActivationFunction(Function activationFunction)
+void AppManager::setNetworkActivationFunction(std::shared_ptr<Function> activationFunctionHidden, std::shared_ptr<Function> activationFunctionOutput)
 {
-	std::function<double(double)> func = [&activationFunction](double x) { return activationFunction.function(x); };
-	std::function<double(double)> deriv = [&activationFunction](double x) { return activationFunction.derivative(x); };
-	
+	std::shared_ptr<Function> tempH = activationFunctionHidden;
+	std::shared_ptr<Function> tempO = activationFunctionOutput;
+	if (tempO->name() == "SoftMax") {
+		tempO = nullptr;
+	}
 	int currScenario = gui->getCurrentScenrio();
+
 	switch (currScenario) {
 	case 1:
-		nN1->setHiddenActivationFunction(func, deriv);
+		nN1->setHiddenActivationFunction(tempH);
+		nN1->setOutputActivationFunction(tempO);
 		break;
 	case 2:
-		nN2->setHiddenActivationFunction(func, deriv);
+		nN2->setHiddenActivationFunction(tempH);
+		nN2->setOutputActivationFunction(tempO);
 		break;
 	case 3:
-		nN3->setHiddenActivationFunction(func, deriv);
+		nN3->setHiddenActivationFunction(tempH);
+		nN3->setOutputActivationFunction(tempO);
 		break;
 
 	default:

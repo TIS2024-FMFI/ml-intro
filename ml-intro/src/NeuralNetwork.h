@@ -22,10 +22,8 @@ private:
     std::vector<Perceptron> hiddenLayer;
     std::vector<Perceptron> outputLayer;
 
-    std::function<double(double)> hiddenActivationFn;
-    std::function<double(double)> hiddenActivationFnDerivative;
-    std::function<double(double)> outputActivationFn;
-    std::function<double(double)> outputActivationFnDerivative;
+    std::shared_ptr<Function> outputActivationFunction;
+    std::shared_ptr<Function> hiddenActivationFunction;
 
 
 
@@ -35,10 +33,8 @@ private:
 public:
     // Constructor
     NeuralNetwork(int inputSize, int hiddenSize, int outputSize,
-        std::function<double(double)> hiddenActivationFn = nullptr,
-    std::function<double(double)> hiddenActivationFnDerivative = nullptr,
-    std::function<double(double)> outputActivationFn = nullptr,
-    std::function<double(double)> outputActivationFnDerivative = nullptr);
+        std::shared_ptr<Function> outputActivationFunction,
+    std::shared_ptr<Function> hiddenActivationFunction);
 
     // Predict output for given inputs
     std::vector<double> predict(const std::vector<double>& inputs);
@@ -51,10 +47,8 @@ public:
         const std::vector<std::vector<double>>& targets,
         int num_epochs);
 
-    void setHiddenActivationFunction(std::function<double(double)> activation,
-        std::function<double(double)> activationDerivative);
-    void setOutputActivationFunction(std::function<double(double)> activation,
-        std::function<double(double)> activationDerivative);
+    void setHiddenActivationFunction(std::shared_ptr<Function> activationFunction);
+    void setOutputActivationFunction(std::shared_ptr<Function> activationFunction);
 
     // Print model information
     void printModel() const;

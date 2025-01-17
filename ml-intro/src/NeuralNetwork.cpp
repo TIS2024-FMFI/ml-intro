@@ -3,25 +3,21 @@
 
 // Constructor
 NeuralNetwork::NeuralNetwork(int inputSize, int hiddenSize, int outputSize,
-    std::function<double(double)> hiddenActivationFn,
-    std::function<double(double)> hiddenActivationFnDerivative,
-    std::function<double(double)> outputActivationFn,
-    std::function<double(double)> outputActivationFnDerivative)
-    : inputSize(inputSize), hiddenSize(hiddenSize), outputSize(outputSize), learningRate(0.05), bias(1.0), hiddenActivationFn(hiddenActivationFn), hiddenActivationFnDerivative(hiddenActivationFnDerivative),
-    outputActivationFn(outputActivationFn),
-    outputActivationFnDerivative(outputActivationFnDerivative){
+    std::shared_ptr<Function> outputActivationFunction,
+std::shared_ptr<Function> hiddenActivationFunction)
+    : inputSize(inputSize), hiddenSize(hiddenSize), outputSize(outputSize), learningRate(0.05), bias(1.0), outputActivationFunction(outputActivationFunction), hiddenActivationFunction(hiddenActivationFunction){
     // Initialize hidden layer perceptrons
     for (int i = 0; i < hiddenSize; ++i) {
-        hiddenLayer.emplace_back(inputSize, hiddenActivationFn, hiddenActivationFnDerivative);
+        hiddenLayer.emplace_back(inputSize, hiddenActivationFunction);
     }
 
     // Initialize output layer perceptrons
     for (int i = 0; i < outputSize; ++i) {
         if (hiddenSize <= 0) {
-            outputLayer.emplace_back(inputSize, outputActivationFn, outputActivationFnDerivative);
+            outputLayer.emplace_back(inputSize, outputActivationFunction);
         }
         else {
-            outputLayer.emplace_back(hiddenSize, outputActivationFn, outputActivationFnDerivative);
+            outputLayer.emplace_back(hiddenSize, outputActivationFunction);
         }
         
     }
@@ -33,7 +29,7 @@ std::vector<double> NeuralNetwork::computeLayerOutput(const std::vector<Perceptr
     for (const auto& perceptron : layer) {
         outputs.push_back(perceptron.guess(inputs));
     }
-    if (isOutput && outputActivationFn == nullptr) {
+    if (isOutput && outputActivationFunction == nullptr) {
         return softmax(outputs);
     }
     return outputs;
@@ -42,6 +38,8 @@ std::vector<double> NeuralNetwork::computeLayerOutput(const std::vector<Perceptr
 // Predict output for given inputs
 std::vector<double> NeuralNetwork::predict(const std::vector<double>& inputs) {
     if (inputs.size() != inputSize) {
+        std::cout << inputs << "\n";
+        std::cout << inputSize << "\n";
         throw std::invalid_argument("Input size does not match the network's input layer size.");
     }
 
@@ -112,67 +110,97 @@ void NeuralNetwork::fit(const std::vector<std::vector<double>>& trainingData,
     std::vector<double> errorRates; // Uchovava chybovost za poslednych 10 epoch
 
     for (int epoch = 0; epoch < num_epochs; ++epoch) {
-        int correctPredictions = 0; // Pocet spravnych predikcii v aktualnej epoche
+        int correctPredictions = 0;
+
         for (size_t i = 0; i < trainingData.size(); ++i) {
+ 
             train(trainingData[i], targets[i]);
 
-            // Skontrolujeme predikciu
-            //std::vector<double> prediction = predict(trainingData[i]);
+   
+            std::vector<double> prediction = predict(trainingData[i]);
 
-            //// Najdeme index s najvyssou pravdepodobnostou pre predikciu a target
-            //size_t predictedIndex = std::distance(prediction.begin(), std::max_element(prediction.begin(), prediction.end()));
-            //size_t targetIndex = std::distance(targets[i].begin(), std::max_element(targets[i].begin(), targets[i].end()));
-
-            //if (predictedIndex == targetIndex) {
-            //    correctPredictions++;
-            //}
+            if ((prediction[0] >= 0.5 && targets[i][0] == 1) ||  
+                (prediction[0] < 0.5 && targets[i][0] == 0)) {   
+                correctPredictions++;
+            }
         }
-        ///*if (epoch % 10 == 0) {
-        //    printModel();
-        //}*/
+        if (epoch % 10 == 0) {
+            printModel();
+        }
 
-        //// Vypocitame uspesnost
-        //double accuracy = (static_cast<double>(correctPredictions) / trainingData.size()) * 100.0;
-        //errorRates.push_back(100.0 - accuracy); // Chybovost = 100% - uspesnost
+        double accuracy = (static_cast<double>(correctPredictions) / trainingData.size()) * 100.0;
+        errorRates.push_back(100.0 - accuracy); // Chybovost = 100% - uspesnost
 
-        //// Uchovavame iba poslednych 10 hodnot
-        //if (errorRates.size() > 10) {
-        //    errorRates.erase(errorRates.begin());
-        //}
+        if (errorRates.size() > 10) {
+            errorRates.erase(errorRates.begin());
+        }
 
-        //// Vypis uspesnosti kazdych 10 epoch
-        //if ((epoch + 1) % 10 == 0 || epoch == num_epochs - 1) {
-        //    double averageErrorRate = std::accumulate(errorRates.begin(), errorRates.end(), 0.0) / errorRates.size();
-        //    /*if (averageErrorRate < 5.0) {
-        //        for (size_t i = 0; i < trainingData.size(); ++i) {
-        //            std::vector<double> prediction = predict(trainingData[i]);
-        //            std::cout << "Input: " << trainingData[i] << " Prediction: " << prediction << "\n" << " Target: " << targets[i] << "\n";
-        //            int predictedClass = std::distance(prediction.begin(), std::max_element(prediction.begin(), prediction.end()));
-        //            std::cout << "Predicted Class: " << predictedClass << "\n";
-        //        }
-        //    }*/
-        //    std::cout << "Epoch " << epoch + 1 << ": Average Error Rate (last 10 epochs): " << averageErrorRate << "%" << std::endl;
-        //}
+        if ((epoch + 1) % 10 == 0 || epoch == num_epochs - 1) {
+            double averageErrorRate = std::accumulate(errorRates.begin(), errorRates.end(), 0.0) / errorRates.size();
+            std::cout << "Epoch " << epoch + 1 << ": Average Error Rate (last 10 epochs): " << averageErrorRate << "%" << std::endl;
+            std::cout << "Epoch " << epoch + 1 << ": Accuracy: " << accuracy << "%" << std::endl;
+        }
     }
 }
+
+
+// Fit on a dataset
+//void NeuralNetwork::fit(const std::vector<std::vector<double>>& trainingData,
+//    const std::vector<std::vector<double>>& targets,
+//    int num_epochs) {
+//    std::vector<double> errorRates; 
+//
+//    for (int epoch = 0; epoch < num_epochs; ++epoch) {
+//        int correctPredictions = 0; 
+//
+//        for (size_t i = 0; i < trainingData.size(); ++i) {
+//            train(trainingData[i], targets[i]);
+//
+//            std::vector<double> prediction = predict(trainingData[i]);
+//
+//            size_t predictedClass = std::distance(prediction.begin(), std::max_element(prediction.begin(), prediction.end()));
+//            size_t targetClass = std::distance(targets[i].begin(), std::max_element(targets[i].begin(), targets[i].end()));
+//
+//            if (predictedClass == targetClass) {
+//                correctPredictions++;
+//            }
+//        }
+//
+//        double accuracy = (static_cast<double>(correctPredictions) / trainingData.size()) * 100.0;
+//        errorRates.push_back(100.0 - accuracy); // Chybovost = 100% - uspesnost
+//
+//        if (errorRates.size() > 10) {
+//            errorRates.erase(errorRates.begin());
+//        }
+//
+//        if ((epoch + 1) % 10 == 0 || epoch == num_epochs - 1) {
+//            double averageErrorRate = std::accumulate(errorRates.begin(), errorRates.end(), 0.0) / errorRates.size();
+//            std::cout << "Epoch " << epoch + 1 << ": Average Error Rate (last 10 epochs): " << averageErrorRate << "%" << std::endl;
+//            std::cout << "Epoch " << epoch + 1 << ": Accuracy: " << accuracy << "%" << std::endl;
+//        }
+//    }
+//}
+
 
 
 
 
 
 // Set activation function for all perceptrons in the hidden layer
-void NeuralNetwork::setHiddenActivationFunction(std::function<double(double)> activation,
-    std::function<double(double)> activationDerivative) {
+void NeuralNetwork::setHiddenActivationFunction(std::shared_ptr<Function> activationFunction) {
+    hiddenActivationFunction = activationFunction;
     for (auto& perceptron : hiddenLayer) {
-        perceptron.setActivationFunction(activation, activationDerivative);
+        perceptron.setActivationFunction(activationFunction);
     }
+
 
 }
 // Set activation function for all perceptrons in the output layer
-void NeuralNetwork::setOutputActivationFunction(std::function<double(double)> activation,
-    std::function<double(double)> activationDerivative) {
+void NeuralNetwork::setOutputActivationFunction(std::shared_ptr<Function> activationFunction) {
+    outputActivationFunction = activationFunction;
+
     for (auto& perceptron : outputLayer) {
-        perceptron.setActivationFunction(activation, activationDerivative);
+        perceptron.setActivationFunction(activationFunction);
     }
 }
 

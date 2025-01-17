@@ -2,8 +2,8 @@
 #include <iostream>
 #include "AppManager.h"
 
-ImGuiApp::ImGuiApp(AppManager& appManager, HINSTANCE hInstance) : appManager(&appManager),  hInstance(hInstance), hwnd(nullptr), running(true),
-    currentScenario(1), bias(0), learningRate(0), activationFunctionName(), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)), bitmap(canvasSize, std::vector<bool>(canvasSize, false)) {}
+ImGuiApp::ImGuiApp(AppManager& appManager, HINSTANCE hInstance) : appManager(&appManager), hInstance(hInstance), hwnd(nullptr), running(true),
+currentScenario(1), bias(0), learningRate(0), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)), bitmap(canvasSize, std::vector<bool>(canvasSize, false)) {}
 
 ImGuiApp::~ImGuiApp() {
     if (ImGui::GetCurrentContext()) {
@@ -120,21 +120,43 @@ void ImGuiApp::Run() {
     }
 }
 
-Function ImGuiApp::getActivationFunction()
+std::shared_ptr<Function> ImGuiApp::getActivationFunctionOutput()
 {
-    if (activationFunctionName == "ReLu") {
-        return ReLu();
-
-    } else if (activationFunctionName == "Sigmoid") {
-        return Sigmoid();
-         
-    } else if (activationFunctionName == "Tanh") {
-        return Tanh();
-
-    } else {
-        return Function();
+    if (activationFunctionNameOutput == "ReLu") {
+        return std::make_shared<ReLu>();
     }
-   
+    else if (activationFunctionNameOutput == "Sigmoid") {
+        return std::make_shared<Sigmoid>();
+    }
+    else if (activationFunctionNameOutput == "Tanh") {
+        return std::make_shared<Tanh>();
+    }
+    else if (activationFunctionNameOutput == "SoftMax") {
+        return std::make_shared<SoftMax>();
+    }
+    else {
+        return std::make_shared<ReLu>(); // Default activation function
+    }
+}
+
+std::shared_ptr<Function> ImGuiApp::getActivationFunctionHidden()
+{
+    if (activationFunctionNameHidden == "ReLu") {
+        return std::make_shared<ReLu>();
+
+    }
+    else if (activationFunctionNameHidden == "Sigmoid") {
+        return std::make_shared<Sigmoid>();
+
+    }
+    else if (activationFunctionNameHidden == "Tanh") {
+        return std::make_shared<Tanh>();
+
+    }
+    
+    else {
+        return std::make_shared<ReLu>(); // No activation function
+    }
 }
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -251,11 +273,34 @@ void ImGuiApp::RenderMenuBar() {
     }
 }
 
+bool ImGuiApp::CustomButton(const char* label, ImVec4 color) {
+    ImGui::PushID(label);
+
+    ImVec2 button_size = ImVec2(60, 30);
+
+    ImVec2 p = ImGui::GetCursorScreenPos();
+    bool is_clicked = ImGui::InvisibleButton(label, button_size);
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+    ImU32 color_bg = ImGui::GetColorU32(color);
+    ImU32 color_text = ImGui::GetColorU32(ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+
+    draw_list->AddRectFilled(p, ImVec2(p.x + button_size.x, p.y + button_size.y), color_bg);
+
+    ImVec2 text_size = ImGui::CalcTextSize(label);
+    ImVec2 text_pos = ImVec2(p.x + (button_size.x - text_size.x) / 2, p.y + (button_size.y - text_size.y) / 2);
+    draw_list->AddText(text_pos, color_text, label);
+
+    ImGui::PopID();
+
+    return is_clicked;
+}
+
 void ImGuiApp::RenderRunButton() {
     if (ImGui::Button("Run")) {
-       appManager->setNetworkBias(bias);
+        appManager->setNetworkBias(bias);
         appManager->setNetworkLearningRate(learningRate);
-        appManager->setNetworkActivationFunction(getActivationFunction());
+        appManager->setNetworkActivationFunction(getActivationFunctionHidden(),getActivationFunctionOutput());
 
         appManager->runNetwork();
     }
@@ -275,21 +320,45 @@ void ImGuiApp::RenderLoadButton()
     }
 }
 
-void ImGuiApp::RenderActivationFunctions()
+void ImGuiApp::RenderActivationFunctionsOuput()
 {
     ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-    if (ImGui::CollapsingHeader("Activation Function")) {
-        ImGui::TreeNodeEx("ReLu", (activationFunctionName == "ReLu") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+    if (ImGui::CollapsingHeader("Activation Function (output layer)")) {
+        ImGui::TreeNodeEx("ReLu", (activationFunctionNameOutput == "ReLu") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
         if (ImGui::IsItemClicked()) {
-            activationFunctionName = "ReLu";
+            activationFunctionNameOutput = "ReLu";
         }
-        ImGui::TreeNodeEx("Sigmoid", (activationFunctionName == "Sigmoid") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        ImGui::TreeNodeEx("Sigmoid", (activationFunctionNameOutput == "Sigmoid") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
         if (ImGui::IsItemClicked()) {
-            activationFunctionName = "Sigmoid";
+            activationFunctionNameOutput = "Sigmoid";
         }
-        ImGui::TreeNodeEx("Tanh", (activationFunctionName == "Tanh") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        ImGui::TreeNodeEx("Tanh", (activationFunctionNameOutput == "Tanh") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
         if (ImGui::IsItemClicked()) {
-            activationFunctionName = "Tanh";
+            activationFunctionNameOutput = "Tanh";
+        }
+        ImGui::TreeNodeEx("SoftMax", (activationFunctionNameOutput == "SoftMax") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        if (ImGui::IsItemClicked()) {
+            activationFunctionNameOutput = "SoftMax";
+        }
+        
+    }
+}
+
+void ImGuiApp::RenderActivationFunctionsHidden()
+{
+    ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+    if (ImGui::CollapsingHeader("Activation Function (hidden layer)")) {
+        ImGui::TreeNodeEx("ReLu", (activationFunctionNameHidden == "ReLu") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        if (ImGui::IsItemClicked()) {
+            activationFunctionNameHidden = "ReLu";
+        }
+        ImGui::TreeNodeEx("Sigmoid", (activationFunctionNameHidden == "Sigmoid") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        if (ImGui::IsItemClicked()) {
+            activationFunctionNameHidden = "Sigmoid";
+        }
+        ImGui::TreeNodeEx("Tanh", (activationFunctionNameHidden == "Tanh") ? node_flags | ImGuiTreeNodeFlags_Selected : node_flags);
+        if (ImGui::IsItemClicked()) {
+            activationFunctionNameHidden = "Tanh";
         }
     }
 }
@@ -298,7 +367,7 @@ void ImGuiApp::RenderScenario_1() {
     // Renderer
     RendererFrame();
     /*ImGui::BeginChild("Renderer", ImVec2(150, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
-    
+
     ImGui::EndChild();*/
 
     ImGui::SameLine();
@@ -318,6 +387,12 @@ void ImGuiApp::RenderScenario_1() {
         RenderOuput_1();
     }
 
+    if (ImGui::CollapsingHeader("Tell Output")) {
+        CustomButton("Red", ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+        ImGui::SameLine();
+        CustomButton("Green", ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
+    }
+
     if (ImGui::CollapsingHeader("Bias")) {
         ImGui::SliderFloat("bias", &bias, -1.0f, 1.0f);
     }
@@ -326,7 +401,8 @@ void ImGuiApp::RenderScenario_1() {
         ImGui::SliderFloat("learning rate", &learningRate, 0.0f, 1.0f);
     }
 
-    RenderActivationFunctions();
+    RenderActivationFunctionsOuput();
+    RenderActivationFunctionsHidden();
 
     RenderRunButton();
     RenderLoadButton();
@@ -354,6 +430,10 @@ void ImGuiApp::RenderScenario_2() {
         RenderOuput_2();
     }
 
+    if (ImGui::CollapsingHeader("Tell Output")) {
+        RenderTellOuput_2();
+    }
+
     if (ImGui::CollapsingHeader("Bias")) {
         ImGui::SliderFloat("bias", &bias, -1.0f, 1.0f);
     }
@@ -362,7 +442,8 @@ void ImGuiApp::RenderScenario_2() {
         ImGui::SliderFloat("learning rate", &learningRate, 0.0f, 1.0f);
     }
 
-    RenderActivationFunctions();
+    RenderActivationFunctionsOuput();
+    RenderActivationFunctionsHidden();
 
     RenderRunButton();
     RenderLoadButton();
@@ -386,6 +467,17 @@ void ImGuiApp::RenderScenario_3() {
         DrawBitmapEditor();
     }
 
+    if (ImGui::CollapsingHeader("Ouput")) {
+        for (size_t i = 0; i < 10; i++)
+        {
+            ImGui::Button(std::to_string(i).c_str());
+
+            if (i < 9) {
+                ImGui::SameLine();
+            }
+        }
+    }
+
     if (ImGui::CollapsingHeader("Tell Output")) {
         for (size_t i = 0; i < 10; i++)
         {
@@ -405,7 +497,8 @@ void ImGuiApp::RenderScenario_3() {
         ImGui::SliderFloat("learning rate", &learningRate, 0.0f, 1.0f);
     }
 
-    RenderActivationFunctions();
+    RenderActivationFunctionsOuput();
+    RenderActivationFunctionsHidden();
 
     RenderRunButton();
     RenderLoadButton();
@@ -453,7 +546,7 @@ void ImGuiApp::GradientColorPicker(const char* label, float* color) {
 
 void ImGuiApp::RendererFrame() {
     ImVec2 space = ImGui::GetContentRegionAvail();
-    ImGui::BeginChild("Renderer", ImVec2(space.x/2, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
+    ImGui::BeginChild("Renderer", ImVec2(space.x / 2, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
 
     ImVec2 rendererScale = ImGui::GetContentRegionAvail();
     frameBuffer->RescaleFrameBuffer(rendererScale.x, rendererScale.y);
@@ -551,7 +644,7 @@ void ImGuiApp::RenderOuput_1() {
     col = ImColor(colf);
     draw_list->AddCircleFilled(ImVec2(x + sz * 0.5f, y + sz * 0.5f), sz * 0.5f, col);
     x += sz + spacing;
-    
+
 
     ImGui::Dummy(ImVec2((sz + spacing), (sz + spacing)));
 }
@@ -565,14 +658,14 @@ void ImGuiApp::RenderOuput_2() {
     float sz = 40.0f;
     const float spacing = 10.0f;
 
-    ImVec4 red = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); 
-    ImVec4 magenta = ImVec4(1.0f, 0.0f, 1.0f, 1.0f); 
-    ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f); 
-    ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); 
+    ImVec4 red = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+    ImVec4 magenta = ImVec4(1.0f, 0.0f, 1.0f, 1.0f);
+    ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+    ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
     ImVec4 blue = ImVec4(0.0f, 0.0f, 1.0f, 1.0f);
-    ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f); 
+    ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
     ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-    std::vector<ImVec4> colors = {red, magenta, yellow, white, blue, cyan, green};
+    std::vector<ImVec4> colors = { red, magenta, yellow, white, blue, cyan, green };
 
     for (ImVec4 color : colors) {
         draw_list->AddCircleFilled(ImVec2(x + sz * 0.5f, y + sz * 0.5f), sz * 0.5f, ImColor(color));
@@ -581,6 +674,35 @@ void ImGuiApp::RenderOuput_2() {
 
 
     ImGui::Dummy(ImVec2((sz + spacing), (sz + spacing)));
+}
+
+void ImGuiApp::RenderTellOuput_2() {
+    ImVec4 red = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+    CustomButton("Red", red);
+    ImGui::SameLine();
+
+    ImVec4 magenta = ImVec4(1.0f, 0.0f, 1.0f, 1.0f);
+    CustomButton("Magenta", magenta);
+    ImGui::SameLine();
+
+    ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+    CustomButton("Yellow", yellow);
+    ImGui::SameLine();
+
+    ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+    CustomButton("White", white);
+    ImGui::SameLine();
+
+    ImVec4 blue = ImVec4(0.0f, 0.0f, 1.0f, 1.0f);
+    CustomButton("Blue", blue);
+    ImGui::SameLine();
+
+    ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
+    CustomButton("Cyan", cyan);
+    ImGui::SameLine();
+
+    ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+    CustomButton("Green", green);
 }
 
 //int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
