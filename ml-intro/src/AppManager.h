@@ -23,7 +23,7 @@ public:
 	void runNetwork();
 	void saveNetwork();
 	void loadNetwork();
-	void setNetworkInput();
+	Eigen::VectorXd setNetworkInput();
 	void setNetworkBias(float bias);
 	void setNetworkLearningRate(float learningRate);
 	void setNetworkActivationFunction(std::shared_ptr<Function> activationFunctionHidden, std::shared_ptr<Function> activationFunctionOutput);

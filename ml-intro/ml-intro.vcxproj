@@ -112,7 +112,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FT2_BUILD_LIBRARY;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)vendor\nlohmann</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\vendor\eigen\eigen-3.4.0;$(ProjectDir)\vendor\nlohmann</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -165,7 +165,6 @@
     <ClCompile Include="vendor\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="src\NeuralNetwork.cpp" />
     <ClCompile Include="src\openWindow.cpp" />
-    <ClCompile Include="src\Perceptron.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AppManager.h" />
@@ -194,7 +193,6 @@
     <ClInclude Include="vendor\ImGui\imstb_truetype.h" />
     <ClInclude Include="src\openWindow.h" />
     <ClInclude Include="src\NeuralNetwork.h" />
-    <ClInclude Include="src\Perceptron.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

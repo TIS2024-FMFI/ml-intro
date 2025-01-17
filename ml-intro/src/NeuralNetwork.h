@@ -2,13 +2,14 @@
 #ifndef NEURALNETWORK_H
 #define NEURALNETWORK_H
 
-#include "Perceptron.h"
+#include "functions.cpp"
+#include <Eigen/Dense>
+#include <memory>
 #include <vector>
 #include <functional>
-#include "json.hpp"
+#include <iostream>
 #include <fstream>
-#include "functions.cpp"
-
+#include "json.hpp"
 
 class NeuralNetwork {
 private:
@@ -18,65 +19,52 @@ private:
     double learningRate;
     double bias;
 
-    // Layers of perceptrons
-    std::vector<Perceptron> hiddenLayer;
-    std::vector<Perceptron> outputLayer;
+    // Weights and biases represented as matrices/vectors
+    Eigen::MatrixXd hiddenWeights;
+    Eigen::MatrixXd outputWeights;
 
     std::shared_ptr<Function> outputActivationFunction;
     std::shared_ptr<Function> hiddenActivationFunction;
 
-
-
     // Helper to compute layer outputs
-    std::vector<double> computeLayerOutput(const std::vector<Perceptron>& layer, const std::vector<double>& inputs, bool isOutputLayer);
+    Eigen::VectorXd computeLayerOutput(const Eigen::MatrixXd& weights, const Eigen::VectorXd& biases,
+        const Eigen::VectorXd& inputs, const std::shared_ptr<Function>& activationFunction);
 
 public:
     // Constructor
     NeuralNetwork(int inputSize, int hiddenSize, int outputSize,
         std::shared_ptr<Function> outputActivationFunction,
-    std::shared_ptr<Function> hiddenActivationFunction);
+        std::shared_ptr<Function> hiddenActivationFunction);
 
     // Predict output for given inputs
-    std::vector<double> predict(const std::vector<double>& inputs);
+    Eigen::VectorXd predict(const Eigen::VectorXd& inputs);
 
     // Train the neural network
-    void train(const std::vector<double>& inputs, const std::vector<double>& targets);
+    void train(const Eigen::VectorXd& inputs, const Eigen::VectorXd& targets);
 
     // Fit on a dataset
-    void fit(const std::vector<std::vector<double>>& trainingData,
-        const std::vector<std::vector<double>>& targets,
+    void fit(const std::vector<Eigen::VectorXd>& trainingData,
+        const std::vector<Eigen::VectorXd>& targets,
         int num_epochs);
 
+    // Setters for activation functions
     void setHiddenActivationFunction(std::shared_ptr<Function> activationFunction);
     void setOutputActivationFunction(std::shared_ptr<Function> activationFunction);
-
-    // Print model information
-    void printModel() const;
-
-    // Get and set bias for all perceptrons
+    std::string getActivationFuncName();
+    // Getters and setters for bias
     double getBias() const;
     void setBias(double newBias);
 
-    // Get and set learning rate for all perceptrons
+    // Getters and setters for learning rate
     double getLearningRate() const;
     void setLearningRate(double newLearningRate);
 
+    // Save and load network state
     void saveNetwork(const std::string& filename);
     void loadNetwork(const std::string& filename);
 
-    std::vector<double> softmax(const std::vector<double>& logits);
-
-
+    // Utility function for softmax
+    Eigen::VectorXd softmax(const Eigen::VectorXd& logits);
 };
 
-template <typename T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
-    os << "[ ";
-    for (const T& element : vec) {
-        os << element << " ";
-    }
-    os << "]";
-    return os;
-}
-
-#endif //NEURALNETWORK_H
+#endif // NEURALNETWORK_H

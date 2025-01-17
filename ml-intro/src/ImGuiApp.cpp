@@ -3,7 +3,7 @@
 #include "AppManager.h"
 
 ImGuiApp::ImGuiApp(AppManager& appManager, HINSTANCE hInstance) : appManager(&appManager), hInstance(hInstance), hwnd(nullptr), running(true),
-currentScenario(1), bias(0), learningRate(0), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)), bitmap(canvasSize, std::vector<bool>(canvasSize, false)) {}
+currentScenario(1), bias(1.0), learningRate(0.05), color(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)), bitmap(canvasSize, std::vector<bool>(canvasSize, false)) {}
 
 ImGuiApp::~ImGuiApp() {
     if (ImGui::GetCurrentContext()) {
