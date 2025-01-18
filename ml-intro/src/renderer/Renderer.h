@@ -16,7 +16,7 @@ using namespace glm;
 class Renderer {
 public:
 	Renderer(FrameBuffer* fb, Camera* cam);
-	void loadNN(/*todo*/);
+	void loadNN(std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> data);
 	void renderScene();
 	GLuint getFrameTexture() { return m_frameBuffer->getFrameTexture(); }
 

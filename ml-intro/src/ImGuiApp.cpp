@@ -135,7 +135,7 @@ std::shared_ptr<Function> ImGuiApp::getActivationFunctionOutput()
         return std::make_shared<SoftMax>();
     }
     else {
-        return std::make_shared<ReLu>(); // Default activation function
+        return nullptr; // Default activation function
     }
 }
 
@@ -155,7 +155,7 @@ std::shared_ptr<Function> ImGuiApp::getActivationFunctionHidden()
     }
     
     else {
-        return std::make_shared<ReLu>(); // No activation function
+        return nullptr; // No activation function
     }
 }
 
@@ -307,11 +307,14 @@ bool ImGuiApp::CustomButton(const char* label, ImVec4 color) {
     return is_clicked;
 }
 
+void ImGuiApp::SendParameters() {
+    appManager->setNetworkBias(bias);
+    appManager->setNetworkLearningRate(learningRate);
+    appManager->setNetworkActivationFunction(getActivationFunctionHidden(), getActivationFunctionOutput());
+}
 void ImGuiApp::RenderRunButton() {
     if (ImGui::Button("Run")) {
-        appManager->setNetworkBias(bias);
-        appManager->setNetworkLearningRate(learningRate);
-        appManager->setNetworkActivationFunction(getActivationFunctionHidden(),getActivationFunctionOutput());
+        SendParameters();
 
         appManager->runNetwork();
     }
@@ -400,13 +403,17 @@ void ImGuiApp::RenderScenario_1() {
 
     if (ImGui::CollapsingHeader("Tell Output")) {
         if (CustomButton("Red", ImVec4(1.0f, 0.0f, 0.0f, 1.0f))){
+            SendParameters();
             appManager->tellOutput(0);
+            
         }
 
         ImGui::SameLine();
 
         if (CustomButton("Green", ImVec4(0.0f, 1.0f, 0.0f, 1.0f))) {
+            SendParameters();
             appManager->tellOutput(1);
+            
         }
     }
 
@@ -430,9 +437,8 @@ void ImGuiApp::RenderScenario_1() {
 
 void ImGuiApp::RenderScenario_2() {
     // Renderer
-    ImGui::BeginChild("Renderer", ImVec2(150, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
+    RendererFrame();
 
-    ImGui::EndChild();
 
     ImGui::SameLine();
 
@@ -471,9 +477,9 @@ void ImGuiApp::RenderScenario_2() {
 
 void ImGuiApp::RenderScenario_3() {
     // Renderer
-    ImGui::BeginChild("Renderer", ImVec2(150, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
+    RendererFrame();
 
-    ImGui::EndChild();
+
 
     ImGui::SameLine();
 
@@ -499,7 +505,9 @@ void ImGuiApp::RenderScenario_3() {
         for (size_t i = 0; i < 10; i++)
         {
             if (ImGui::Button(std::to_string(i).c_str())) {
+                SendParameters();
                 appManager->tellOutput(i);
+                
             }
 
             if (i < 9) {
@@ -699,43 +707,53 @@ void ImGuiApp::RenderOuput_2() {
 void ImGuiApp::RenderTellOuput_2() {
     ImVec4 red = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
     if (CustomButton("Red", red)) {
+        SendParameters();
         appManager->tellOutput(0);
     }
     ImGui::SameLine();
 
     ImVec4 magenta = ImVec4(1.0f, 0.0f, 1.0f, 1.0f);
     if (CustomButton("Magenta", magenta)) {
+        SendParameters();
         appManager->tellOutput(1);
     }
     ImGui::SameLine();
 
     ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
     if (CustomButton("Yellow", yellow)) {
+        SendParameters();
         appManager->tellOutput(2);
+        
     }
     ImGui::SameLine();
 
     ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
     if (CustomButton("White", white)) {
+        SendParameters();
         appManager->tellOutput(3);
+        
     }
     ImGui::SameLine();
 
     ImVec4 blue = ImVec4(0.0f, 0.0f, 1.0f, 1.0f);
     if (CustomButton("Blue", blue)) {
+        SendParameters();
         appManager->tellOutput(4);
     }
     ImGui::SameLine();
 
     ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
     if (CustomButton("Cyan", cyan)) {
+        SendParameters();
         appManager->tellOutput(5);
     }
     ImGui::SameLine();
 
     ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
     if (CustomButton("Green", green)) {
+        SendParameters();
         appManager->tellOutput(6);
+        
     }
 }
 
@@ -790,8 +808,8 @@ void ImGuiApp::MouseDeltaHandeler()
 //    return 0;
 //}
 
-void sendRendererData(std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> data) {
-    
+void ImGuiApp::RenderNN(std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> data) {
+    renderer->loadNN(data);
 }
 
 

@@ -15,11 +15,14 @@ Renderer::Renderer(FrameBuffer* fb, Camera* cam)
 	glPointSize(25.0f);
 	glLineWidth(5.0f);
 
-	loadNN();
+	loadNN({});
 }
 
 
-void Renderer::loadNN(/*todo: send the network data here*/) {
+void Renderer::loadNN(std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> data) {
+	layers = data.first;  // Assign the first element of the pair to layers
+	weights = data.second;
+	/*
 	layers = {{-0.78f, 0.42f, 0.52f, -0.44f, 0.12f, -0.93f, -0.023f, 0.60f, 0.56f},
 			   {-1.f, -.5f, .5f, -1.f},
 			   {0.f} };
@@ -29,10 +32,25 @@ void Renderer::loadNN(/*todo: send the network data here*/) {
 				{0.04f, -0.59f, 0.29f, -0.26f, -0.55f, 0.68f, 0.32f, -0.13f, -0.53f},
 	
 				{0.2, 0.4, 0.8, 1} };;
-	/*
+	
 	layers = { {0.2f, -0.8f}, { 0.5f, -0.3f, 0.9f }, { 0.7f } };
 	weights = { {1, -1}, {0.5, -0.75}, {0, -0.5}, {0.25, 0.5, -0.25} };;
 	*/
+	std::cout << "Layers:\n";
+	for (const auto& layer : layers) {
+		for (float val : layer) {
+			std::cout << val << " ";
+		}
+		std::cout << "\n";
+	}
+
+	std::cout << "Weights:\n";
+	for (const auto& weightSet : weights) {
+		for (float val : weightSet) {
+			std::cout << val << " ";
+		}
+		std::cout << "\n";
+	}
 	float layerSpacing = 2.0f, nodeSpacing = 1.0f;
 
 	Edge::ClearEdges();

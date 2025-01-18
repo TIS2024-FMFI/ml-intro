@@ -8,16 +8,16 @@ AppManager::AppManager() : gui(nullptr)
 		2,
 		0,
 		1,
-		nullptr, // No hidden activation function
-		nullptr // Sigmoid activation function for the output layer
+		nullptr, 
+		std::make_shared<Sigmoid>()
 	);
 
 	nN2 = new NeuralNetwork(
 		3,
 		5,
 		7,
-		nullptr, // ReLU activation function for the hidden layer
-		nullptr // ReLU activation function for the output layer
+		std::make_shared<ReLu>(), 
+		nullptr 
 	);
 }
 
@@ -240,22 +240,29 @@ void AppManager::setNetworkActivationFunction(std::shared_ptr<Function> activati
 {
 	std::shared_ptr<Function> tempH = activationFunctionHidden;
 	std::shared_ptr<Function> tempO = activationFunctionOutput;
-	if (tempO->name() == "SoftMax") {
+	if (tempO != nullptr && tempO->name() == "SoftMax") {
 		tempO = nullptr;
 	}
 	int currScenario = gui->getCurrentScenrio();
 
 	switch (currScenario) {
 	case 1:
-		nN1->setHiddenActivationFunction(tempH);
+		if (tempH != nullptr) {
+			nN1->setHiddenActivationFunction(tempH);
+		}
+		
 		nN1->setOutputActivationFunction(tempO);
 		break;
 	case 2:
-		nN2->setHiddenActivationFunction(tempH);
+		if (tempH != nullptr) {
+			nN2->setHiddenActivationFunction(tempH);
+		}
 		nN2->setOutputActivationFunction(tempO);
 		break;
 	case 3:
-		nN3->setHiddenActivationFunction(tempH);
+		if (tempH != nullptr) {
+			nN3->setHiddenActivationFunction(tempH);
+		}
 		nN3->setOutputActivationFunction(tempO);
 		break;
 
@@ -273,8 +280,9 @@ int AppManager::tellOutput(int output)
 	switch (currScenario) {
 	case 1: {
 		double outputValue = static_cast<double>(output);
-		Eigen::VectorXd prediction = nN1->predict(inputs);
+		
 		nN1->train(inputs, Eigen::VectorXd::Constant(1, outputValue));
+		Eigen::VectorXd prediction = nN1->predict(inputs);
 		double normalizedPrediction = prediction[0];
 		if (nN1->getActivationFuncName() == "Tanh") {
 			normalizedPrediction = (prediction[0] + 1.0) / 2.0; // Pre Tanh normalizácia na [0, 1]
@@ -283,6 +291,7 @@ int AppManager::tellOutput(int output)
 		if (result > 1) {
 			result = 1;
 		}
+		gui->RenderNN(nN1->extractNetworkData(inputs));
 		std::cout << std::fixed << std::setprecision(3);
 		std::cout << "INPUTS: " << inputs.transpose() << "\n";
 		std::cout << "PREDICTION: " << prediction.transpose() << "\n";
@@ -295,11 +304,11 @@ int AppManager::tellOutput(int output)
 		if (output >= 0 && output < 7) {
 			outputVector[output] = 1.0;
 		}
-		Eigen::VectorXd prediction = nN2->predict(inputs);
+		
 		nN2->train(inputs, outputVector);
-
+		Eigen::VectorXd prediction = nN2->predict(inputs);
 		result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + 7)));
-
+		gui->RenderNN(nN2->extractNetworkData(inputs));
 		std::cout << std::fixed << std::setprecision(3);
 		std::cout << "INPUTS: " << inputs.transpose() << "\n";
 		std::cout << "PREDICTION: " << prediction.transpose() << "\n";
@@ -312,3 +321,25 @@ int AppManager::tellOutput(int output)
 	}
 	return result;
 }
+
+void AppManager::sendDataToRenderer(const Eigen::VectorXd& input) {
+	int currScenario = gui->getCurrentScenrio();
+
+	switch (currScenario) {
+	case 1:
+		gui->RenderNN(nN1->extractNetworkData(input));
+		break;
+	case 2:
+		gui->RenderNN(nN2->extractNetworkData(input));
+		break;
+	case 3:
+		gui->RenderNN(nN3->extractNetworkData(input));
+		break;
+
+	default:
+		break;
+	}
+}
+
+
+

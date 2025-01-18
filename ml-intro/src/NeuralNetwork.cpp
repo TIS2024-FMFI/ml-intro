@@ -5,12 +5,12 @@
 
 // Constructor
 NeuralNetwork::NeuralNetwork(int inputSize, int hiddenSize, int outputSize,
-    std::shared_ptr<Function> outputActivationFunction,
-    std::shared_ptr<Function> hiddenActivationFunction)
+    std::shared_ptr<Function> hiddenActivationFunction,
+    std::shared_ptr<Function> outputActivationFunction)
     : inputSize(inputSize), hiddenSize(hiddenSize), outputSize(outputSize),
     learningRate(0.05), bias(1.0),
-    outputActivationFunction(outputActivationFunction),
-    hiddenActivationFunction(hiddenActivationFunction) {
+    hiddenActivationFunction(hiddenActivationFunction), outputActivationFunction(outputActivationFunction)
+     {
 
     // Initialize weights for the hidden layer
     if (hiddenSize > 0) {
