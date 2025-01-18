@@ -65,13 +65,14 @@ void AppManager::runNetwork()
 			if (nN1->getActivationFuncName() == "Tanh") {
 				normalizedPrediction = (prediction[0] + 1.0) / 2.0; // Pre Tanh normalizácia na [0, 1]
 			}
+			
 			std::cout << std::fixed << std::setprecision(3);
 			std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose() << "NORMALIZED: " << normalizedPrediction
 				<< " Target: " << targets[i].transpose() << "\n";
 		}
 
 		nN1->fit(trainingData, targets, 100);
-
+		sendDataToRenderer(trainingData.back());
 		std::cout << "Predictions after training:\n";
 		for (size_t i = 0; i < trainingData.size(); ++i) {
 			Eigen::VectorXd prediction = nN1->predict(trainingData[i]);
@@ -79,6 +80,7 @@ void AppManager::runNetwork()
 			if (nN1->getActivationFuncName() == "Tanh") {
 				normalizedPrediction = (prediction[0] + 1.0) / 2.0; // Pre Tanh normalizácia na [0, 1]
 			}
+			
 			std::cout << std::fixed << std::setprecision(3);
 			std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose() << " NORMALIZED: " << normalizedPrediction
 				<< std::setprecision(0) <<  " Target: " << targets[i].transpose() << "\n";
@@ -101,7 +103,7 @@ void AppManager::runNetwork()
 		}
 
 		nN2->fit(trainingData, targets, 100);
-
+		sendDataToRenderer(trainingData.back());
 		std::cout << "Predictions after training:\n";
 		for (size_t i = 0; i < trainingData.size(); ++i) {
 			Eigen::VectorXd prediction = nN2->predict(trainingData[i]);
@@ -291,7 +293,7 @@ int AppManager::tellOutput(int output)
 		if (result > 1) {
 			result = 1;
 		}
-		gui->RenderNN(nN1->extractNetworkData(inputs));
+		sendDataToRenderer(inputs);
 		std::cout << std::fixed << std::setprecision(3);
 		std::cout << "INPUTS: " << inputs.transpose() << "\n";
 		std::cout << "PREDICTION: " << prediction.transpose() << "\n";
@@ -308,7 +310,7 @@ int AppManager::tellOutput(int output)
 		nN2->train(inputs, outputVector);
 		Eigen::VectorXd prediction = nN2->predict(inputs);
 		result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + 7)));
-		gui->RenderNN(nN2->extractNetworkData(inputs));
+		sendDataToRenderer(inputs);
 		std::cout << std::fixed << std::setprecision(3);
 		std::cout << "INPUTS: " << inputs.transpose() << "\n";
 		std::cout << "PREDICTION: " << prediction.transpose() << "\n";
