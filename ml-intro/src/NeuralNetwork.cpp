@@ -8,19 +8,19 @@ NeuralNetwork::NeuralNetwork(int inputSize, int hiddenSize, int outputSize,
     std::shared_ptr<Function> hiddenActivationFunction,
     std::shared_ptr<Function> outputActivationFunction)
     : inputSize(inputSize), hiddenSize(hiddenSize), outputSize(outputSize),
-    learningRate(0.05), bias(1.0),
+    learningRate(0.05), bias(1.0), lambda(0.01),
     hiddenActivationFunction(hiddenActivationFunction), outputActivationFunction(outputActivationFunction)
      {
 
     // Initialize weights for the hidden layer
     if (hiddenSize > 0) {
         // Inicializácia váh pre skrytú a výstupnú vrstvu
-        hiddenWeights = Eigen::MatrixXd::Random(hiddenSize, inputSize);
-        outputWeights = Eigen::MatrixXd::Random(outputSize, hiddenSize);
+        hiddenWeights = Eigen::MatrixXd::Random(hiddenSize, inputSize) * sqrt(2.0 / inputSize);
+        outputWeights = Eigen::MatrixXd::Random(outputSize, hiddenSize)* sqrt(2.0 / hiddenSize);
     }
     else {
         // Ak hiddenSize = 0, výstupná vrstva priamo spracováva vstupy
-        outputWeights = Eigen::MatrixXd::Random(outputSize, inputSize);
+        outputWeights = Eigen::MatrixXd::Random(outputSize, inputSize) * sqrt(2.0 / inputSize);
     }
 }
 
@@ -82,19 +82,25 @@ void NeuralNetwork::train(const Eigen::VectorXd& inputs, const Eigen::VectorXd& 
             }).array();
     }
 
+    // Update output weights with L2 regularization
     if (hiddenSize > 0) {
-        outputWeights -= learningRate * (outputErrors * hiddenOutput.transpose());
+        Eigen::MatrixXd gradientOutput = outputErrors * hiddenOutput.transpose();
+        outputWeights -= learningRate * (gradientOutput + lambda * outputWeights); // Add L2 penalty
     }
     else {
-        outputWeights -= learningRate * (outputErrors * inputs.transpose());
+        Eigen::MatrixXd gradientOutput = outputErrors * inputs.transpose();
+        outputWeights -= learningRate * (gradientOutput + lambda * outputWeights); // Add L2 penalty
     }
 
+    // Update hidden weights with L2 regularization
     if (hiddenSize > 0) {
         Eigen::VectorXd hiddenErrors = outputWeights.transpose() * outputErrors;
         hiddenErrors = hiddenErrors.array() * hiddenOutput.unaryExpr([this](double x) {
             return hiddenActivationFunction->derivative(x);
             }).array();
-            hiddenWeights -= learningRate * (hiddenErrors * inputs.transpose());
+
+            Eigen::MatrixXd gradientHidden = hiddenErrors * inputs.transpose();
+            hiddenWeights -= learningRate * (gradientHidden + lambda * hiddenWeights); // Add L2 penalty
     }
 }
 
@@ -158,6 +164,11 @@ void NeuralNetwork::setLearningRate(double newLearningRate) {
 
 // Apply the softmax function to a vector
 Eigen::VectorXd NeuralNetwork::softmax(const Eigen::VectorXd& logits) const{
+    /*std::cout << "Logits: ";
+    for (int i = 0; i < logits.size(); ++i) {
+        std::cout << logits[i] << " ";
+    }
+    std::cout << std::endl;*/
     Eigen::VectorXd expLogits = (logits.array() - logits.maxCoeff()).exp(); // For numerical stability
     return expLogits / expLogits.sum(); // Normalize by the sum of exponents
 }
@@ -301,13 +312,14 @@ std::string NeuralNetwork::getActivationFuncName() {
     }
     return outputActivationFunction->name();
 }
-std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> NeuralNetwork::extractNetworkData(const Eigen::VectorXd& input) const {
-    std::vector<std::vector<float>> layers;  // Store activations
-    std::vector<std::vector<float>> weights; // Store weights
+std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> NeuralNetwork::extractNetworkData(const Eigen::VectorXd& input) const {
+    std::vector<Eigen::MatrixXd> layers;  // Store activations as Eigen matrices
+    std::vector<Eigen::MatrixXd> weights; // Store weights as Eigen matrices
 
     // Input layer activations
-    std::vector<float> inputActivations(input.data(), input.data() + input.size());
-    layers.emplace_back(inputActivations);
+    Eigen::MatrixXd inputActivations = input; // Store input as a single-column matrix
+    layers.push_back(inputActivations);
+
 
     Eigen::VectorXd hiddenOutput;
     if (hiddenSize > 0) {
@@ -317,8 +329,8 @@ std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> Neur
             return hiddenActivationFunction->function(x);
             });
 
-        std::vector<float> hiddenActivations(hiddenOutput.data(), hiddenOutput.data() + hiddenOutput.size());
-        layers.emplace_back(hiddenActivations);
+        Eigen::MatrixXd hiddenActivations = hiddenOutput; // Store hidden layer activations
+        layers.push_back(hiddenActivations);
     }
 
     // Output layer: compute activations
@@ -331,23 +343,20 @@ std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> Neur
         finalOutput = softmax(finalOutput);
     }
 
-    std::vector<float> outputActivations(finalOutput.data(), finalOutput.data() + finalOutput.size());
-    layers.emplace_back(outputActivations);
+    Eigen::MatrixXd outputActivations = finalOutput; // Store output layer activations
+    layers.push_back(outputActivations);
 
-    // Convert hidden weights
+    // Store hidden weights
     if (hiddenSize > 0) {
-        for (int i = 0; i < hiddenWeights.rows(); ++i) {
-            std::vector<float> row(hiddenWeights.row(i).data(), hiddenWeights.row(i).data() + hiddenWeights.cols());
-            weights.emplace_back(row);
-        }
+        weights.push_back(hiddenWeights); // Add hidden weights as Eigen matrix
     }
 
-    // Convert output weights
-    for (int i = 0; i < outputWeights.rows(); ++i) {
-        std::vector<float> row(outputWeights.row(i).data(), outputWeights.row(i).data() + outputWeights.cols());
-        weights.emplace_back(row);
-    }
+    // Store output weights
+    weights.push_back(outputWeights); // Add output weights as Eigen matrix
+
+
 
     return { layers, weights };
 }
+
 

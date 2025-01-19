@@ -36,7 +36,7 @@ void Renderer::loadNN(std::pair<std::vector<std::vector<float>>, std::vector<std
 	layers = { {0.2f, -0.8f}, { 0.5f, -0.3f, 0.9f }, { 0.7f } };
 	weights = { {1, -1}, {0.5, -0.75}, {0, -0.5}, {0.25, 0.5, -0.25} };;
 	*/
-	std::cout << "Layers:\n";
+	/*std::cout << "Layers:\n";
 	for (const auto& layer : layers) {
 		for (float val : layer) {
 			std::cout << val << " ";
@@ -50,7 +50,7 @@ void Renderer::loadNN(std::pair<std::vector<std::vector<float>>, std::vector<std
 			std::cout << val << " ";
 		}
 		std::cout << "\n";
-	}
+	}*/
 	float layerSpacing = 2.0f, nodeSpacing = 1.0f;
 
 	Edge::ClearEdges();
