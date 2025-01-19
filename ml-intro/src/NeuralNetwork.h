@@ -33,8 +33,8 @@ private:
 public:
     // Constructor
     NeuralNetwork(int inputSize, int hiddenSize, int outputSize,
-        std::shared_ptr<Function> outputActivationFunction,
-        std::shared_ptr<Function> hiddenActivationFunction);
+        std::shared_ptr<Function> hiddenActivationFunction ,
+        std::shared_ptr<Function> outputActivationFunction);
 
     // Predict output for given inputs
     Eigen::VectorXd predict(const Eigen::VectorXd& inputs);

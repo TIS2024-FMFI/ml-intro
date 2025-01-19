@@ -36,6 +36,8 @@ public:
     float getBias() { return bias; }
     float getLearningRate() { return learningRate; }
     ImVec4 getInput() { return color; }
+    void RenderNN(std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> data);
+
 
 
 private:
@@ -82,7 +84,7 @@ private:
     void RenderOuput_2();
     void RenderTellOuput_2();
     void MouseDeltaHandeler();
-    void sendRendererData(std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> data);
+    void SendParameters();
 
 };
 
