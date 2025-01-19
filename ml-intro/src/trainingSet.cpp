@@ -89,5 +89,56 @@ std::vector<Eigen::VectorXd> generateTargets2(const std::vector<Eigen::VectorXd>
 }
 
 
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <stdexcept>
+#include <Eigen/Dense>
+
+std::pair<std::vector<Eigen::VectorXd>, std::vector<Eigen::VectorXd>> loadFixedTrainingSet(int limit) {
+    std::vector<Eigen::VectorXd> trainingData;
+    std::vector<Eigen::VectorXd> targets;
+
+    std::ifstream file("resources/mnist_train.csv");
+    if (!file) {
+        throw std::runtime_error("Unable to open file: mnist_train.csv");
+    }
+
+    std::string line;
+    int loadedCases = 0;
+
+    // Read each line from the CSV
+    while (std::getline(file, line) && loadedCases < limit) {
+        std::stringstream ss(line);
+
+        Eigen::VectorXd input(28 * 28); // 784 pixels for a 28x28 image
+        Eigen::VectorXd target(10);    // One-hot target for digits 0-9
+
+        std::string value;
+        int index = 0;
+
+        // Read the label (first value)
+        std::getline(ss, value, ',');
+        int label = std::stoi(value);
+        target.setZero();
+        target[label] = 1.0;
+
+        // Read the 784 pixel values
+        while (std::getline(ss, value, ',')) {
+            input[index++] = std::stod(value) / 255.0; // Normalize pixel values to 0-1
+        }
+
+        trainingData.push_back(input);
+        targets.push_back(target);
+
+        ++loadedCases;
+    }
+
+    file.close();
+    return { trainingData, targets };
+}
+
+
+
 
 

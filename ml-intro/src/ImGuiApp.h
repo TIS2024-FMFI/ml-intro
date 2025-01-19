@@ -37,7 +37,7 @@ public:
     float getLearningRate() { return learningRate; }
     ImVec4 getInput() { return color; }
     void RenderNN(std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> data);
-
+    std::vector<std::vector<bool>> getBitmap() { return bitmap; };
 
 
 private:
