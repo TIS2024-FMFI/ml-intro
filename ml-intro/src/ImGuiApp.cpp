@@ -274,12 +274,6 @@ void ImGuiApp::RenderMenuBar() {
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Render Text")) {
-            if (ImGui::MenuItem("Enable##TextRender", nullptr, Renderer::isEnabled())) Renderer::EnableText();
-            if (ImGui::MenuItem("Disable##TextRender", nullptr, !Renderer::isEnabled())) Renderer::DisableText();
-            ImGui::EndMenu();
-        }
-
         ImGui::EndMenuBar();
     }
 }
@@ -774,12 +768,12 @@ void ImGuiApp::MouseDeltaHandeler()
 
     if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
     {
-        if (!isDragging && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
+        if (!isDragging && !ImGui::IsAnyItemActive() &&
+            ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) 
         {
             ShowCursor(FALSE);
             dragStartPos = mousePos;
             isDragging = true;
-            //SetCursorPos(mid.x, mid.y);
         }
         else if (isDragging) {
             camera.MoveCamera(vec2(mousePos.x - dragStartPos.x, mousePos.y - dragStartPos.y) * .05f);
