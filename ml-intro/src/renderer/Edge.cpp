@@ -7,12 +7,8 @@ std::vector<float> Edge::edgeData;
 bool Edge::initialized = false;
 int Edge::vertCount = 0;
 
-Edge::Edge(vec3 posA, vec3 posB, float w) : posA(posA), posB(posB), weight(w) {
-    Edge::InitializeBuffers();
+Edge::Edge(vec3 posA, vec3 posB) : posA(posA), posB(posB) {
     Edge::AddEdge(*this);
-
-    vec3 p = mix(posA, posB, 0.25);
-    Label(p, weight);
 }
 
 void Edge::InitializeBuffers() {
@@ -38,39 +34,35 @@ void Edge::InitializeBuffers() {
 
     Edge::shaderProgram = ShaderPrograms::getInstance().getEdgeShaderProgramId();
 
-    Label::InitializeBuffers();
-
     initialized = true;
 }
 
 
 void Edge::AddEdge(const Edge& edge) {
-    edgeData.push_back(edge.posA.x);
-    edgeData.push_back(edge.posA.y);
-    edgeData.push_back(edge.posA.z);
-    edgeData.push_back(edge.weight);
-    edgeData.push_back(0.0);
-
-    edgeData.push_back(edge.posB.x);
-    edgeData.push_back(edge.posB.y);
-    edgeData.push_back(edge.posB.z);
-    edgeData.push_back(edge.weight);
-    edgeData.push_back(1.0);
+    edgeData.insert(edgeData.end(), {
+        edge.posA.x, edge.posA.y, edge.posA.z, 0, 0,
+        edge.posB.x, edge.posB.y, edge.posB.z, 0, 1,
+        });
 
     vertCount += 2;
 }
 
+void Edge::UpdateValues(vector<float> weights) {
+    for (int i = 0; i < vertCount; i++) {
+        edgeData[i * 5 + 3] = weights[i/2];
+    }
+}
+
 void Edge::UploadData() {
+    if (!initialized) return;
     glBindBuffer(GL_ARRAY_BUFFER, edgeVBO);
     glBufferData(GL_ARRAY_BUFFER, edgeData.size() * sizeof(float), edgeData.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    Label::UploadData();
 }
 
 void Edge::ClearEdges() {
     edgeData.clear();
     vertCount = 0;
-    Label::ClearLabels();
 }
 
 void Edge::RenderEdges(Camera* cam) {
@@ -80,7 +72,6 @@ void Edge::RenderEdges(Camera* cam) {
     auto duration = now.time_since_epoch();
     float t = (chrono::duration_cast<chrono::milliseconds>(duration).count() % 1000) / 1000.0f;
 
-    //cout << "time: " << t << endl;
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

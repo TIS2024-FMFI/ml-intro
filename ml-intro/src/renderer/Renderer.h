@@ -26,6 +26,7 @@ public:
 
 	void Init(FrameBuffer* fb, Camera* cam);
 	void loadNN(vector<Eigen::MatrixXd> activations, vector<Eigen::MatrixXd> weights);
+	void updateNN(vector<Eigen::MatrixXd> activations, vector<Eigen::MatrixXd> weights);
 	void renderScene();
 	GLuint getFrameTexture() { return frameBuffer->getFrameTexture(); }
 
@@ -34,9 +35,17 @@ public:
 
 	void setText(bool doRender) { renderText = doRender; };
 	bool isEnabled() { return renderText; }
+	void renderLabels();
 private:
 	Renderer();
 	~Renderer() {}
+
+	void generatePositions(vector<Eigen::MatrixXd>);
+	void createVertices();
+	void createEdges();
+	void setupLabels(vector<Eigen::MatrixXd>, vector<Eigen::MatrixXd>);
+	void uploadToBuffers();
+	vector<float> unzipVec(vector<Eigen::MatrixXd>);
 
 
 	FrameBuffer* frameBuffer;
@@ -47,7 +56,10 @@ private:
 	bool squareRender = false;
 
 	//temp
-	vector<pair<vec3, vec3>> edges;
-	vector<vec3> nodes;
+	//vector<pair<vec3, vec3>> edges;
+	//vector<vec3> nodes;
+
+	vector<vector<vec3>> vertPos;
+	vector<Label> labels;
 
 };

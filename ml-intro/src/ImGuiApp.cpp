@@ -270,7 +270,10 @@ void ImGuiApp::RenderMenuBar() {
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Settings")) {
-            if (ImGui::MenuItem("Render Text", nullptr, renderer->isEnabled())) renderer->setText(!renderer->isEnabled());
+            if (ImGui::MenuItem("Render Text", nullptr, renderer->isEnabled())) { 
+                renderer->setText(!renderer->isEnabled()); 
+                renderer->renderLabels(); 
+            };
             ImGui::EndMenu();
         }
 

@@ -5,10 +5,10 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Camera.h"
 #include "ShaderPrograms.h"
-#include "Label.h"
 #include <chrono>
 
 using namespace glm;
+using namespace std;
 
 class Edge {
 public:
@@ -17,10 +17,11 @@ public:
     float weight;
     static GLuint shaderProgram;
 
-    Edge(vec3 posA, vec3 posB, float w);
+    Edge(vec3 posA, vec3 posB);
 
     static void InitializeBuffers();
     static void AddEdge(const Edge& edge);
+    static void UpdateValues(vector<float>);
     static void UploadData();
     static void RenderEdges(Camera* camera);
     static void ClearEdges();

@@ -15,44 +15,11 @@ void Renderer::Init(FrameBuffer* fb, Camera* cam) {
 
 
 void Renderer::loadNN(vector<Eigen::MatrixXd> activations,  vector<Eigen::MatrixXd> weights) {
-	Edge::ClearEdges();
-	Node::ClearNodes();
+	generatePositions(activations);
+	createVertices();
+	createEdges();
+	updateNN(activations, weights);
 
-	/*
-	float layerSpacing = 2.0f, nodeSpacing = 1.0f;
-
-
-	int n = 0, p = 0;
-	vector<vec3> lastLayer = {};
-	for (int i = 0; i < layers.size(); ++i) {
-		vector<vec3> currentLayer = {};
-		for (size_t j = 0; j < layers[i].size(); ++j) {
-			float z = 0.0f;
-			float y = j * nodeSpacing - layers[i].size() * nodeSpacing / 2.0f;
-			if (squareRender) {
-				float sqrt_f = sqrtf(layers[i].size());
-				float offset = (sqrt_f-1) * nodeSpacing / 2.0f;
-
-				z = (int)(j / sqrt_f) * nodeSpacing - offset;
-				y = (j % (int)sqrt_f) * nodeSpacing - offset;
-			}
-
-			vec3 nodePos = vec3((i - 1) * layerSpacing, y, z);
-			Node(nodePos, getNthActivation(n++, layers));
-
-			currentLayer.emplace_back(nodePos);
-			if (i > 0) {
-				for (size_t k = 0; k < layers[i - 1].size(); ++k) {
-					Edge(lastLayer[k], currentLayer[j], getNthWeight(p++, weights));
-				}
-			}
-		}
-		lastLayer = currentLayer;
-	}
-
-	Node::UploadData();
-	Edge::UploadData();
-	*/
 }
 
 
@@ -60,7 +27,6 @@ void Renderer::renderScene() {
 	if (!initialized) return;
 
 	camera->UpdateProjMatrix();
-
 	frameBuffer->Bind();
 
 	Edge::RenderEdges(camera);
@@ -71,4 +37,104 @@ void Renderer::renderScene() {
 	}
 
 	frameBuffer->Unbind();
+}
+
+
+
+void Renderer::generatePositions(vector<Eigen::MatrixXd> activations) {
+	float layerSpacing = 2.0f, nodeSpacing = 1.0f;
+	int nOfLayers = activations.size();
+	vertPos.clear();
+
+	for (int layer = 0; layer < nOfLayers; layer++) {
+		float x = (layer - nOfLayers * .5f) * layerSpacing;
+		vertPos.push_back({});
+		int n = activations[layer].size();
+		int square = sqrt(n);
+		for (int i = 0; i < n; i++) {
+			float y = squareRender ? i % square - square * .5f : (i - n * .5f) * nodeSpacing;
+			float z = squareRender ? i / square - square * .5f : 0;
+			vertPos.back().push_back(vec3(x, y, z));
+		}
+	}
+}
+
+void Renderer::createVertices() {
+	Node::InitializeBuffers();
+	Node::ClearNodes();
+	for (auto layer : vertPos) {
+		for (vec3 vertex : layer) {
+			Node::Node(vertex);
+		}
+	}
+}
+
+void Renderer::createEdges() {
+	Edge::InitializeBuffers();
+	Edge::ClearEdges();
+	for (int layer = 1; layer < vertPos.size(); layer++) {
+		for (auto current : vertPos[layer]) {
+			for (auto prev : vertPos[layer - 1]) {
+				Edge(prev, current);
+			}
+		}
+	}
+}
+
+void Renderer::setupLabels(vector<Eigen::MatrixXd> activations, vector<Eigen::MatrixXd> weights) {
+	Label::InitializeBuffers();
+	Label::ClearLabels();
+	Label::UploadData();
+	renderText = false;
+
+	vector<float> data = unzipVec(activations);
+	int i = 0;
+	labels.clear();
+	for (int layer = 0; layer < vertPos.size(); layer++) {
+		for (vec3 pos : vertPos[layer]) {
+			labels.push_back(Label(pos, data[i++]));
+		}
+	}
+
+	data = unzipVec(weights);
+	i = 0;
+	for (int layer = 1; layer < vertPos.size(); layer++) {
+		for (auto current : vertPos[layer]) {
+			for (auto prev : vertPos[layer - 1]) {
+				labels.push_back(Label(mix(prev, current, 0.25f), data[i++]));
+			}
+		}
+	}
+}
+
+void Renderer::renderLabels() {
+	if (!renderText) return;
+	if (Label::isVertexCountZero()) {
+		for (Label l : labels) {
+			Label::AddLabel(l); //this one is expensive
+		}
+		Label::UploadData();
+	}
+}
+
+void Renderer::updateNN(vector<Eigen::MatrixXd> activations, vector<Eigen::MatrixXd> weights) {
+	Node::UpdateValues(unzipVec(activations));
+	Edge::UpdateValues(unzipVec(weights));
+	setupLabels(activations, weights);
+	renderLabels();
+	uploadToBuffers();
+}
+
+vector<float> Renderer::unzipVec(vector<Eigen::MatrixXd> weights) {
+	vector<float> out;
+	for (auto&& l : weights) {
+		out.insert(out.end(), l.reshaped().begin(), l.reshaped().end());
+	}
+	return out;
+}
+
+void Renderer::uploadToBuffers() {
+	Node::UploadData();
+	Edge::UploadData();
+	if (renderText) Label::UploadData();
 }

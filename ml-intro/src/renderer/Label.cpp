@@ -24,14 +24,10 @@ float Label::scale = 0.002f;
 
 
 Label::Label(vec3 position, float weight) : pos(position), weight(weight) {
-    InitializeBuffers();
-
     std::ostringstream stream;
     stream << std::fixed << std::setprecision(3);
     stream << weight;
     text = stream.str();
-
-    AddLabel(*this);
 }
 
 void Label::InitializeBuffers() {
@@ -198,6 +194,7 @@ void Label::AddLabel(const Label& label) {
 
 
 void Label::UploadData() {
+    if (!initialized) return;
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, labelData.size() * sizeof(float), labelData.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, rectVBO);
