@@ -362,7 +362,7 @@ int AppManager::tellOutput(int output)
 		if (result > 1) {
 			result = 1;
 		}
-		//sendDataToRenderer(inputs);
+		sendDataToRenderer(inputs);
 		break;
 	}
 
@@ -399,21 +399,22 @@ int AppManager::tellOutput(int output)
 
 void AppManager::sendDataToRenderer(const Eigen::VectorXd& input) {
 	int currScenario = gui->getCurrentScenrio();
-
+	std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> data = {};
 	switch (currScenario) {
 	case 1:
-		//gui->RenderNN(nN1->extractNetworkData(input));
+		data = nN1->extractNetworkData(input);
 		break;
 	case 2:
-		//gui->RenderNN(nN2->extractNetworkData(input));
+		//data = nN2->extractNetworkData(input);
 		break;
 	case 3:
-		//gui->RenderNN(nN3->extractNetworkData(input));
+		//data = nN3->extractNetworkData(input);
 		break;
 
 	default:
 		break;
 	}
+	Renderer::getInstance().loadNN(data.first, data.second);
 }
 
 

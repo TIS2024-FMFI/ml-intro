@@ -28,6 +28,8 @@ public:
 	void setNetworkLearningRate(float learningRate);
 	void setNetworkActivationFunction(std::shared_ptr<Function> activationFunctionHidden, std::shared_ptr<Function> activationFunctionOutput);
 	int tellOutput(int output);
+
+private:
 	void sendDataToRenderer(const Eigen::VectorXd& input);
 
 };

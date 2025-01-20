@@ -8,6 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <Eigen/Dense>
 
 
 using namespace std;
@@ -15,66 +16,38 @@ using namespace glm;
 
 class Renderer {
 public:
-	Renderer(FrameBuffer* fb, Camera* cam);
-	void loadNN(std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> data);
+	Renderer(const Renderer&) = delete;
+	Renderer& operator=(const Renderer&) = delete;
+
+	static Renderer& getInstance() {
+		static Renderer instance;
+		return instance;
+	}
+
+	void Init(FrameBuffer* fb, Camera* cam);
+	void loadNN(vector<Eigen::MatrixXd> activations, vector<Eigen::MatrixXd> weights);
 	void renderScene();
-	GLuint getFrameTexture() { return m_frameBuffer->getFrameTexture(); }
+	GLuint getFrameTexture() { return frameBuffer->getFrameTexture(); }
 
-	void testUpdate() {
-		for (int y = 0; y < layers.size(); y++) {
-			for (int x = 0; x < layers[y].size(); x++) {
-				layers[y][x] = -layers[y][x];
-			}
-		}
+	void SquareRender() { squareRender = true; };
+	void PlaneRender() { squareRender = false; };
 
-		for (int y = 0; y < weights.size(); y++) {
-			for (int x = 0; x < weights[y].size(); x++) {
-				weights[y][x] = -weights[y][x];
-			}
-		}
-	}
-
-	static void SquareRender() { squareRender = true; };
-	static void PlaneRender() { squareRender = false; };
-
-	static void EnableText() { renderText = true; };
-	static void DisableText() { renderText = false; };
-	static bool isEnabled() { return renderText; }
-
+	void setText(bool doRender) { renderText = doRender; };
+	bool isEnabled() { return renderText; }
 private:
-	void useShaderProgram();
-
-	float getNthActivation(int n, vector<vector<float>> layers) {
-		int currentId = 0;
-		int currentLayer = 0;
-		for (; currentId + layers[currentLayer].size() <= n; currentId += layers[currentLayer++].size());
-		return layers[currentLayer][n - currentId];
-	}
-
-	float getNthWeight(int n, vector<vector<float>> weights) {
-		int currentId = 0;
-		int currentLayer = 0;
-		for (; currentId + weights[currentLayer].size() <= n; currentId += weights[currentLayer++].size());
-		return weights[currentLayer][n - currentId];
-	}
+	Renderer();
+	~Renderer() {}
 
 
-	float test = 0;
-	FrameBuffer* m_frameBuffer;
-	Camera* m_camera;
+	FrameBuffer* frameBuffer;
+	Camera* camera;
 
-	int nOfVerticies;
+	bool initialized = false;
+	bool renderText = false;
+	bool squareRender = false;
 
+	//temp
 	vector<pair<vec3, vec3>> edges;
 	vector<vec3> nodes;
 
-	//for debuging purposes
-	vector<vector<float>> layers;
-	vector<vector<float>> weights;
-
-	GLuint edgeVAO, edgeVBO;
-	GLuint vertVAO, vertVBO;
-
-	static bool renderText;
-	static bool squareRender;
 };

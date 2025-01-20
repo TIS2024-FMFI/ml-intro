@@ -1,60 +1,26 @@
 #include "Renderer.h"
 
-bool Renderer::renderText = false;
-bool Renderer::squareRender = true;
-
-Renderer::Renderer(FrameBuffer* fb, Camera* cam)
-	: m_frameBuffer(fb), m_camera(cam)
-{
-	glGenVertexArrays(1, &edgeVAO);
-	glGenBuffers(1, &edgeVBO);
-
-	glGenVertexArrays(1, &vertVAO);
-	glGenBuffers(1, &vertVBO);
-
+Renderer::Renderer() {
 	glPointSize(25.0f);
 	glLineWidth(5.0f);
 
-	loadNN({});
+	loadNN({}, {});
+}
+
+void Renderer::Init(FrameBuffer* fb, Camera* cam) {
+	frameBuffer = fb;
+	camera = cam;
+	initialized = true;
 }
 
 
-void Renderer::loadNN(std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> data) {
-	layers = data.first;  // Assign the first element of the pair to layers
-	weights = data.second;
-	/*
-	layers = {{-0.78f, 0.42f, 0.52f, -0.44f, 0.12f, -0.93f, -0.023f, 0.60f, 0.56f},
-			   {-1.f, -.5f, .5f, -1.f},
-			   {0.f} };
-	weights = { {-0.71f, 0.42f, -0.22f, 0.02f, 0.24f, -0.18f, 0.24f, -0.20f, 0.52f}, 
-				{-0.18f, -0.16f, 0.80f, -0.58f, 0.72f, -0.60f, -0.99f, -0.24f, 0.28f}, 
-				{0.04f, -0.66f, 0.34f, -0.35f, -0.28f, -0.34f, -0.30f, 0.74f, -0.72f}, 
-				{0.04f, -0.59f, 0.29f, -0.26f, -0.55f, 0.68f, 0.32f, -0.13f, -0.53f},
-	
-				{0.2, 0.4, 0.8, 1} };;
-	
-	layers = { {0.2f, -0.8f}, { 0.5f, -0.3f, 0.9f }, { 0.7f } };
-	weights = { {1, -1}, {0.5, -0.75}, {0, -0.5}, {0.25, 0.5, -0.25} };;
-	*/
-	/*std::cout << "Layers:\n";
-	for (const auto& layer : layers) {
-		for (float val : layer) {
-			std::cout << val << " ";
-		}
-		std::cout << "\n";
-	}
-
-	std::cout << "Weights:\n";
-	for (const auto& weightSet : weights) {
-		for (float val : weightSet) {
-			std::cout << val << " ";
-		}
-		std::cout << "\n";
-	}*/
-	float layerSpacing = 2.0f, nodeSpacing = 1.0f;
-
+void Renderer::loadNN(vector<Eigen::MatrixXd> activations,  vector<Eigen::MatrixXd> weights) {
 	Edge::ClearEdges();
 	Node::ClearNodes();
+
+	/*
+	float layerSpacing = 2.0f, nodeSpacing = 1.0f;
+
 
 	int n = 0, p = 0;
 	vector<vec3> lastLayer = {};
@@ -86,30 +52,23 @@ void Renderer::loadNN(std::pair<std::vector<std::vector<float>>, std::vector<std
 
 	Node::UploadData();
 	Edge::UploadData();
+	*/
 }
 
 
 void Renderer::renderScene() {
-	//test += 0.001;
+	if (!initialized) return;
 
-	//m_camera->SetCameraView(vec3(sin(test) * 5., sin(test*3.14159265)*3., cos(test) * 5.), vec3(.0));
-	m_camera->UpdateProjMatrix();
+	camera->UpdateProjMatrix();
 
+	frameBuffer->Bind();
 
-	m_frameBuffer->Bind();
-
-
-	useShaderProgram();
-
-	m_frameBuffer->Unbind();
-}
-
-void Renderer::useShaderProgram() {
-
-	Edge::RenderEdges(m_camera);
-	Node::RenderNodes(m_camera);
+	Edge::RenderEdges(camera);
+	Node::RenderNodes(camera);
 
 	if (renderText) {
-		Label::RenderLabels(m_camera);
+		Label::RenderLabels(camera);
 	}
+
+	frameBuffer->Unbind();
 }

@@ -88,7 +88,8 @@ bool ImGuiApp::Initialize() {
 
 
     frameBuffer = new FrameBuffer(rendererSize.x, rendererSize.y);
-    renderer = new Renderer(frameBuffer, &camera);
+    renderer = &Renderer::getInstance();
+    renderer->Init(frameBuffer, &camera);
 
     return true;
 }
@@ -268,9 +269,8 @@ void ImGuiApp::RenderMenuBar() {
             if (ImGui::MenuItem("Material 3")) {}
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Render Text")) {
-            if (ImGui::MenuItem("Enable##TextRender", nullptr, Renderer::isEnabled())) Renderer::EnableText();
-            if (ImGui::MenuItem("Disable##TextRender", nullptr, !Renderer::isEnabled())) Renderer::DisableText();
+        if (ImGui::BeginMenu("Settings")) {
+            if (ImGui::MenuItem("Render Text", nullptr, renderer->isEnabled())) renderer->setText(!renderer->isEnabled());
             ImGui::EndMenu();
         }
 
@@ -801,9 +801,5 @@ void ImGuiApp::MouseDeltaHandeler()
 //    app.Run();
 //    return 0;
 //}
-
-void ImGuiApp::RenderNN(std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> data) {
-    renderer->loadNN(data);
-}
 
 
