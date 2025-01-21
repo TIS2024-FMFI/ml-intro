@@ -375,7 +375,8 @@ int AppManager::tellOutput(int output)
 		nN2->train(inputs, outputVector);
 		Eigen::VectorXd prediction = nN2->predict(inputs);
 		result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + 7)));
-		//sendDataToRenderer(inputs);
+		sendDataToRenderer(inputs);
+		break;
 	}
 	case 3: {
 		Eigen::VectorXd outputVector = Eigen::VectorXd::Zero(10);
@@ -386,7 +387,7 @@ int AppManager::tellOutput(int output)
 		nN3->train(inputs, outputVector);
 		Eigen::VectorXd prediction = nN3->predict(inputs);
 		result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + 10)));
-		//sendDataToRenderer(inputs);
+		sendDataToRenderer(inputs);
 
 		break;
 	}
@@ -405,10 +406,10 @@ void AppManager::sendDataToRenderer(const Eigen::VectorXd& input) {
 		data = nN1->extractNetworkData(input);
 		break;
 	case 2:
-		//data = nN2->extractNetworkData(input);
+		data = nN2->extractNetworkData(input);
 		break;
 	case 3:
-		//data = nN3->extractNetworkData(input);
+		data = nN3->extractNetworkData(input);
 		break;
 
 	default:
