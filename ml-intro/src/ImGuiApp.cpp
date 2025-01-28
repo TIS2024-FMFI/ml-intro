@@ -417,6 +417,10 @@ void ImGuiApp::RenderScenario_1() {
         }
     }
 
+    if (ImGui::CollapsingHeader("Epochs")) {
+        ImGui::SliderInt("epochs", &epochs, 10, 10000);
+    }
+
     if (ImGui::CollapsingHeader("Bias")) {
         ImGui::SliderFloat("bias", &bias, -1.0f, 1.0f);
     }
@@ -457,6 +461,10 @@ void ImGuiApp::RenderScenario_2() {
         RenderTellOuput_2();
     }
 
+    if (ImGui::CollapsingHeader("Epochs")) {
+        ImGui::SliderInt("epochs", &epochs, 10, 10000);
+    }
+
     if (ImGui::CollapsingHeader("Bias")) {
         ImGui::SliderFloat("bias", &bias, -1.0f, 1.0f);
     }
@@ -490,7 +498,7 @@ void ImGuiApp::RenderScenario_3() {
         DrawBitmapEditor();
     }
 
-    if (ImGui::CollapsingHeader("Ouput")) {
+    if (ImGui::CollapsingHeader("Ouptut")) {
         for (size_t i = 0; i < 10; i++)
         {
             ImGui::Button(std::to_string(i).c_str());
@@ -514,6 +522,10 @@ void ImGuiApp::RenderScenario_3() {
                 ImGui::SameLine();
             }
         }
+    }
+
+    if (ImGui::CollapsingHeader("Epochs")) {
+        ImGui::SliderInt("epochs", &epochs, 10, 10000);
     }
 
     if (ImGui::CollapsingHeader("Bias")) {
