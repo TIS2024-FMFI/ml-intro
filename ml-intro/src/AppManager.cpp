@@ -61,6 +61,7 @@ void AppManager::runNetwork()
 	std::vector<Eigen::VectorXd> trainingData;
 	std::vector<Eigen::VectorXd> targets;
 	int currScenario = gui->getCurrentScenrio();
+	int epochs = gui->getEpochs();
 
 	switch (currScenario) {
 	case 1:
@@ -82,7 +83,7 @@ void AppManager::runNetwork()
 				<< " Target: " << targets[i].transpose() << "\n";
 		}
 
-		nN1->fit(trainingData, targets, 100);
+		nN1->fit(trainingData, targets, epochs);
 		sendDataToRenderer(trainingData.back());
 		std::cout << "Predictions after training:\n";
 		for (size_t i = 0; i < trainingData.size(); ++i) {
@@ -113,7 +114,7 @@ void AppManager::runNetwork()
 				<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
 		}
 
-		nN2->fit(trainingData, targets, 100);
+		nN2->fit(trainingData, targets, epochs);
 		sendDataToRenderer(trainingData.back());
 		std::cout << "Predictions after training:\n";
 		for (size_t i = 0; i < trainingData.size(); ++i) {
@@ -139,7 +140,7 @@ void AppManager::runNetwork()
 			std::cout << " Prediction: " << prediction.transpose()
 				<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
 		}
-		nN3->fit(trainingData, targets, 30);
+		nN3->fit(trainingData, targets, epochs);
 		std::cout << "Predictions after training:\n";
 		for (size_t i = 0; i < trainingData.size(); ++i) {
 			Eigen::VectorXd prediction = nN3->predict(trainingData[i]);
@@ -341,13 +342,12 @@ void AppManager::setNetworkActivationFunction(std::shared_ptr<Function> activati
 
 
 
-int AppManager::tellOutput(int output)
+void AppManager::tellOutput(int output)
 {
 	Eigen::VectorXd inputs = setNetworkInput();
 
 	int currScenario = gui->getCurrentScenrio();
-	int result = 0;
-
+	int result = -1;
 	switch (currScenario) {
 	case 1: {
 		double outputValue = static_cast<double>(output);
@@ -362,6 +362,7 @@ int AppManager::tellOutput(int output)
 		if (result > 1) {
 			result = 1;
 		}
+		std::cout << "RESULT: " << result << "\n";
 		//sendDataToRenderer(inputs);
 		break;
 	}
@@ -376,6 +377,8 @@ int AppManager::tellOutput(int output)
 		Eigen::VectorXd prediction = nN2->predict(inputs);
 		result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + 7)));
 		//sendDataToRenderer(inputs);
+		std::cout << "RESULT: " << result << "\n";
+		break;
 	}
 	case 3: {
 		Eigen::VectorXd outputVector = Eigen::VectorXd::Zero(10);
@@ -387,6 +390,7 @@ int AppManager::tellOutput(int output)
 		Eigen::VectorXd prediction = nN3->predict(inputs);
 		result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + 10)));
 		//sendDataToRenderer(inputs);
+		std::cout << "RESULT: " << result << "\n";
 
 		break;
 	}
@@ -394,7 +398,7 @@ int AppManager::tellOutput(int output)
 	default:
 		break;
 	}
-	return result;
+	gui->setOuput(result);
 }
 
 void AppManager::sendDataToRenderer(const Eigen::VectorXd& input) {
