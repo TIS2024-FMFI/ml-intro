@@ -57,7 +57,7 @@ private:
     int currentScenario;
     std::string activationFunctionNameOutput;
     std::string activationFunctionNameHidden;
-    int output = 3;
+    int output = -1;
     int epochs;
     float bias;
     float learningRate;
