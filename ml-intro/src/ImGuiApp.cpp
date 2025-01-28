@@ -531,9 +531,7 @@ void ImGuiApp::RenderScenario_3() {
                 ImGui::SameLine();
             }
         }
-    }
-
-    
+    }    
 
     if (ImGui::CollapsingHeader("Bias")) {
         ImGui::SliderFloat("bias", &bias, -1.0f, 1.0f);
