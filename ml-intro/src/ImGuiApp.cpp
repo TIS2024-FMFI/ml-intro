@@ -501,6 +501,8 @@ void ImGuiApp::RenderScenario_3() {
     if (ImGui::CollapsingHeader("Output")) {
         if (output != -1) {
             ImGui::Text("Result: %d", output);
+        } else {
+            ImGui::Text("No result yet");
         }
 
         //for (size_t i = 0; i < 10; i++)
