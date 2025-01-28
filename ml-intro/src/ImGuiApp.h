@@ -33,6 +33,8 @@ public:
     int getCurrentScenrio() { return currentScenario; }
     std::shared_ptr<Function> getActivationFunctionOutput();
     std::shared_ptr<Function> getActivationFunctionHidden();
+    void setOuput(int Output) { output = Output; }
+    int getOutput() { return output; }
     int getEpochs() { return epochs; }
     float getBias() { return bias; }
     float getLearningRate() { return learningRate; }
@@ -55,6 +57,7 @@ private:
     int currentScenario;
     std::string activationFunctionNameOutput;
     std::string activationFunctionNameHidden;
+    int output = 3;
     int epochs;
     float bias;
     float learningRate;
