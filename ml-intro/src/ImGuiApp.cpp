@@ -417,9 +417,7 @@ void ImGuiApp::RenderScenario_1() {
         }
     }
 
-    if (ImGui::CollapsingHeader("Epochs")) {
-        ImGui::SliderInt("epochs", &epochs, 10, 10000);
-    }
+    
 
     if (ImGui::CollapsingHeader("Bias")) {
         ImGui::SliderFloat("bias", &bias, -1.0f, 1.0f);
@@ -431,7 +429,9 @@ void ImGuiApp::RenderScenario_1() {
 
     RenderActivationFunctionsOuput();
     RenderActivationFunctionsHidden();
-
+    if (ImGui::CollapsingHeader("Epochs")) {
+        ImGui::SliderInt("epochs", &epochs, 10, 100);
+    }
     RenderRunButton();
     RenderLoadButton();
     RenderSaveButton();
@@ -461,9 +461,7 @@ void ImGuiApp::RenderScenario_2() {
         RenderTellOuput_2();
     }
 
-    if (ImGui::CollapsingHeader("Epochs")) {
-        ImGui::SliderInt("epochs", &epochs, 10, 10000);
-    }
+    
 
     if (ImGui::CollapsingHeader("Bias")) {
         ImGui::SliderFloat("bias", &bias, -1.0f, 1.0f);
@@ -475,6 +473,10 @@ void ImGuiApp::RenderScenario_2() {
 
     RenderActivationFunctionsOuput();
     RenderActivationFunctionsHidden();
+
+    if (ImGui::CollapsingHeader("Epochs")) {
+        ImGui::SliderInt("epochs", &epochs, 10, 100);
+    }
 
     RenderRunButton();
     RenderLoadButton();
@@ -531,9 +533,7 @@ void ImGuiApp::RenderScenario_3() {
         }
     }
 
-    if (ImGui::CollapsingHeader("Epochs")) {
-        ImGui::SliderInt("epochs", &epochs, 10, 10000);
-    }
+    
 
     if (ImGui::CollapsingHeader("Bias")) {
         ImGui::SliderFloat("bias", &bias, -1.0f, 1.0f);
@@ -545,7 +545,9 @@ void ImGuiApp::RenderScenario_3() {
 
     RenderActivationFunctionsOuput();
     RenderActivationFunctionsHidden();
-
+    if (ImGui::CollapsingHeader("Epochs")) {
+        ImGui::SliderInt("epochs", &epochs, 10, 50);
+    }
     RenderRunButton();
     RenderLoadButton();
     RenderSaveButton();
@@ -677,8 +679,8 @@ void ImGuiApp::RenderOuput_1() {
     float sz = 40.0f;
     const float spacing = 10.0f;
 
-    ImVec4 red = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-    ImVec4 green = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+    ImVec4 red = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+    ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
     std::vector<ImVec4> colors = { red, green };
 
     for (size_t i = 0; i < colors.size(); ++i) {
