@@ -29,8 +29,9 @@ public:
 	void setNetworkActivationFunction(std::shared_ptr<Function> activationFunctionHidden, std::shared_ptr<Function> activationFunctionOutput);
 	int tellOutput(int output);
 
-private:
-	void sendDataToRenderer(const Eigen::VectorXd& input);
+	void renderNewScene();
+	void updateCurrentScene();
+	std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> getNetworkData();
 
 };
 

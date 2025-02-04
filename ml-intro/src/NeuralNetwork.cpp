@@ -22,6 +22,9 @@ NeuralNetwork::NeuralNetwork(int inputSize, int hiddenSize, int outputSize,
         // Ak hiddenSize = 0, výstupná vrstva priamo spracováva vstupy
         outputWeights = Eigen::MatrixXd::Random(outputSize, inputSize) * sqrt(2.0 / inputSize);
     }
+
+
+    lastInput = Eigen::VectorXd::Zero(inputSize);
 }
 
 // Predict output for given inputs
@@ -57,6 +60,7 @@ Eigen::VectorXd NeuralNetwork::predict(const Eigen::VectorXd& inputs) {
 void NeuralNetwork::train(const Eigen::VectorXd& inputs, const Eigen::VectorXd& targets) {
     Eigen::VectorXd finalOutput;
     Eigen::VectorXd hiddenOutput;
+    lastInput = inputs;
 
     if (hiddenSize > 0) {
         Eigen::VectorXd hiddenInput = hiddenWeights * inputs + Eigen::VectorXd::Constant(hiddenSize, bias);
@@ -312,7 +316,9 @@ std::string NeuralNetwork::getActivationFuncName() {
     }
     return outputActivationFunction->name();
 }
-std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> NeuralNetwork::extractNetworkData(const Eigen::VectorXd& input) const {
+std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> NeuralNetwork::extractNetworkData() const {
+
+    Eigen::VectorXd input = lastInput;
     std::vector<Eigen::MatrixXd> layers;  // Store activations as Eigen matrices
     std::vector<Eigen::MatrixXd> weights; // Store weights as Eigen matrices
 

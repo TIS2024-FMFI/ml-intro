@@ -21,6 +21,8 @@ private:
     double bias;
     double lambda;
 
+    Eigen::VectorXd lastInput;
+
     // Weights and biases represented as matrices/vectors
     Eigen::MatrixXd hiddenWeights;
     Eigen::MatrixXd outputWeights;
@@ -68,7 +70,7 @@ public:
     // Utility function for softmax
     Eigen::VectorXd softmax(const Eigen::VectorXd& logits) const;
 
-    std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> extractNetworkData(const Eigen::VectorXd& input) const;
+    std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> extractNetworkData() const;
 
 };
 

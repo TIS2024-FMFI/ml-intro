@@ -91,6 +91,7 @@ bool ImGuiApp::Initialize() {
     renderer = &Renderer::getInstance();
     renderer->Init(frameBuffer, &camera);
 
+    appManager->renderNewScene();
     return true;
 }
 
@@ -257,9 +258,9 @@ void ImGuiApp::Render() {
 void ImGuiApp::RenderMenuBar() {
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("Scenarios")) {
-            if (ImGui::MenuItem("Scenario 1", nullptr, currentScenario == 1)) currentScenario = 1;
-            if (ImGui::MenuItem("Scenario 2", nullptr, currentScenario == 2)) currentScenario = 2;
-            if (ImGui::MenuItem("Scenario 3", nullptr, currentScenario == 3)) currentScenario = 3;
+            if (ImGui::MenuItem("Scenario 1", nullptr, currentScenario == 1)) { currentScenario = 1; Renderer::getInstance().PlaneRender();appManager->renderNewScene(); }
+            if (ImGui::MenuItem("Scenario 2", nullptr, currentScenario == 2)) { currentScenario = 2; Renderer::getInstance().PlaneRender(); appManager->renderNewScene(); }
+            if (ImGui::MenuItem("Scenario 3", nullptr, currentScenario == 3)) { currentScenario = 3; Renderer::getInstance().SquareRender(); appManager->renderNewScene(); }
             ImGui::EndMenu();
         }
 
@@ -314,6 +315,7 @@ void ImGuiApp::RenderRunButton() {
         SendParameters();
 
         appManager->runNetwork();
+        appManager->updateCurrentScene();
     }
 }
 
