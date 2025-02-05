@@ -7,10 +7,8 @@ std::vector<float> Node::nodeData;
 bool Node::initialized = false;
 int Node::vertCount = 0;
 
-Node::Node(vec3 position, float activation) : pos(position), activation(activation) {
-    Node::InitializeBuffers();
+Node::Node(vec3 position) : pos(position) {
     Node::AddNode(*this);
-    Label(position, activation);
 }
 
 void Node::InitializeBuffers() {
@@ -33,36 +31,35 @@ void Node::InitializeBuffers() {
 
     Node::shaderProgram = ShaderPrograms::getInstance().getNodeShaderProgramId();
 
-    Label::InitializeBuffers();
-
     initialized = true;
 }
 
 void Node::AddNode(const Node& node) {
-
-    nodeData.push_back(node.pos.x);
-    nodeData.push_back(node.pos.y);
-    nodeData.push_back(node.pos.z);
-    nodeData.push_back(node.activation);
-
+    nodeData.insert(nodeData.end(), {
+            node.pos.x, node.pos.y, node.pos.z, 0
+        });
     vertCount++;
+}
+
+void Node::UpdateValues(vector<float> values) {
+    for (int i = 0; i < vertCount; i++) {
+        nodeData[i * 4 + 3] = values[i];
+    }
 }
 
 void Node::ClearNodes() {
     nodeData.clear();
     vertCount = 0;
-    Label::ClearLabels();
 }
 
 void Node::UploadData() {
+    if (!initialized) return;
     glBindBuffer(GL_ARRAY_BUFFER, nodeVBO);
     glBufferData(GL_ARRAY_BUFFER, nodeData.size() * sizeof(float), nodeData.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    Label::UploadData();
 }
 
 void Node::RenderNodes(Camera* cam) {
-
     if (!initialized) return;
 
     glEnable(GL_DEPTH_TEST);

@@ -4,20 +4,21 @@
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 #include "Camera.h"
-#include "Label.h"
 #include "ShaderPrograms.h"
 
 using namespace glm;
+using namespace std;
 
 class Node {
 public:
     vec3 pos;
     float activation;
 
-    Node(vec3 position, float activation);
+    Node(vec3 position);
 
     static void InitializeBuffers();
     static void AddNode(const Node& node);
+    static void UpdateValues(vector<float>);
     static void UploadData();
     static void RenderNodes(Camera* camera);
     static void ClearNodes();
@@ -29,4 +30,3 @@ private:
     static bool initialized;
     static int vertCount;
 };
-#pragma once

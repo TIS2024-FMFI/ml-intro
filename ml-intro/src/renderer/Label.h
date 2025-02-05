@@ -35,6 +35,8 @@ public:
     static void RenderLabels(Camera* cam);
     static void ClearLabels();
 
+    static bool isVertexCountZero() { return vertexCount == 0; };
+
 private:
     static GLuint VAO, VBO;
     static GLuint rectVAO, rectVBO;

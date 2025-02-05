@@ -83,8 +83,9 @@ void AppManager::runNetwork()
 				<< " Target: " << targets[i].transpose() << "\n";
 		}
 
+
 		nN1->fit(trainingData, targets, epochs);
-		sendDataToRenderer(trainingData.back());
+		//sendDataToRenderer(trainingData.back());
 		std::cout << "Predictions after training:\n";
 		for (size_t i = 0; i < trainingData.size(); ++i) {
 			Eigen::VectorXd prediction = nN1->predict(trainingData[i]);
@@ -114,8 +115,9 @@ void AppManager::runNetwork()
 				<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
 		}
 
+
 		nN2->fit(trainingData, targets, epochs);
-		sendDataToRenderer(trainingData.back());
+		//sendDataToRenderer(trainingData.back());
 		std::cout << "Predictions after training:\n";
 		for (size_t i = 0; i < trainingData.size(); ++i) {
 			Eigen::VectorXd prediction = nN2->predict(trainingData[i]);
@@ -363,7 +365,6 @@ void AppManager::tellOutput(int output)
 			result = 1;
 		}
 		std::cout << "RESULT: " << result << "\n";
-		//sendDataToRenderer(inputs);
 		break;
 	}
 
@@ -376,7 +377,7 @@ void AppManager::tellOutput(int output)
 		nN2->train(inputs, outputVector);
 		Eigen::VectorXd prediction = nN2->predict(inputs);
 		result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + 7)));
-		//sendDataToRenderer(inputs);
+
 		std::cout << "RESULT: " << result << "\n";
 		break;
 	}
@@ -389,7 +390,7 @@ void AppManager::tellOutput(int output)
 		nN3->train(inputs, outputVector);
 		Eigen::VectorXd prediction = nN3->predict(inputs);
 		result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + 10)));
-		//sendDataToRenderer(inputs);
+
 		std::cout << "RESULT: " << result << "\n";
 
 		break;
@@ -398,27 +399,34 @@ void AppManager::tellOutput(int output)
 	default:
 		break;
 	}
+  
+	updateCurrentScene();
 	gui->setOuput(result);
 }
 
-void AppManager::sendDataToRenderer(const Eigen::VectorXd& input) {
+std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> AppManager::getNetworkData() {
 	int currScenario = gui->getCurrentScenrio();
 
 	switch (currScenario) {
 	case 1:
-		//gui->RenderNN(nN1->extractNetworkData(input));
-		break;
+		return nN1->extractNetworkData();
 	case 2:
-		//gui->RenderNN(nN2->extractNetworkData(input));
-		break;
+		return nN2->extractNetworkData();
 	case 3:
-		//gui->RenderNN(nN3->extractNetworkData(input));
-		break;
-
-	default:
-		break;
+		return nN3->extractNetworkData();
 	}
+	return nN1->extractNetworkData();
 }
 
+
+void AppManager::renderNewScene() {
+	auto data = getNetworkData();
+	Renderer::getInstance().loadNN(data.first, data.second);
+}
+
+void AppManager::updateCurrentScene() {
+	auto data = getNetworkData();
+	Renderer::getInstance().updateNN(data.first, data.second);
+}
 
 

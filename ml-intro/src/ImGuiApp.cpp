@@ -88,8 +88,10 @@ bool ImGuiApp::Initialize() {
 
 
     frameBuffer = new FrameBuffer(rendererSize.x, rendererSize.y);
-    renderer = new Renderer(frameBuffer, &camera);
+    renderer = &Renderer::getInstance();
+    renderer->Init(frameBuffer, &camera);
 
+    appManager->renderNewScene();
     return true;
 }
 
@@ -256,9 +258,9 @@ void ImGuiApp::Render() {
 void ImGuiApp::RenderMenuBar() {
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("Scenarios")) {
-            if (ImGui::MenuItem("Scenario 1", nullptr, currentScenario == 1)) currentScenario = 1;
-            if (ImGui::MenuItem("Scenario 2", nullptr, currentScenario == 2)) currentScenario = 2;
-            if (ImGui::MenuItem("Scenario 3", nullptr, currentScenario == 3)) currentScenario = 3;
+            if (ImGui::MenuItem("Scenario 1", nullptr, currentScenario == 1)) { currentScenario = 1; Renderer::getInstance().PlaneRender();appManager->renderNewScene(); }
+            if (ImGui::MenuItem("Scenario 2", nullptr, currentScenario == 2)) { currentScenario = 2; Renderer::getInstance().PlaneRender(); appManager->renderNewScene(); }
+            if (ImGui::MenuItem("Scenario 3", nullptr, currentScenario == 3)) { currentScenario = 3; Renderer::getInstance().SquareRender(); appManager->renderNewScene(); }
             ImGui::EndMenu();
         }
 
@@ -268,15 +270,11 @@ void ImGuiApp::RenderMenuBar() {
             if (ImGui::MenuItem("Material 3")) {}
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Render Text")) {
-            if (ImGui::MenuItem("Enable##TextRender", nullptr, Renderer::isEnabled())) Renderer::EnableText();
-            if (ImGui::MenuItem("Disable##TextRender", nullptr, !Renderer::isEnabled())) Renderer::DisableText();
-            ImGui::EndMenu();
-        }
-
-        if (ImGui::BeginMenu("Render Text")) {
-            if (ImGui::MenuItem("Enable##TextRender", nullptr, Renderer::isEnabled())) Renderer::EnableText();
-            if (ImGui::MenuItem("Disable##TextRender", nullptr, !Renderer::isEnabled())) Renderer::DisableText();
+        if (ImGui::BeginMenu("Settings")) {
+            if (ImGui::MenuItem("Render Text", nullptr, renderer->isEnabled())) { 
+                renderer->setText(!renderer->isEnabled()); 
+                renderer->renderLabels(); 
+            };
             ImGui::EndMenu();
         }
 
@@ -317,6 +315,7 @@ void ImGuiApp::RenderRunButton() {
         SendParameters();
 
         appManager->runNetwork();
+        appManager->updateCurrentScene();
     }
 }
 
@@ -538,7 +537,8 @@ void ImGuiApp::RenderScenario_3() {
     }
 
     if (ImGui::CollapsingHeader("Learning Rate")) {
-        ImGui::SliderFloat("learning rate", &learningRate, 0.0f, 1.0f);
+        learningRate = clamp(learningRate, 0.0f, 0.025f);
+        ImGui::SliderFloat("learning rate", &learningRate, 0.0f, 0.025f);
     }
 
     RenderActivationFunctionsOuput();
@@ -801,12 +801,12 @@ void ImGuiApp::MouseDeltaHandeler()
 
     if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
     {
-        if (!isDragging && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
+        if (!isDragging && !ImGui::IsAnyItemActive() &&
+            ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) 
         {
             ShowCursor(FALSE);
             dragStartPos = mousePos;
             isDragging = true;
-            //SetCursorPos(mid.x, mid.y);
         }
         else if (isDragging) {
             camera.MoveCamera(vec2(mousePos.x - dragStartPos.x, mousePos.y - dragStartPos.y) * .05f);
@@ -834,9 +834,5 @@ void ImGuiApp::MouseDeltaHandeler()
 //    app.Run();
 //    return 0;
 //}
-
-void ImGuiApp::RenderNN(std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> data) {
-    renderer->loadNN(data);
-}
 
 

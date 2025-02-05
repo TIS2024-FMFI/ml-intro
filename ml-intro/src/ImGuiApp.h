@@ -39,9 +39,9 @@ public:
     float getBias() { return bias; }
     float getLearningRate() { return learningRate; }
     ImVec4 getInput() { return color; }
-    void RenderNN(std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> data);
     std::vector<std::vector<bool>> getBitmap() { return bitmap; };
 
+    Renderer* renderer = nullptr;
 
 private:
     HWND hwnd;
@@ -66,7 +66,6 @@ private:
     ImVec2 rendererSize = ImVec2(500, 500);
     Camera camera = Camera(glm::vec3(0, 0, 5), glm::vec3(0, 0, 0), &rendererSize.x, &rendererSize.y);
     FrameBuffer* frameBuffer = nullptr;
-    Renderer* renderer = nullptr;
 
     static LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
     static bool CreateDeviceWGL(HWND hWnd, WGL_WindowData* data);
