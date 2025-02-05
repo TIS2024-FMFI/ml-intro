@@ -520,7 +520,8 @@ void ImGuiApp::RenderScenario_3() {
     }
 
     if (ImGui::CollapsingHeader("Learning Rate")) {
-        ImGui::SliderFloat("learning rate", &learningRate, 0.0f, 1.0f);
+        learningRate = clamp(learningRate, 0.0f, 0.025f);
+        ImGui::SliderFloat("learning rate", &learningRate, 0.0f, 0.025f);
     }
 
     RenderActivationFunctionsOuput();
