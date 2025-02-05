@@ -27,11 +27,13 @@ public:
 	void setNetworkBias(float bias);
 	void setNetworkLearningRate(float learningRate);
 	void setNetworkActivationFunction(std::shared_ptr<Function> activationFunctionHidden, std::shared_ptr<Function> activationFunctionOutput);
-	int tellOutput(int output);
+
+	void tellOutput(int output);
 
 	void renderNewScene();
 	void updateCurrentScene();
 	std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> getNetworkData();
+
 
 };
 

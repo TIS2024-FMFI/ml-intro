@@ -89,11 +89,7 @@ std::vector<Eigen::VectorXd> generateTargets2(const std::vector<Eigen::VectorXd>
 }
 
 
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <stdexcept>
-#include <Eigen/Dense>
+
 
 std::pair<std::vector<Eigen::VectorXd>, std::vector<Eigen::VectorXd>> loadFixedTrainingSet(int limit) {
     std::vector<Eigen::VectorXd> trainingData;
@@ -105,9 +101,21 @@ std::pair<std::vector<Eigen::VectorXd>, std::vector<Eigen::VectorXd>> loadFixedT
     }
 
     std::string line;
+
+    // Generate a random number of lines to skip
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, 499 - limit);
+    int linesToSkip = dis(gen);
+
+    // Skip the random number of lines
+    while (linesToSkip-- > 0 && std::getline(file, line)) {
+        // Simply iterate through lines without processing
+    }
+
     int loadedCases = 0;
 
-    // Read each line from the CSV
+    // Read each line from the CSV and load the data
     while (std::getline(file, line) && loadedCases < limit) {
         std::stringstream ss(line);
 

@@ -7,6 +7,10 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <Eigen/Dense>
+
 
 
 

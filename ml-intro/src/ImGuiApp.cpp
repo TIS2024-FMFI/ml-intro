@@ -416,6 +416,8 @@ void ImGuiApp::RenderScenario_1() {
         }
     }
 
+    
+
     if (ImGui::CollapsingHeader("Bias")) {
         ImGui::SliderFloat("bias", &bias, -1.0f, 1.0f);
     }
@@ -426,7 +428,9 @@ void ImGuiApp::RenderScenario_1() {
 
     RenderActivationFunctionsOuput();
     RenderActivationFunctionsHidden();
-
+    if (ImGui::CollapsingHeader("Epochs")) {
+        ImGui::SliderInt("epochs", &epochs, 10, 100);
+    }
     RenderRunButton();
     RenderLoadButton();
     RenderSaveButton();
@@ -456,6 +460,8 @@ void ImGuiApp::RenderScenario_2() {
         RenderTellOuput_2();
     }
 
+    
+
     if (ImGui::CollapsingHeader("Bias")) {
         ImGui::SliderFloat("bias", &bias, -1.0f, 1.0f);
     }
@@ -466,6 +472,10 @@ void ImGuiApp::RenderScenario_2() {
 
     RenderActivationFunctionsOuput();
     RenderActivationFunctionsHidden();
+
+    if (ImGui::CollapsingHeader("Epochs")) {
+        ImGui::SliderInt("epochs", &epochs, 10, 100);
+    }
 
     RenderRunButton();
     RenderLoadButton();
@@ -489,15 +499,22 @@ void ImGuiApp::RenderScenario_3() {
         DrawBitmapEditor();
     }
 
-    if (ImGui::CollapsingHeader("Ouput")) {
-        for (size_t i = 0; i < 10; i++)
-        {
-            ImGui::Button(std::to_string(i).c_str());
-
-            if (i < 9) {
-                ImGui::SameLine();
-            }
+    if (ImGui::CollapsingHeader("Output")) {
+        if (output != -1) {
+            ImGui::Text("Result: %d", output);
+        } else {
+            ImGui::Text("No result yet");
         }
+
+        //for (size_t i = 0; i < 10; i++)
+        //{
+        //    //ImGui::Button(std::to_string(i).c_str());
+        //    ImGui::Text("%d", i);
+
+        //    if (i < 9) {
+        //        ImGui::SameLine();
+        //    }
+        //}
     }
 
     if (ImGui::CollapsingHeader("Tell Output")) {
@@ -513,7 +530,7 @@ void ImGuiApp::RenderScenario_3() {
                 ImGui::SameLine();
             }
         }
-    }
+    }    
 
     if (ImGui::CollapsingHeader("Bias")) {
         ImGui::SliderFloat("bias", &bias, -1.0f, 1.0f);
@@ -526,7 +543,9 @@ void ImGuiApp::RenderScenario_3() {
 
     RenderActivationFunctionsOuput();
     RenderActivationFunctionsHidden();
-
+    if (ImGui::CollapsingHeader("Epochs")) {
+        ImGui::SliderInt("epochs", &epochs, 10, 50);
+    }
     RenderRunButton();
     RenderLoadButton();
     RenderSaveButton();
@@ -658,20 +677,21 @@ void ImGuiApp::RenderOuput_1() {
     float sz = 40.0f;
     const float spacing = 10.0f;
 
-    ImVec4 colf;
-    ImU32 col;
+    ImVec4 red = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+    ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+    std::vector<ImVec4> colors = { red, green };
 
-    // Red output circle
-    colf = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-    col = ImColor(colf);
-    draw_list->AddCircleFilled(ImVec2(x + sz * 0.5f, y + sz * 0.5f), sz * 0.5f, col);
-    x += sz + spacing;
+    for (size_t i = 0; i < colors.size(); ++i) {
+        ImVec4 color = colors[i];
 
-    // Green output circle
-    colf = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
-    col = ImColor(colf);
-    draw_list->AddCircleFilled(ImVec2(x + sz * 0.5f, y + sz * 0.5f), sz * 0.5f, col);
-    x += sz + spacing;
+        if (i == output) {
+            ImVec4 darker = ImVec4(color.x * 0.7f, color.y * 0.7f, color.z * 0.7f, 1.0f);
+            draw_list->AddCircle(ImVec2(x + sz * 0.5f, y + sz * 0.5f), sz * 0.6f, ImColor(darker), 0, 3.0f);
+        }
+
+        draw_list->AddCircleFilled(ImVec2(x + sz * 0.5f, y + sz * 0.5f), sz * 0.5f, ImColor(color));
+        x += sz + spacing;
+    }
 
 
     ImGui::Dummy(ImVec2((sz + spacing), (sz + spacing)));
@@ -695,7 +715,14 @@ void ImGuiApp::RenderOuput_2() {
     ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
     std::vector<ImVec4> colors = { red, magenta, yellow, white, blue, cyan, green };
 
-    for (ImVec4 color : colors) {
+    for (size_t i = 0; i < colors.size(); ++i) {
+        ImVec4 color = colors[i];
+
+        if (i == output) {
+            ImVec4 darker = ImVec4(color.x * 0.7f, color.y * 0.7f, color.z * 0.7f, 1.0f);
+            draw_list->AddCircle(ImVec2(x + sz * 0.5f, y + sz * 0.5f), sz * 0.6f, ImColor(darker), 0, 3.0f);
+        }
+
         draw_list->AddCircleFilled(ImVec2(x + sz * 0.5f, y + sz * 0.5f), sz * 0.5f, ImColor(color));
         x += sz + spacing;
     }
