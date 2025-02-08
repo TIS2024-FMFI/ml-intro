@@ -30,6 +30,7 @@ NeuralNetwork::NeuralNetwork(int inputSize, int hiddenSize, int outputSize,
 // Predict output for given inputs
 Eigen::VectorXd NeuralNetwork::predict(const Eigen::VectorXd& inputs) {
     Eigen::VectorXd finalOutput;
+    lastInput = inputs;
 
     if (hiddenSize > 0) {
         Eigen::VectorXd hiddenInput = hiddenWeights * inputs + Eigen::VectorXd::Constant(hiddenSize, bias);

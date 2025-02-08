@@ -39,6 +39,7 @@ public:
     float getBias() { return bias; }
     float getLearningRate() { return learningRate; }
     ImVec4 getInput() { return color; }
+    std::vector<float> getInput2() { return networkInputVector; };
     std::vector<std::vector<bool>> getBitmap() { return bitmap; };
 
     Renderer* renderer = nullptr;
@@ -62,6 +63,7 @@ private:
     float bias;
     float learningRate;
     ImVec4 color;
+    std::vector<float> networkInputVector = {0, 0};
 
     ImVec2 rendererSize = ImVec2(500, 500);
     Camera camera = Camera(glm::vec3(0, 0, 5), glm::vec3(0, 0, 0), &rendererSize.x, &rendererSize.y);

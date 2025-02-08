@@ -258,9 +258,24 @@ void ImGuiApp::Render() {
 void ImGuiApp::RenderMenuBar() {
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("Scenarios")) {
-            if (ImGui::MenuItem("Scenario 1", nullptr, currentScenario == 1)) { currentScenario = 1; Renderer::getInstance().PlaneRender();appManager->renderNewScene(); }
-            if (ImGui::MenuItem("Scenario 2", nullptr, currentScenario == 2)) { currentScenario = 2; Renderer::getInstance().PlaneRender(); appManager->renderNewScene(); }
-            if (ImGui::MenuItem("Scenario 3", nullptr, currentScenario == 3)) { currentScenario = 3; Renderer::getInstance().SquareRender(); appManager->renderNewScene(); }
+            if (ImGui::MenuItem("Scenario 1", nullptr, currentScenario == 1)) {
+                currentScenario = 1; 
+                networkInputVector = { color.x, color.y };
+                Renderer::getInstance().PlaneRender(); appManager->renderNewScene(); 
+            }
+            if (ImGui::MenuItem("Scenario 2", nullptr, currentScenario == 2)) { 
+                currentScenario = 2;
+                networkInputVector = { color.x, color.y, color.z };
+                Renderer::getInstance().PlaneRender(); appManager->renderNewScene(); 
+            }
+            if (ImGui::MenuItem("Scenario 3", nullptr, currentScenario == 3)) { 
+                currentScenario = 3; 
+                networkInputVector.clear();
+                for (auto r : bitmap) {
+                    networkInputVector.insert(networkInputVector.end(), r.begin(), r.end());
+                }
+                Renderer::getInstance().SquareRender(); appManager->renderNewScene(); 
+            }
             ImGui::EndMenu();
         }
 
@@ -450,6 +465,7 @@ void ImGuiApp::RenderScenario_2() {
 
     if (ImGui::CollapsingHeader("Input")) {
         ImGui::ColorEdit3("input", (float*)&color);
+        networkInputVector = { color.x, color.y, color.z };
     }
 
     if (ImGui::CollapsingHeader("Output")) {
@@ -581,6 +597,8 @@ void ImGuiApp::GradientColorPicker(const char* label, float* color) {
         color[0] = x_ratio;      //r
         color[1] = y_ratio;      //g
         color[2] = 0.0f;         //b
+
+        networkInputVector = { x_ratio, y_ratio };
     }
 
     // Highlight the current color position on the gradient
@@ -621,13 +639,8 @@ void ImGuiApp::DrawBitmapEditor() {
             ImVec2 topLeft = ImVec2(canvasPos.x + x * pixelSize, canvasPos.y + y * pixelSize);
             ImVec2 bottomRight = ImVec2(topLeft.x + pixelSize, topLeft.y + pixelSize);
 
-            // Draw the pixel
-            if (bitmap[y][x]) {
-                drawList->AddRectFilled(topLeft, bottomRight, IM_COL32(0, 0, 0, 255)); // Black
-            }
-            else {
-                drawList->AddRectFilled(topLeft, bottomRight, IM_COL32(255, 255, 255, 255)); // White
-            }
+            auto col = bitmap[y][x] ? IM_COL32(0, 0, 0, 255) : IM_COL32(255, 255, 255, 255);
+            drawList->AddRectFilled(topLeft, bottomRight, col);
 
             // Draw the grid
             drawList->AddRect(topLeft, bottomRight, IM_COL32(200, 200, 200, 255));
@@ -636,22 +649,24 @@ void ImGuiApp::DrawBitmapEditor() {
 
     // Handle mouse interaction
     if (ImGui::IsMouseHoveringRect(canvasPos, ImVec2(canvasPos.x + canvasSizeInPixels.x, canvasPos.y + canvasSizeInPixels.y))) {
+        ImVec2 mousePos = ImGui::GetMousePos();
+        int x = (mousePos.x - canvasPos.x) / pixelSize;
+        int y = (mousePos.y - canvasPos.y) / pixelSize;
         if (ImGui::IsMouseDown(0)) { // Left mouse button
-            ImVec2 mousePos = ImGui::GetMousePos();
-            int x = (mousePos.x - canvasPos.x) / pixelSize;
-            int y = (mousePos.y - canvasPos.y) / pixelSize;
-
             if (x >= 0 && x < canvasSize && y >= 0 && y < canvasSize) {
                 bitmap[y][x] = true; // Set pixel "on"
             }
         }
         if (ImGui::IsMouseDown(1)) { // Right mouse button
-            ImVec2 mousePos = ImGui::GetMousePos();
-            int x = (mousePos.x - canvasPos.x) / pixelSize;
-            int y = (mousePos.y - canvasPos.y) / pixelSize;
-
             if (x >= 0 && x < canvasSize && y >= 0 && y < canvasSize) {
                 bitmap[y][x] = false; // Set pixel "off"
+            }
+        }
+
+        if (ImGui::IsMouseDown(0) || ImGui::IsMouseDown(1)) {
+            networkInputVector.clear();
+            for (auto r : bitmap) {
+                networkInputVector.insert(networkInputVector.end(), r.begin(), r.end());
             }
         }
     }
@@ -662,9 +677,10 @@ void ImGuiApp::DrawBitmapEditor() {
     if (ImGui::Button("Clear")) {
         for (int y = 0; y < canvasSize; y++) {
             for (int x = 0; x < canvasSize; x++) {
-                bitmap[y][x] = false;
+                bitmap[y][x] = false; 
             }
         }
+        networkInputVector = std::vector<float>(canvasSize * canvasSize, 0);
     }
 }
 
