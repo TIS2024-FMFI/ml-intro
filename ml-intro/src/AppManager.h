@@ -9,10 +9,14 @@ class AppManager
 {
 private:
 	ImGuiApp* gui;
-	NeuralNetwork* nN1;
-	NeuralNetwork* nN2;
-	NeuralNetwork* nN3;
+	//std::map<int, std::unique_ptr<NeuralNetwork>> networks;
+	std::map<int, std::shared_ptr<NeuralNetwork>> networks;
+	//NeuralNetwork* nN1;
+	//NeuralNetwork* nN2;
+	//NeuralNetwork* nN3;
 	NeuralNetwork* testing;
+
+	NeuralNetwork* getCurrentNetwork();
 
 public:
 	AppManager();
@@ -32,7 +36,6 @@ public:
 
 	void renderNewScene();
 	void updateCurrentScene();
-	std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> getNetworkData();
 
 
 };
