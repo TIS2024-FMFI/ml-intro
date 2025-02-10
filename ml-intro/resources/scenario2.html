@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multicolor Classification Scenario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .highlight {
+            background-color: #f9f9f9;
+            border-left: 5px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Multicolor Classification Scenario</h1>
+
+    <div class="section">
+        <h2>Overview</h2>
+        <p>This scenario focuses on classifying inputs based on their RGB color values into one of multiple categories, such as red, magenta, yellow, white, blue, cyan, and green. Users can adjust the neural network's hyperparameters to improve accuracy.</p>
+    </div>
+
+    <div class="section">
+        <h2>Interface</h2>
+        <ul>
+            <li><strong>Input:</strong> Users can select an RGB color using the color picker or adjust the R, G, B values manually.</li>
+            <li><strong>Output:</strong> The available classes are represented by colors: red, magenta, yellow, white, blue, cyan, and green.</li>
+            <li><strong>Bias:</strong> Users can adjust the bias to control the network's constant term.</li>
+            <li><strong>Learning Rate:</strong> Controls how much the weights change during training.</li>
+            <li><strong>Activation Functions:</strong> Users can select activation functions for both hidden and output layers. Available options include ReLU, Sigmoid, Tanh, and SoftMax.</li>
+            <li><strong>Epochs:</strong> Number of iterations for training the network.</li>
+            <li><strong>Run Button:</strong> Starts the training process based on the selected parameters.</li>
+            <li><strong>Save/Load:</strong> Save the current network state or load a previously saved state.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>How the Neural Network Works</h2>
+        <p>The neural network processes the input (R, G, B values) through one hidden layer. The activations are calculated using the selected activation functions. The network learns to associate input colors with their corresponding categories by adjusting weights and biases during training.</p>
+    </div>
+
+    <div class="section">
+        <h2>Recommendations for Training</h2>
+        <ul>
+            <li><strong>Learning Rate:</strong> Start with a small learning rate (e.g., 0.01) to ensure stable training.</li>
+            <li><strong>Bias:</strong> Experiment with different bias values to observe their impact on the network's performance.</li>
+            <li><strong>Epochs:</strong> Begin with a low number of epochs (e.g., 10) and gradually increase as needed.</li>
+            <li><strong>Activation Functions:</strong> SoftMax is recommended for the output layer in classification problems. For hidden layers, try ReLU for faster convergence.</li>
+            <li><strong>Visualization:</strong> Observe changes in the network diagram and predictions after training to analyze performance.</li>
+        </ul>
+    </div>
+
+</body>
+</html>

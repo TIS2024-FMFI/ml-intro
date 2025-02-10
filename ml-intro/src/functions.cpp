@@ -79,11 +79,11 @@ public:
     std::string name() const override { return "SoftMax"; }
 
     double function(double x) const override {
-        return (x > 0) ? x : 0; // Dummy implementation (SoftMax requires vector context)
+        return x; // Dummy implementation (SoftMax requires vector context)
     }
 
     double derivative(double x) const override {
-        return (x > 0) ? 1 : 0; // Dummy implementation
+        return x; // Dummy implementation
     }
 
     double error_term(double x, double error) const override {

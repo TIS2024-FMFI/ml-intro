@@ -213,7 +213,7 @@ void ImGuiApp::RenderMenuBar() {
             }
             if (ImGui::MenuItem("Scenario 2", nullptr, currentScenario == 2)) { 
                 currentScenario = 2;
-                networkInputVector = { networkInputVector[0], networkInputVector[1], networkInputVector[2] };
+                networkInputVector = { networkInputVector[0], networkInputVector[1], 0 };
                 renderer->PlaneRender(); appManager->renderNewScene();
             }
             if (ImGui::MenuItem("Scenario 3", nullptr, currentScenario == 3)) { 

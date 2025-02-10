@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handwritten Digit Recognition Scenario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .code {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        ul {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Handwritten Digit Recognition Scenario</h1>
+    <p>This scenario demonstrates a neural network trained to recognize handwritten digits (0-9) using the MNIST dataset. 
+       The network comprises an input layer, one or more hidden layers, and an output layer.</p>
+
+    <h2>How the Scenario Works</h2>
+    <p>The neural network takes a 28x28 pixel image of a handwritten digit as input, normalizes the pixel values, and 
+       processes them through its layers to predict the corresponding digit.</p>
+
+    <h3>Steps:</h3>
+    <ul>
+        <li>The <strong>Input Layer</strong> has 784 neurons (28x28 pixels).</li>
+        <li>One or more <strong>Hidden Layers</strong> process the data using activation functions (e.g., ReLU, Sigmoid).</li>
+        <li>The <strong>Output Layer</strong> has 10 neurons, each representing a digit (0-9).</li>
+        <li>The network outputs the probability of each digit, and the digit with the highest probability is selected as the prediction.</li>
+    </ul>
+
+    <h2>Controls</h2>
+    <ul>
+        <li><strong>Bias:</strong> Adjusts the bias term in the neurons.</li>
+        <li><strong>Learning Rate:</strong> Controls how much the weights change during training.</li>
+        <li><strong>Activation Functions:</strong> Select activation functions for hidden and output layers (e.g., ReLU, Sigmoid).</li>
+        <li><strong>Epochs:</strong> Specifies the number of training iterations.</li>
+        <li><strong>Clear:</strong> Clears the drawn digit.</li>
+        <li><strong>Run:</strong> Starts the training process for the specified number of epochs.</li>
+    </ul>
+
+    <h2>Recommendations for Training</h2>
+    <p>To achieve optimal results, consider the following recommendations:</p>
+    <ul>
+        <li>Use a learning rate between <code>0.00</code> and <code>0.01</code>.</li>
+        <li>For the hidden layer, use <strong>ReLU</strong> for better performance in deep networks.</li>
+        <li>Set epochs to at least <code>10</code> for visible improvements.</li>
+        <li>Use the <strong>Softmax</strong> function in the output layer for multi-class classification.</li>
+    </ul>
+
+
+
+    <h2>Expected Outcomes</h2>
+    <p>After training, the network should correctly classify most handwritten digits based on the input image.</p>
+
+    <h2>Conclusion</h2>
+    <p>This scenario highlights how neural networks can be used for image classification tasks, specifically recognizing 
+       handwritten digits. Experiment with different parameters to observe their impact on training and prediction accuracy.</p>
+</body>
+</html>

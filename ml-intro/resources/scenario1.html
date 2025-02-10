@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red-Green Scenario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .highlight {
+            background-color: #dff0d8;
+            padding: 5px;
+            border-left: 4px solid #3c763d;
+        }
+        .code {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Red-Green Scenario</h1>
+    <p>The <strong>Red-Green Scenario</strong> demonstrates a simple neural network that predicts one of two outputs: red or green. The neural network takes a 2D input corresponding to a selected color and learns to classify it as either "red" or "green".</p>
+    
+    <h2>Key Features</h2>
+    <ul>
+        <li><strong>Input:</strong> Users can select a color on the color picker and see the normalized RGB input values.</li>
+        <li><strong>Output:</strong> The neural network predicts one of two classes: red or green.</li>
+        <li><strong>Training Parameters:</strong> Bias, learning rate, and activation functions for the output layer can be adjusted.</li>
+        <li><strong>Training:</strong> The network can be trained for a chosen number of epochs using the <strong>Run</strong> button.</li>
+        <li><strong>Save/Load:</strong> Save the current state of the network or load a previously saved state.</li>
+    </ul>
+
+    <h2>Recommendations for Training</h2>
+    <div class="highlight">
+        <p>To achieve optimal results, follow these recommendations when training the neural network:</p>
+        <ul>
+            <li>Use a small learning rate (e.g., 0.01–0.05) to prevent the network from overshooting the optimal weights.</li>
+            <li>Start with a bias value around 1.0 for balanced predictions, then adjust based on performance.</li>
+            <li>Choose an appropriate activation function:
+                <ul>
+                    <li><strong>Sigmoid:</strong> Suitable for binary classification tasks.</li>
+                    <li><strong>Tanh:</strong> Normalizes the output between -1 and 1, often useful for hidden layers.</li>
+                </ul>
+            </li>
+            <li>Train the network for at least 10 epochs initially to observe the learning trend.</li>
+            <li>Periodically save the model to preserve progress.</li>
+            <li>If predictions are skewed, consider adjusting the bias or introducing regularization.</li>
+        </ul>
+    </div>
+
+
+
+    <h2>How to Use</h2>
+    <ol>
+        <li>Select a color from the color picker.</li>
+        <li>Choose the output class (red or green).</li>
+        <li>Adjust the bias, learning rate, and activation function as needed.</li>
+        <li>Set the number of training epochs.</li>
+        <li>Click <strong>Run</strong> to train the network.</li>
+        <li>Save the trained model using the <strong>Save</strong> button.</li>
+        <li>To reload a saved model, click <strong>Load</strong>.</li>
+    </ol>
+
+    <h2>Visual Representation</h2>
+    <p>The visualization on the left shows the network's structure, including input and output layers. Weights between layers are updated during training, and their strengths are indicated by line thickness.</p>
+
+</body>
+</html>

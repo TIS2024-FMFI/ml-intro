@@ -25,3 +25,22 @@ std::string openFileDialog() {
         throw std::runtime_error("No file selected or dialog canceled.");
     }
 }
+
+std::string saveFileDialog() {
+    wchar_t filename[MAX_PATH] = L"";
+    OPENFILENAME ofn = {};
+    ofn.lStructSize = sizeof(OPENFILENAME);
+    ofn.hwndOwner = nullptr;
+    ofn.lpstrFilter = L"JSON Files\0*.json\0All Files\0*.*\0";
+    ofn.lpstrFile = filename;
+    ofn.nMaxFile = MAX_PATH;
+    ofn.Flags = OFN_OVERWRITEPROMPT;
+
+    if (GetSaveFileName(&ofn)) {
+        std::wstring wideFilename(filename);
+        return std::string(wideFilename.begin(), wideFilename.end());
+    }
+    else {
+        throw std::runtime_error("Save operation canceled.");
+    }
+}

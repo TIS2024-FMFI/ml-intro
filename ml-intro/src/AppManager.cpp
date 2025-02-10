@@ -74,7 +74,7 @@ void AppManager::runNetwork()
 	}
 	case 2: {
 		auto nN2 = getCurrentNetwork();
-		trainingData = generateTrainingSet2(20);
+		trainingData = generateTrainingSet2(50);
 		targets = generateTargets2(trainingData);
 
 		std::cout << "======================================================================\n";
@@ -137,8 +137,15 @@ void AppManager::runNetwork()
 
 void AppManager::saveNetwork()
 {
-	int scen_id = gui->getCurrentScenrio();
-	getCurrentNetwork()->saveNetwork("xd" + scen_id);
+	try {
+		std::string filepath = saveFileDialog();
+		getCurrentNetwork()->saveNetwork(filepath);
+		updateCurrentScene();
+
+	}
+	catch (const std::exception& e) {
+		std::cerr << "Error: " << e.what() << std::endl;
+	}
 }
 
 void AppManager::loadNetwork()
