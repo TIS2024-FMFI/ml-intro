@@ -1,6 +1,8 @@
 #include "ImGuiApp.h"
 #include <iostream>
 #include "AppManager.h"
+#include "openWindow.h"
+
 
 ImGuiApp::ImGuiApp(AppManager& appManager, HINSTANCE hInstance) : appManager(&appManager), hInstance(hInstance), hwnd(nullptr) {}
 
@@ -225,9 +227,9 @@ void ImGuiApp::RenderMenuBar() {
         }
 
         if (ImGui::BeginMenu("Study Material")) {
-            if (ImGui::MenuItem("Material 1")) {}
-            if (ImGui::MenuItem("Material 2")) {}
-            if (ImGui::MenuItem("Material 3")) {}
+            if (ImGui::MenuItem("Material 1")) { openWindow("resources/scenario1.html"); }
+            if (ImGui::MenuItem("Material 2")) { openWindow("resources/scenario2.html"); }
+            if (ImGui::MenuItem("Material 3")) { openWindow("resources/scenario3.html"); }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Settings")) {
