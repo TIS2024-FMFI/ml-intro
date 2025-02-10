@@ -9,12 +9,7 @@ class AppManager
 {
 private:
 	ImGuiApp* gui;
-	//std::map<int, std::unique_ptr<NeuralNetwork>> networks;
 	std::map<int, std::shared_ptr<NeuralNetwork>> networks;
-	//NeuralNetwork* nN1;
-	//NeuralNetwork* nN2;
-	//NeuralNetwork* nN3;
-	NeuralNetwork* testing;
 
 	NeuralNetwork* getCurrentNetwork();
 
@@ -28,15 +23,11 @@ public:
 	void saveNetwork();
 	void loadNetwork();
 	Eigen::VectorXd setNetworkInput();
-	void setNetworkBias(float bias);
-	void setNetworkLearningRate(float learningRate);
-	void setNetworkActivationFunction(std::shared_ptr<Function> activationFunctionHidden, std::shared_ptr<Function> activationFunctionOutput);
 
-	void tellOutput(int output);
+	void tellOutput(int output); 
+	void predictCurrentGuiInput();
 
 	void renderNewScene();
 	void updateCurrentScene();
-
-
 };
 

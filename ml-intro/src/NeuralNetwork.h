@@ -17,9 +17,12 @@ private:
     int inputSize;
     int hiddenSize;
     int outputSize;
-    double learningRate;
-    double bias;
     double lambda;
+
+    double* bias;
+    double* learningRate;
+    int* outputActivationFunction;
+    int* hiddenActivationFunction;
 
     Eigen::VectorXd lastInput;
 
@@ -27,18 +30,18 @@ private:
     Eigen::MatrixXd hiddenWeights;
     Eigen::MatrixXd outputWeights;
 
-    std::shared_ptr<Function> outputActivationFunction;
-    std::shared_ptr<Function> hiddenActivationFunction;
 
     // Helper to compute layer outputs
     Eigen::VectorXd computeLayerOutput(const Eigen::MatrixXd& weights, const Eigen::VectorXd& biases,
         const Eigen::VectorXd& inputs, const std::shared_ptr<Function>& activationFunction);
 
+    std::vector<std::shared_ptr<Function>> listFunctions = { std::make_shared<ReLu>() , std::make_shared<Sigmoid>(), std::make_shared<Tanh>(), std::make_shared<SoftMax>() };
+
 public:
     // Constructor
     NeuralNetwork(int inputSize, int hiddenSize, int outputSize,
-        std::shared_ptr<Function> hiddenActivationFunction ,
-        std::shared_ptr<Function> outputActivationFunction);
+        int* hiddenActivationFunction, int* outputActivationFunction,
+        double* bias_Ptr, double* learningRate_Ptr);
 
     // Predict output for given inputs
     Eigen::VectorXd predict(const Eigen::VectorXd& inputs);
@@ -52,8 +55,8 @@ public:
         int num_epochs);
 
     // Setters for activation functions
-    void setHiddenActivationFunction(std::shared_ptr<Function> activationFunction);
-    void setOutputActivationFunction(std::shared_ptr<Function> activationFunction);
+    void setHiddenActivationFunction(int activationFunction);
+    void setOutputActivationFunction(int activationFunction);
     std::string getActivationFuncName();
     // Getters and setters for bias
     double getBias() const;

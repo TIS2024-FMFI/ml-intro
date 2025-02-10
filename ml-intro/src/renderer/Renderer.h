@@ -32,6 +32,7 @@ public:
 
 	void SquareRender() { squareRender = true; };
 	void PlaneRender() { squareRender = false; };
+	bool isSquareRender() { return squareRender; }
 
 	void setText(bool doRender) { renderText = doRender; };
 	bool isEnabled() { return renderText; }

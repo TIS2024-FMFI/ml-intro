@@ -1,56 +1,25 @@
 #include "AppManager.h"
 #include <iomanip>
 
-AppManager::AppManager() : gui(nullptr)
+AppManager::AppManager()
 {
+	gui = new ImGuiApp(*this, GetModuleHandle(nullptr));
 
-	//nN1 = new NeuralNetwork(
-	//	2,
-	//	0,
-	//	1,
-	//	nullptr,
-	//	std::make_shared<Sigmoid>()
-	//);
-
-	//nN2 = new NeuralNetwork(
-	//	3,
-	//	5,
-	//	7,
-	//	std::make_shared<ReLu>(),
-	//	nullptr
-	//);
-
-	//nN3 = new NeuralNetwork(
-	//	28 * 28,
-	//	128,
-	//	10,
-	//	std::make_shared<ReLu>(),
-	//	nullptr
-	//);
-
-	networks[1] = std::make_unique<NeuralNetwork>( 2, 0, 1, nullptr, std::make_shared<Sigmoid>() );
-	networks[2] = std::make_unique<NeuralNetwork>( 3, 5, 7, std::make_shared<ReLu>(), nullptr );
-	networks[3] = std::make_unique<NeuralNetwork>( 28 * 28, 128, 10, std::make_shared<ReLu>(), nullptr );
+	networks[1] = std::make_unique<NeuralNetwork>( 2      , 0  , 1 , &gui->activationFunctionHidden, &gui->activationFunctionOutput, &gui->bias, &gui->learningRate);
+	networks[2] = std::make_unique<NeuralNetwork>( 3      , 5  , 7 , &gui->activationFunctionHidden, &gui->activationFunctionOutput, &gui->bias, &gui->learningRate);
+	networks[3] = std::make_unique<NeuralNetwork>( 28 * 28, 128, 10, &gui->activationFunctionHidden, &gui->activationFunctionOutput, &gui->bias, &gui->learningRate);
 }
 
 AppManager::~AppManager()
 {
 	delete gui;
-	//delete nN1;
-	//delete nN2;
-	//delete nN3;
 }
 
 void AppManager::run()
 {
-	if (gui == nullptr) {
-		HINSTANCE hInstance = GetModuleHandle(nullptr);
-
-		gui = new ImGuiApp(*this, hInstance);
-		if (!gui->Initialize()) {
-			MessageBox(nullptr, _T("Failed to initialize ImGui application"), _T("Error"), MB_OK | MB_ICONERROR);
-			return;
-		}
+	if (!gui->Initialize()) {
+		MessageBox(nullptr, _T("Failed to initialize ImGui application"), _T("Error"), MB_OK | MB_ICONERROR);
+		return;
 	}
 
 	gui->Run();
@@ -58,7 +27,6 @@ void AppManager::run()
 
 
 
-// TODO
 void AppManager::runNetwork()
 {
 	std::vector<Eigen::VectorXd> trainingData;
@@ -167,212 +135,25 @@ void AppManager::runNetwork()
 
 
 
-// TODO
 void AppManager::saveNetwork()
 {
-	//int currScenario = gui->getCurrentScenrio();
-
-
-	//switch (currScenario) {
-	//case 1: {
-	//	nN1->saveNetwork("xd1");
-	//	break;
-	//}
-
-	//case 2: {
-	//	nN2->saveNetwork("xd2");
-	//	break;
-	//}
-
-	//default:
-	//	nN3->saveNetwork("xd3");
-	//	break;
-	//}
-
 	int scen_id = gui->getCurrentScenrio();
 	getCurrentNetwork()->saveNetwork("xd" + scen_id);
 }
 
-// TODO
 void AppManager::loadNetwork()
 {
-	//int currScenario = gui->getCurrentScenrio();
-
-
-	//switch (currScenario) {
-	//case 1: {
-	//	nN1->loadNetwork(openFileDialog());
-	//	break;
-	//}
-
-	//case 2: {
-	//	nN2->loadNetwork(openFileDialog());
-	//	break;
-	//}
-
-	//default:
-	//	nN3->loadNetwork(openFileDialog());
-	//	break;
-	//}
-
 	getCurrentNetwork()->loadNetwork(openFileDialog());
 }
 
 // TODO
 Eigen::VectorXd AppManager::setNetworkInput()
 {
-	//int currScenario = gui->getCurrentScenrio();
-	//Eigen::VectorXd inputs;
-
-	//switch (currScenario) {
-	//case 1: {
-	//	// Create a vector of size 2 for scenario 1
-	//	inputs = Eigen::VectorXd(2);
-	//	inputs(0) = gui->getInput().x;
-	//	inputs(1) = gui->getInput().y;
-	//	break;
-	//}
-
-	//case 2: {
-	//	// Create a vector of size 3 for scenario 2
-	//	inputs = Eigen::VectorXd(3);
-	//	inputs(0) = gui->getInput().x;
-	//	inputs(1) = gui->getInput().y;
-	//	inputs(2) = gui->getInput().z;
-	//	break;
-	//}
-
-	//case 3: {
-	//	std::vector<std::vector<bool>> bitmap = gui->getBitmap();
-
-	//	inputs = Eigen::VectorXd(28 * 28);
-
-	//	int index = 0;
-	//	for (const auto& row : bitmap) {
-	//		for (bool cell : row) {
-	//			inputs(index++) = cell ? 1.0 : 0.0;
-	//		}
-	//	}
-	//	break;
-	//}
-
-	//default:
-	//	// Return an empty vector in case of an unsupported scenario
-	//	inputs = Eigen::VectorXd(0);
-	//	break;
-	//}
-
-	//return inputs;
-
-
-	auto guiInput = gui->getInput2();
+	auto guiInput = gui->getInput();
 	Eigen::VectorXd eigenVec(guiInput.size());
 	std::copy(guiInput.begin(), guiInput.end(), eigenVec.data());
 	return eigenVec;
 }
-
-void AppManager::setNetworkBias(float bias)
-{
-	//int currScenario = gui->getCurrentScenrio();
-
-	//switch (currScenario) {
-	//case 1:
-	//	nN1->setBias(bias);
-	//	break;
-	//case 2:
-	//	nN2->setBias(bias);
-	//	break;
-	//case 3:
-	//	nN3->setBias(bias);
-	//	break;
-
-	//default:
-	//	break;
-	//}
-
-	getCurrentNetwork()->setBias(bias);
-}
-
-void AppManager::setNetworkLearningRate(float learningRate)
-{
-	//int currScenario = gui->getCurrentScenrio();
-
-	//switch (currScenario) {
-	//case 1:
-	//	nN1->setLearningRate(learningRate);
-	//	break;
-	//case 2:
-	//	nN2->setLearningRate(learningRate);
-	//	break;
-	//case 3:
-	//	nN3->setLearningRate(learningRate);
-	//	break;
-
-	//default:
-	//	break;
-	//}
-	getCurrentNetwork()->setLearningRate(learningRate);
-}
-
-void AppManager::setNetworkActivationFunction(std::shared_ptr<Function> activationFunctionHidden, std::shared_ptr<Function> activationFunctionOutput)
-{
-	std::shared_ptr<Function> tempH = activationFunctionHidden;
-	std::shared_ptr<Function> tempO = activationFunctionOutput;
-	
-	//int currScenario = gui->getCurrentScenrio();
-
-	//switch (currScenario) {
-	//case 1:
-	//	if (tempH != nullptr) {
-	//		nN1->setHiddenActivationFunction(tempH);
-	//	}
-	//	if (tempO != nullptr) {
-	//		if (tempO->name() == "SoftMax") {
-	//			tempO = nullptr;
-	//		}
-	//		nN1->setOutputActivationFunction(tempO);
-	//	}
-	//	
-	//	break;
-	//case 2:
-	//	if (tempH != nullptr) {
-	//		nN2->setHiddenActivationFunction(tempH);
-	//	}
-	//	if (tempO != nullptr) {
-	//		if (tempO->name() == "SoftMax") {
-	//			tempO = nullptr;
-	//		}
-	//		nN2->setOutputActivationFunction(tempO);
-	//	}
-	//	break;
-	//case 3:
-	//	if (tempH != nullptr) {
-	//		nN3->setHiddenActivationFunction(tempH);
-	//	}
-	//	if (tempO != nullptr) {
-	//		if (tempO->name() == "SoftMax") {
-	//			tempO = nullptr;
-	//		}
-	//		nN3->setOutputActivationFunction(tempO);
-	//	}
-	//	break;
-
-	//default:
-	//	break;
-	//}
-
-	if (tempH != nullptr) {
-		getCurrentNetwork()->setHiddenActivationFunction(tempH);
-	}
-	if (tempO != nullptr) {
-		if (tempO->name() == "SoftMax") {
-			tempO = nullptr;
-		}
-		getCurrentNetwork()->setOutputActivationFunction(tempO);
-	}
-}
-
-
 
 void AppManager::tellOutput(int output)
 {
@@ -451,6 +232,15 @@ void AppManager::tellOutput(int output)
 void AppManager::renderNewScene() {
 	auto data = getCurrentNetwork()->extractNetworkData();
 	Renderer::getInstance().loadNN(data.first, data.second);
+}
+
+void AppManager::predictCurrentGuiInput() {
+	int inputSize = getCurrentNetwork()->getInputSize();
+	Eigen::VectorXd prediction = getCurrentNetwork()->predict(setNetworkInput());
+	auto inpt = setNetworkInput();
+	//std::cout << prediction[0] << ", " << prediction[1] << std::endl;
+	int result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + inputSize)));
+	gui->setOuput(result);
 }
 
 void AppManager::updateCurrentScene() {

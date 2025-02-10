@@ -18,6 +18,7 @@ void Renderer::loadNN(vector<Eigen::MatrixXd> activations,  vector<Eigen::Matrix
 	generatePositions(activations);
 	createVertices();
 	createEdges();
+	renderText = false;
 	updateNN(activations, weights);
 
 }
@@ -86,7 +87,6 @@ void Renderer::setupLabels(vector<Eigen::MatrixXd> activations, vector<Eigen::Ma
 	Label::InitializeBuffers();
 	Label::ClearLabels();
 	Label::UploadData();
-	renderText = false;
 
 	vector<float> data = unzipVec(activations);
 	int i = 0;
