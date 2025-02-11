@@ -343,7 +343,7 @@ std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> NeuralNetw
         return listFunctions[*outputActivationFunction]->function(x);
         });
 
-    if (!outputActivationFunction) {
+    if (*outputActivationFunction == 3) {
         finalOutput = softmax(finalOutput);
     }
 

@@ -88,7 +88,7 @@ void AppManager::runNetwork()
 
 			//std::cout << std::fixed << std::setprecision(3);
 			//std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose()
-			//	<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
+				//<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
 		}
 
 
@@ -96,10 +96,10 @@ void AppManager::runNetwork()
 		//sendDataToRenderer(trainingData.back());
 		//std::cout << "Predictions after training:\n";
 		for (size_t i = 0; i < trainingData.size(); ++i) {
-			Eigen::VectorXd prediction = nN2->predict(trainingData[i]);
+			//Eigen::VectorXd prediction = nN2->predict(trainingData[i]);
 			//std::cout << std::fixed << std::setprecision(3);
 			//std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose()
-			//	<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
+				//<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
 		}
 		break;
 	}
@@ -153,7 +153,16 @@ void AppManager::saveNetwork()
 
 void AppManager::loadNetwork()
 {
-	getCurrentNetwork()->loadNetwork(openFileDialog());
+	try {
+		std::string filepath = openFileDialog();
+		getCurrentNetwork()->loadNetwork(filepath);
+		updateCurrentScene();
+
+	}
+	catch (const std::exception& e) {
+		std::cerr << "Error: " << e.what() << std::endl;
+	}
+
 }
 
 // TODO
