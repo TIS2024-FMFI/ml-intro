@@ -17,6 +17,19 @@ AppManager::~AppManager()
 	delete gui;
 }
 
+void AppManager::resetNetworkToRandomValues() {
+	int currScenario = gui->getCurrentScenrio();
+
+	if (networks.find(currScenario) != networks.end()) {
+		auto cs = networks[currScenario].get();
+		networks[currScenario] = std::make_unique<NeuralNetwork>(cs->getInputSize(), cs->getHiddenSize(), cs->getOutputSize(),
+			&gui->activationFunctionHidden, &gui->activationFunctionOutput, &gui->bias, &gui->learningRate);
+	}
+	else {
+		throw std::exception("Invalid scenario index!");
+	}
+}
+
 void AppManager::runNetwork()
 {
 	std::vector<Eigen::VectorXd> trainingData;
