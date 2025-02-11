@@ -1,6 +1,8 @@
 #include "ImGuiApp.h"
 #include <iostream>
 #include "AppManager.h"
+#include "openWindow.h"
+
 
 ImGuiApp::ImGuiApp(AppManager& appManager) : appManager(&appManager)
 {
@@ -130,9 +132,9 @@ void ImGuiApp::myMenuBar() {
         }
 
         if (ImGui::BeginMenu("Study Material")) {
-            if (ImGui::MenuItem("Material 1")) {}
-            if (ImGui::MenuItem("Material 2")) {}
-            if (ImGui::MenuItem("Material 3")) {}
+            if (ImGui::MenuItem("Material 1")) { openWindow("resources/scenario1.html"); }
+            if (ImGui::MenuItem("Material 2")) { openWindow("resources/scenario2.html"); }
+            if (ImGui::MenuItem("Material 3")) { openWindow("resources/scenario3.html"); }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Settings")) {
@@ -206,11 +208,22 @@ void ImGuiApp::myControlPanelFrame() {
         appManager->runNetwork();
         appManager->updateCurrentScene();
     }
+    ImGui::SameLine();
     if (ImGui::Button("Save")) {
         appManager->saveNetwork();
     }
+    ImGui::SameLine();
     if (ImGui::Button("Load")) {
         appManager->loadNetwork();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Reset")) {
+        appManager->resetNetworkToRandomValues();
+        appManager->predictCurrentGuiInput();
+        appManager->updateCurrentScene();
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("sets all the weights to random values");
     }
 
     ImGui::End();

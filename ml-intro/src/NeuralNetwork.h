@@ -76,6 +76,8 @@ public:
     std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> extractNetworkData() const;
 
     int getInputSize() { return inputSize; }
+    int getHiddenSize() { return hiddenSize; }
+    int getOutputSize() { return outputSize; }
 };
 
 #endif // NEURALNETWORK_H

@@ -50,7 +50,7 @@ Eigen::VectorXd NeuralNetwork::predict(const Eigen::VectorXd& inputs) {
             });
     }
 
-    if (!outputActivationFunction) {
+    if (*outputActivationFunction == 3) {
         finalOutput = softmax(finalOutput);
     }
 
@@ -76,12 +76,12 @@ void NeuralNetwork::train(const Eigen::VectorXd& inputs, const Eigen::VectorXd& 
         return listFunctions[*outputActivationFunction]->function(x);
         });
 
-    if (!outputActivationFunction) {
+    if (*outputActivationFunction == 3) {
         finalOutput = softmax(finalOutput);
     }
 
     Eigen::VectorXd outputErrors = finalOutput - targets;
-    if (outputActivationFunction) {
+    if (*outputActivationFunction != 3) {
         outputErrors = outputErrors.array() * outputInput.unaryExpr([this](double x) {
             return listFunctions[*outputActivationFunction]->derivative(x);
             }).array();
@@ -268,7 +268,7 @@ void NeuralNetwork::loadNetwork(const std::string& filename) {
         *hiddenActivationFunction = 2;
     }
     else {
-        *hiddenActivationFunction = 3;
+        *hiddenActivationFunction = 0;
     }
 
     if (outputActivationName == "ReLu") {
@@ -281,7 +281,7 @@ void NeuralNetwork::loadNetwork(const std::string& filename) {
         *outputActivationFunction = 2;
     }
     else {
-        *outputActivationFunction = 0;
+        *outputActivationFunction = 3;
     }
 
     // Load hidden layer weights

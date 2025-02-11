@@ -7,3 +7,4 @@
 #include <stdexcept>
 
 std::string openFileDialog();
+std::string saveFileDialog();
