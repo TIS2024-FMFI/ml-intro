@@ -179,6 +179,7 @@
     <ClInclude Include="src\myGui\ScenarioFactory.h" />
     <ClInclude Include="src\myGui\Scenario_2.h" />
     <ClInclude Include="src\myGui\Scenario_3.h" />
+    <ClInclude Include="src\MyWindow.h" />
     <ClInclude Include="src\renderer\Camera.h" />
     <ClInclude Include="src\renderer\Edge.h" />
     <ClInclude Include="src\renderer\FrameBuffer.h" />

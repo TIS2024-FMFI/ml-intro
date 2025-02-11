@@ -50,14 +50,13 @@ void FrameBuffer::RescaleFrameBuffer(float width, float height)
 void FrameBuffer::Bind() const
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	//glEnable(GL_DEPTH_TEST);
+	glClearColor(bcg.x, bcg.y, bcg.z, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void FrameBuffer::Unbind() const
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//glDisable(GL_DEPTH_TEST);
-	glClearColor(0.47f, 0.53f, 0.67f, 1.0f);
+	glClearColor(.99, .55, .48, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

@@ -8,14 +8,16 @@
 #include <Windows.h>
 #include <tchar.h>
 #include <GLFW/glfw3.h>
-#include "imgui.h"
-#include "imgui_impl_win32.h"
-#include "imgui_impl_opengl3.h"
+#include <imgui.h>
+#include <imgui_internal.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 #include "renderer/Renderer.h"
 #include "functions.cpp"
 #include "string"
 #include "myGui/Scenario.h"
 #include "myGui/ScenarioFactory.h"
+#include "MyWindow.h"
 
 
 class AppManager;
@@ -32,9 +34,8 @@ public:
     int activationFunctionOutput = 0;
     int activationFunctionHidden = 0;
 
-    ImGuiApp(AppManager& appManager, HINSTANCE hInstance);
+    ImGuiApp(AppManager& appManager);
     ~ImGuiApp();
-    bool Initialize();
     void Run();
 
     int getCurrentScenrio() { return currentScenario; }
@@ -42,16 +43,18 @@ public:
     int getEpochs() { return epochs; }
     std::vector<float> getInput() { return networkInputVector; };
 
-    Renderer* renderer = nullptr;
+    Renderer* renderer;
 
 private:
+    MyWindow myWindow = MyWindow(1280, 720);
     HWND hwnd;
     WNDCLASSEX wc;
     HINSTANCE hInstance;
 
 
     AppManager* appManager;
-    bool running = true;
+    bool darkTheme = false;
+    bool isRenderDebugOpen = false;
     int currentScenario = 1;
 
     std::vector<float> networkInputVector = { 0, 0 };
@@ -68,11 +71,11 @@ private:
     static LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
     static bool CreateDeviceWGL(HWND hWnd, WGL_WindowData* data);
     static void CleanupDeviceWGL(HWND hWnd, WGL_WindowData* data);
-    void Render();
-    void RenderMenuBar();
-    //bool CustomButton(const char* label, ImVec4 color);
-    void myControllPanelFrame();
+    void InitializeNewFrame();
+    void myMenuBar();
+    void myControlPanelFrame();
     void myRendererFrame();
+    void myRendererDebugPanel();
     void MouseCameraHandeler();
 
 };

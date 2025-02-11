@@ -16,6 +16,10 @@ public:
 
     Node(vec3 position);
 
+    static vec3* negCol;
+    static vec3* posCol;
+    static float PointSize;
+
     static void InitializeBuffers();
     static void AddNode(const Node& node);
     static void UpdateValues(vector<float>);
