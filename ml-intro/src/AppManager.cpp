@@ -26,6 +26,19 @@ void AppManager::run()
 }
 
 
+void AppManager::resetNetworkToRandomValues() {
+	int currScenario = gui->getCurrentScenrio();
+
+	if (networks.find(currScenario) != networks.end()) {
+		auto cs = networks[currScenario].get();
+		networks[currScenario] = std::make_unique<NeuralNetwork>(cs->getInputSize(), cs->getHiddenSize(), cs->getOutputSize() ,
+			&gui->activationFunctionHidden, &gui->activationFunctionOutput, &gui->bias, &gui->learningRate);
+	}
+	else {
+		throw std::exception("Invalid scenario index!");
+	}
+}
+
 
 void AppManager::runNetwork()
 {
@@ -40,8 +53,8 @@ void AppManager::runNetwork()
 		trainingData = generateTrainingSet1(50);
 		targets = generateTargets1(trainingData);
 
-		std::cout << "======================================================================\n";
-		std::cout << "Predictions before training:\n";
+		//std::cout << "======================================================================\n";
+		//std::cout << "Predictions before training:\n";
 
 		for (size_t i = 0; i < trainingData.size(); ++i) {
 			Eigen::VectorXd prediction = nN1->predict(trainingData[i]);
@@ -50,15 +63,15 @@ void AppManager::runNetwork()
 				normalizedPrediction = (prediction[0] + 1.0) / 2.0;
 			}
 
-			std::cout << std::fixed << std::setprecision(3);
-			std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose() << "NORMALIZED: " << normalizedPrediction
-				<< " Target: " << targets[i].transpose() << "\n";
+			//std::cout << std::fixed << std::setprecision(3);
+			//std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose() << "NORMALIZED: " << normalizedPrediction
+			//	<< " Target: " << targets[i].transpose() << "\n";
 		}
 
 
 		nN1->fit(trainingData, targets, epochs);
 		//sendDataToRenderer(trainingData.back());
-		std::cout << "Predictions after training:\n";
+		//std::cout << "Predictions after training:\n";
 		for (size_t i = 0; i < trainingData.size(); ++i) {
 			Eigen::VectorXd prediction = nN1->predict(trainingData[i]);
 			double normalizedPrediction = prediction[0];
@@ -66,9 +79,9 @@ void AppManager::runNetwork()
 				normalizedPrediction = (prediction[0] + 1.0) / 2.0;
 			}
 
-			std::cout << std::fixed << std::setprecision(3);
-			std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose() << " NORMALIZED: " << normalizedPrediction
-				<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
+			//std::cout << std::fixed << std::setprecision(3);
+			//std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose() << " NORMALIZED: " << normalizedPrediction
+			//	<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
 		}
 		break;
 	}
@@ -77,26 +90,26 @@ void AppManager::runNetwork()
 		trainingData = generateTrainingSet2(50);
 		targets = generateTargets2(trainingData);
 
-		std::cout << "======================================================================\n";
-		std::cout << "Predictions before training:\n";
+		//std::cout << "======================================================================\n";
+		//std::cout << "Predictions before training:\n";
 
 		for (size_t i = 0; i < trainingData.size(); ++i) {
 			Eigen::VectorXd prediction = nN2->predict(trainingData[i]);
 
-			std::cout << std::fixed << std::setprecision(3);
-			std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose()
-				<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
+			//std::cout << std::fixed << std::setprecision(3);
+			//std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose()
+			//	<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
 		}
 
 
 		nN2->fit(trainingData, targets, epochs);
 		//sendDataToRenderer(trainingData.back());
-		std::cout << "Predictions after training:\n";
+		//std::cout << "Predictions after training:\n";
 		for (size_t i = 0; i < trainingData.size(); ++i) {
 			Eigen::VectorXd prediction = nN2->predict(trainingData[i]);
-			std::cout << std::fixed << std::setprecision(3);
-			std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose()
-				<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
+			//std::cout << std::fixed << std::setprecision(3);
+			//std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose()
+			//	<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
 		}
 		break;
 	}
@@ -107,23 +120,23 @@ void AppManager::runNetwork()
 		targets = data.second;
 		/*printVectorSet(trainingData);
 		printVectorSet(targets);*/
-		std::cout << "======================================================================\n";
-		std::cout << "Predictions before training:\n";
+		//std::cout << "======================================================================\n";
+		//std::cout << "Predictions before training:\n";
 
 		for (size_t i = 0; i < trainingData.size(); ++i) {
 			Eigen::VectorXd prediction = nN3->predict(trainingData[i]);
 
-			std::cout << std::fixed << std::setprecision(3);
-			std::cout << " Prediction: " << prediction.transpose()
-				<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
+			//std::cout << std::fixed << std::setprecision(3);
+			//std::cout << " Prediction: " << prediction.transpose()
+			//	<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
 		}
 		nN3->fit(trainingData, targets, epochs);
-		std::cout << "Predictions after training:\n";
+		//std::cout << "Predictions after training:\n";
 		for (size_t i = 0; i < trainingData.size(); ++i) {
 			Eigen::VectorXd prediction = nN3->predict(trainingData[i]);
-			std::cout << std::fixed << std::setprecision(3);
-			std::cout << " Prediction: " << prediction.transpose()
-				<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
+			//std::cout << std::fixed << std::setprecision(3);
+			//std::cout << " Prediction: " << prediction.transpose()
+			//	<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
 		}
 		break;
 
@@ -183,7 +196,7 @@ void AppManager::tellOutput(int output)
 		if (result > 1) {
 			result = 1;
 		}
-		std::cout << "RESULT: " << result << "\n";
+		//std::cout << "RESULT: " << result << "\n";
 		break;
 	}
 
@@ -198,7 +211,7 @@ void AppManager::tellOutput(int output)
 		Eigen::VectorXd prediction = nN2->predict(inputs);
 		result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + 7)));
 
-		std::cout << "RESULT: " << result << "\n";
+		//std::cout << "RESULT: " << result << "\n";
 		break;
 	}
 	case 3: {
@@ -212,7 +225,7 @@ void AppManager::tellOutput(int output)
 		Eigen::VectorXd prediction = nN3->predict(inputs);
 		result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + 10)));
 
-		std::cout << "RESULT: " << result << "\n";
+		//std::cout << "RESULT: " << result << "\n";
 
 		break;
 	}
@@ -221,15 +234,16 @@ void AppManager::tellOutput(int output)
 		break;
 	}
 
-	//int inputSize = getCurrentNetwork()->getInputSize();
-	//Eigen::VectorXd outputVector = Eigen::VectorXd::Zero(inputSize);
-	//if (output >= 0 && output < inputSize) {
+	////would work only for scenario 2 and 3
+	//int outputSize = getCurrentNetwork()->getOutputSize();
+	//Eigen::VectorXd outputVector = Eigen::VectorXd::Zero(outputSize);
+	//if (output >= 0 && output < outputSize) {
 	//	outputVector[output] = 1.0;
 	//}
 
 	//getCurrentNetwork()->train(inputs, outputVector);
 	//Eigen::VectorXd prediction = getCurrentNetwork()->predict(inputs);
-	//result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + inputSize))); //prediction.end() by nefungovalo? (neviem co je vo vnutry)
+	//result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + outputSize))); //prediction.end() by nefungovalo? (neviem co je vo vnutry)
   
 	updateCurrentScene();
 	gui->setOuput(result);
@@ -242,11 +256,24 @@ void AppManager::renderNewScene() {
 }
 
 void AppManager::predictCurrentGuiInput() {
-	int inputSize = getCurrentNetwork()->getInputSize();
+	int result = -1;
 	Eigen::VectorXd prediction = getCurrentNetwork()->predict(setNetworkInput());
-	auto inpt = setNetworkInput();
-	//std::cout << prediction[0] << ", " << prediction[1] << std::endl;
-	int result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + inputSize)));
+	int currScenario = gui->getCurrentScenrio();
+	switch (currScenario) {
+		case 1: {
+			double normalizedPrediction = prediction[0];
+			if (getCurrentNetwork()->getActivationFuncName() == "Tanh") {
+				normalizedPrediction = (prediction[0] + 1.0) / 2.0;
+			}
+			result = static_cast<int>(std::round(normalizedPrediction));
+			result = std::min(result, 1);
+			break;
+		}
+		default: {
+			int outputSize = getCurrentNetwork()->getOutputSize();
+			result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + outputSize)));
+		}
+	}
 	gui->setOuput(result);
 }
 

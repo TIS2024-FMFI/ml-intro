@@ -305,11 +305,22 @@ void ImGuiApp::myControllPanelFrame() {
         appManager->runNetwork();
         appManager->updateCurrentScene();
     }
+    ImGui::SameLine();
     if (ImGui::Button("Save")) {
         appManager->saveNetwork();
     }
+    ImGui::SameLine();
     if (ImGui::Button("Load")) {
         appManager->loadNetwork();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Reset")) {
+        appManager->resetNetworkToRandomValues();
+        appManager->predictCurrentGuiInput();
+        appManager->updateCurrentScene();
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("sets all the weights to random values");
     }
 
     ImGui::EndChild();

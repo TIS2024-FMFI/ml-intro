@@ -29,5 +29,7 @@ public:
 
 	void renderNewScene();
 	void updateCurrentScene();
+
+	void resetNetworkToRandomValues();
 };
 
