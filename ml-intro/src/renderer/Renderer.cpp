@@ -4,6 +4,11 @@ Renderer::Renderer() {
 	glPointSize(25.0f);
 	glLineWidth(1.0f);
 
+	Edge::negCol = &negative;
+	Node::negCol = &negative;
+	Edge::posCol = &positive;
+	Node::posCol = &positive;
+
 	loadNN({}, {});
 }
 
@@ -18,6 +23,7 @@ void Renderer::loadNN(vector<Eigen::MatrixXd> activations,  vector<Eigen::Matrix
 	generatePositions(activations);
 	createVertices();
 	createEdges();
+	renderText = false;
 	updateNN(activations, weights);
 
 }
@@ -42,8 +48,6 @@ void Renderer::renderScene() {
 
 
 void Renderer::generatePositions(vector<Eigen::MatrixXd> activations) {
-	float layerSpacing = 2.0f, nodeSpacing = 1.0f;
-	if (squareRender) { layerSpacing = 5; nodeSpacing = 0.5f; }
 	int nOfLayers = activations.size();
 	vertPos.clear();
 
@@ -51,7 +55,7 @@ void Renderer::generatePositions(vector<Eigen::MatrixXd> activations) {
 		float x = (layer - (nOfLayers-1) * .5f) * layerSpacing;
 		vertPos.push_back({});
 		int n = activations[layer].size();
-		int square = sqrt(n);
+		int square = ceil(sqrt(n));
 		for (int i = 0; i < n; i++) {
 			float y = (squareRender ? (i % square) - (square-1) * .5f : i - (n-1)*.5f) * nodeSpacing;
 			float z = (squareRender ? (i / square) - (square-1) * .5f : 0) * nodeSpacing;
@@ -86,7 +90,6 @@ void Renderer::setupLabels(vector<Eigen::MatrixXd> activations, vector<Eigen::Ma
 	Label::InitializeBuffers();
 	Label::ClearLabels();
 	Label::UploadData();
-	renderText = false;
 
 	vector<float> data = unzipVec(activations);
 	int i = 0;

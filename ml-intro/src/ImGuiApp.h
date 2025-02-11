@@ -8,12 +8,16 @@
 #include <Windows.h>
 #include <tchar.h>
 #include <GLFW/glfw3.h>
-#include "imgui.h"
-#include "imgui_impl_win32.h"
-#include "imgui_impl_opengl3.h"
+#include <imgui.h>
+#include <imgui_internal.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 #include "renderer/Renderer.h"
 #include "functions.cpp"
 #include "string"
+#include "myGui/Scenario.h"
+#include "myGui/ScenarioFactory.h"
+#include "MyWindow.h"
 
 
 class AppManager;
@@ -25,45 +29,40 @@ static WGL_WindowData g_MainWindow = { nullptr };
 
 class ImGuiApp {
 public:
-    ImGuiApp(AppManager& appManager, HINSTANCE hInstance);
+    double bias = 1;
+    double learningRate = 0.05f;
+    int activationFunctionOutput = 0;
+    int activationFunctionHidden = 0;
+
+    ImGuiApp(AppManager& appManager);
     ~ImGuiApp();
-    bool Initialize();
     void Run();
 
     int getCurrentScenrio() { return currentScenario; }
-    std::shared_ptr<Function> getActivationFunctionOutput();
-    std::shared_ptr<Function> getActivationFunctionHidden();
     void setOuput(int Output) { output = Output; }
-    int getOutput() { return output; }
     int getEpochs() { return epochs; }
-    float getBias() { return bias; }
-    float getLearningRate() { return learningRate; }
-    ImVec4 getInput() { return color; }
-    std::vector<float> getInput2() { return networkInputVector; };
-    std::vector<std::vector<bool>> getBitmap() { return bitmap; };
+    std::vector<float> getInput() { return networkInputVector; };
 
-    Renderer* renderer = nullptr;
+    Renderer* renderer;
 
 private:
+    MyWindow myWindow = MyWindow(1280, 720);
     HWND hwnd;
     WNDCLASSEX wc;
     HINSTANCE hInstance;
 
-    const int canvasSize = 28;
-    const float pixelSize = 20.0f;
-    std::vector<std::vector<bool>> bitmap;
 
     AppManager* appManager;
-    bool running;
-    int currentScenario;
-    std::string activationFunctionNameOutput;
-    std::string activationFunctionNameHidden;
+    bool darkTheme = false;
+    bool isRenderDebugOpen = false;
+    int currentScenario = 1;
+
+    std::vector<float> networkInputVector = { 0, 0 };
     int output = -1;
-    int epochs;
-    float bias;
-    float learningRate;
-    ImVec4 color;
-    std::vector<float> networkInputVector = {0, 0};
+    int epochs = 10;
+    std::string activationFunctionNameHidden = "Relu";
+    vector<string> outputLayerFunctOptions = { "ReLu", "Sigmoid", "Tanh", "SoftMax" };
+    vector<string> hiddenLayerFunctOptions = { "ReLu", "Sigmoid", "Tanh" };
 
     ImVec2 rendererSize = ImVec2(500, 500);
     Camera camera = Camera(glm::vec3(0, 0, 5), glm::vec3(0, 0, 0), &rendererSize.x, &rendererSize.y);
@@ -72,25 +71,12 @@ private:
     static LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
     static bool CreateDeviceWGL(HWND hWnd, WGL_WindowData* data);
     static void CleanupDeviceWGL(HWND hWnd, WGL_WindowData* data);
-    void Render();
-    void RenderMenuBar();
-    bool CustomButton(const char* label, ImVec4 color);
-    void RenderRunButton();
-    void RenderSaveButton();
-    void RenderLoadButton();
-    void RenderActivationFunctionsOuput();
-    void RenderActivationFunctionsHidden();
-    void RenderScenario_1();
-    void RenderScenario_2();
-    void RenderScenario_3();
-    void GradientColorPicker(const char* label, float* color);
-    void RendererFrame();
-    void DrawBitmapEditor();
-    void RenderOuput_1();
-    void RenderOuput_2();
-    void RenderTellOuput_2();
-    void MouseDeltaHandeler();
-    void SendParameters();
+    void InitializeNewFrame();
+    void myMenuBar();
+    void myControlPanelFrame();
+    void myRendererFrame();
+    void myRendererDebugPanel();
+    void MouseCameraHandeler();
 
 };
 

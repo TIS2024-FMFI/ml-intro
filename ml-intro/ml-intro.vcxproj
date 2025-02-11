@@ -147,6 +147,9 @@
     <ClCompile Include="src\functions.cpp" />
     <ClCompile Include="src\ImGuiApp.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\myGui\CustomImGui.cpp" />
+    <ClCompile Include="src\myGui\ScenarioFactory.cpp" />
+    <ClCompile Include="src\myGui\Scenario_1.h" />
     <ClCompile Include="src\renderer\Edge.cpp" />
     <ClCompile Include="src\renderer\FrameBuffer.cpp" />
     <ClCompile Include="src\renderer\Label.cpp" />
@@ -171,6 +174,12 @@
     <ClInclude Include="src\AppManager.h" />
     <ClInclude Include="src\FileDialog.h" />
     <ClInclude Include="src\ImGuiApp.h" />
+    <ClInclude Include="src\myGui\CustomImGui.h" />
+    <ClInclude Include="src\myGui\Scenario.h" />
+    <ClInclude Include="src\myGui\ScenarioFactory.h" />
+    <ClInclude Include="src\myGui\Scenario_2.h" />
+    <ClInclude Include="src\myGui\Scenario_3.h" />
+    <ClInclude Include="src\MyWindow.h" />
     <ClInclude Include="src\renderer\Camera.h" />
     <ClInclude Include="src\renderer\Edge.h" />
     <ClInclude Include="src\renderer\FrameBuffer.h" />

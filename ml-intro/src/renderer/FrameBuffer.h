@@ -12,6 +12,8 @@ public:
 	void RescaleFrameBuffer(float width, float height);
 	void Bind() const;
 	void Unbind() const;
+
+	glm::vec3 bcg = glm::vec3(.7, .75, .8);
 private:
 	GLuint fbo;
 	GLuint texture;

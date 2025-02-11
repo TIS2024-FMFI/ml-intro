@@ -6,6 +6,9 @@ GLuint Node::nodeVBO = 0;
 std::vector<float> Node::nodeData;
 bool Node::initialized = false;
 int Node::vertCount = 0;
+vec3* Node::negCol = nullptr;
+vec3* Node::posCol = nullptr;
+float Node::PointSize = 4;
 
 Node::Node(vec3 position) : pos(position) {
     Node::AddNode(*this);
@@ -70,7 +73,10 @@ void Node::RenderNodes(Camera* cam) {
 
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, value_ptr(cam->GetViewMatrix()));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, value_ptr(cam->GetProjMatrix()));
-    glUniform1f(glGetUniformLocation(shaderProgram, "pointSize"), 400.0f);
+    glUniform1f(glGetUniformLocation(shaderProgram, "pointSize"), 100.0f*PointSize);
+
+    glUniform3f(glGetUniformLocation(shaderProgram, "negCol"), negCol->x, negCol->y, negCol->z);
+    glUniform3f(glGetUniformLocation(shaderProgram, "posCol"), posCol->x, posCol->y, posCol->z);
 
     glBindVertexArray(nodeVAO);
     glDrawArrays(GL_POINTS, 0, vertCount);

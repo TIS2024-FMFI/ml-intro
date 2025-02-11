@@ -90,6 +90,15 @@
     <ClCompile Include="src\trainingSet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\myGui\Scenario_1.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\myGui\CustomImGui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\myGui\ScenarioFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vendor\ImGui\imconfig.h">
@@ -168,6 +177,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\trainingSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\myGui\Scenario.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\myGui\CustomImGui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\myGui\ScenarioFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\myGui\Scenario_2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\myGui\Scenario_3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MyWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

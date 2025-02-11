@@ -5,10 +5,10 @@
 
 // Constructor
 NeuralNetwork::NeuralNetwork(int inputSize, int hiddenSize, int outputSize,
-    std::shared_ptr<Function> hiddenActivationFunction,
-    std::shared_ptr<Function> outputActivationFunction)
+    int* hiddenActivationFunction, int* outputActivationFunction,
+    double* bias_ptr, double* learningRate_ptr)
     : inputSize(inputSize), hiddenSize(hiddenSize), outputSize(outputSize),
-    learningRate(0.05), bias(1.0), lambda(0.01),
+    learningRate(learningRate_ptr), bias(bias_ptr), lambda(0.01),
     hiddenActivationFunction(hiddenActivationFunction), outputActivationFunction(outputActivationFunction)
      {
 
@@ -33,20 +33,20 @@ Eigen::VectorXd NeuralNetwork::predict(const Eigen::VectorXd& inputs) {
     lastInput = inputs;
 
     if (hiddenSize > 0) {
-        Eigen::VectorXd hiddenInput = hiddenWeights * inputs + Eigen::VectorXd::Constant(hiddenSize, bias);
+        Eigen::VectorXd hiddenInput = hiddenWeights * inputs + Eigen::VectorXd::Constant(hiddenSize, *bias);
         Eigen::VectorXd hiddenOutput = hiddenInput.unaryExpr([this](double x) {
-            return hiddenActivationFunction->function(x);
+            return listFunctions[*hiddenActivationFunction]->function(x);
             });
 
-        Eigen::VectorXd outputInput = outputWeights * hiddenOutput + Eigen::VectorXd::Constant(outputSize, bias);
+        Eigen::VectorXd outputInput = outputWeights * hiddenOutput + Eigen::VectorXd::Constant(outputSize, *bias);
         finalOutput = outputInput.unaryExpr([this](double x) {
-            return outputActivationFunction ? outputActivationFunction->function(x) : x;
+            return listFunctions[*outputActivationFunction]->function(x);
             });
     }
     else {
-        Eigen::VectorXd outputInput = outputWeights * inputs + Eigen::VectorXd::Constant(outputSize, bias);
+        Eigen::VectorXd outputInput = outputWeights * inputs + Eigen::VectorXd::Constant(outputSize, *bias);
         finalOutput = outputInput.unaryExpr([this](double x) {
-            return outputActivationFunction ? outputActivationFunction->function(x) : x;
+            return listFunctions[*outputActivationFunction]->function(x);
             });
     }
 
@@ -64,16 +64,16 @@ void NeuralNetwork::train(const Eigen::VectorXd& inputs, const Eigen::VectorXd& 
     lastInput = inputs;
 
     if (hiddenSize > 0) {
-        Eigen::VectorXd hiddenInput = hiddenWeights * inputs + Eigen::VectorXd::Constant(hiddenSize, bias);
+        Eigen::VectorXd hiddenInput = hiddenWeights * inputs + Eigen::VectorXd::Constant(hiddenSize, *bias);
         hiddenOutput = hiddenInput.unaryExpr([this](double x) {
-            return hiddenActivationFunction->function(x);
+            return listFunctions[*hiddenActivationFunction]->function(x);
             });
     }
 
     Eigen::VectorXd outputInput = (hiddenSize > 0 ? outputWeights * hiddenOutput : outputWeights * inputs) +
-        Eigen::VectorXd::Constant(outputSize, bias);
+        Eigen::VectorXd::Constant(outputSize, *bias);
     finalOutput = outputInput.unaryExpr([this](double x) {
-        return outputActivationFunction ? outputActivationFunction->function(x) : x;
+        return listFunctions[*outputActivationFunction]->function(x);
         });
 
     if (!outputActivationFunction) {
@@ -83,29 +83,29 @@ void NeuralNetwork::train(const Eigen::VectorXd& inputs, const Eigen::VectorXd& 
     Eigen::VectorXd outputErrors = finalOutput - targets;
     if (outputActivationFunction) {
         outputErrors = outputErrors.array() * outputInput.unaryExpr([this](double x) {
-            return outputActivationFunction->derivative(x);
+            return listFunctions[*outputActivationFunction]->derivative(x);
             }).array();
     }
 
     // Update output weights with L2 regularization
     if (hiddenSize > 0) {
         Eigen::MatrixXd gradientOutput = outputErrors * hiddenOutput.transpose();
-        outputWeights -= learningRate * (gradientOutput + lambda * outputWeights); // Add L2 penalty
+        outputWeights -= *learningRate * (gradientOutput + lambda * outputWeights); // Add L2 penalty
     }
     else {
         Eigen::MatrixXd gradientOutput = outputErrors * inputs.transpose();
-        outputWeights -= learningRate * (gradientOutput + lambda * outputWeights); // Add L2 penalty
+        outputWeights -= *learningRate * (gradientOutput + lambda * outputWeights); // Add L2 penalty
     }
 
     // Update hidden weights with L2 regularization
     if (hiddenSize > 0) {
         Eigen::VectorXd hiddenErrors = outputWeights.transpose() * outputErrors;
         hiddenErrors = hiddenErrors.array() * hiddenOutput.unaryExpr([this](double x) {
-            return hiddenActivationFunction->derivative(x);
+            return listFunctions[*hiddenActivationFunction]->derivative(x);
             }).array();
 
             Eigen::MatrixXd gradientHidden = hiddenErrors * inputs.transpose();
-            hiddenWeights -= learningRate * (gradientHidden + lambda * hiddenWeights); // Add L2 penalty
+            hiddenWeights -= *learningRate * (gradientHidden + lambda * hiddenWeights); // Add L2 penalty
     }
 }
 
@@ -138,33 +138,33 @@ void NeuralNetwork::fit(const std::vector<Eigen::VectorXd>& trainingData,
 }
 
 // Set the activation function for the hidden layer
-void NeuralNetwork::setHiddenActivationFunction(std::shared_ptr<Function> activationFunction) {
-    hiddenActivationFunction = activationFunction;
+void NeuralNetwork::setHiddenActivationFunction(int activationFunction) {
+    *hiddenActivationFunction = activationFunction;
 }
 
 // Set the activation function for the output layer
-void NeuralNetwork::setOutputActivationFunction(std::shared_ptr<Function> activationFunction) {
-    outputActivationFunction = activationFunction;
+void NeuralNetwork::setOutputActivationFunction(int activationFunction) {
+    *outputActivationFunction = activationFunction;
 }
 
 // Get the current bias value
 double NeuralNetwork::getBias() const {
-    return bias;
+    return *bias;
 }
 
 // Set a new bias value for the network
 void NeuralNetwork::setBias(double newBias) {
-    bias = newBias;
+    *bias = newBias;
 }
 
 // Get the current learning rate
 double NeuralNetwork::getLearningRate() const {
-    return learningRate;
+    return *learningRate;
 }
 
 // Set a new learning rate for the network
 void NeuralNetwork::setLearningRate(double newLearningRate) {
-    learningRate = newLearningRate;
+    *learningRate = newLearningRate;
 }
 
 // Apply the softmax function to a vector
@@ -185,11 +185,11 @@ void NeuralNetwork::saveNetwork(const std::string& filename) {
     networkJson["inputSize"] = inputSize;
     networkJson["hiddenSize"] = hiddenSize;
     networkJson["outputSize"] = outputSize;
-    networkJson["learningRate"] = learningRate;
-    networkJson["bias"] = bias;
+    networkJson["learningRate"] = *learningRate;
+    networkJson["bias"] = *bias;
 
     // Save activation function names
-    networkJson["hiddenActivationFunction"] = hiddenActivationFunction ? hiddenActivationFunction->name() : "None";
+    networkJson["hiddenActivationFunction"] = listFunctions[*hiddenActivationFunction]->name();
     networkJson["outputActivationFunction"] = getActivationFuncName();
 
     // Save hidden layer weights
@@ -251,40 +251,37 @@ void NeuralNetwork::loadNetwork(const std::string& filename) {
     }
 
     // Load general properties
-    learningRate = networkJson["learningRate"];
-    bias = networkJson["bias"];
+    *learningRate = networkJson["learningRate"];
+    *bias = networkJson["bias"];
 
     // Load activation functions
     std::string hiddenActivationName = networkJson["hiddenActivationFunction"];
     std::string outputActivationName = networkJson["outputActivationFunction"];
 
     if (hiddenActivationName == "ReLu") {
-        hiddenActivationFunction = std::make_shared<ReLu>();
+        *hiddenActivationFunction = 0;
     }
     else if (hiddenActivationName == "Sigmoid") {
-        hiddenActivationFunction = std::make_shared<Sigmoid>();
+        *hiddenActivationFunction = 1;
     }
     else if (hiddenActivationName == "Tanh") {
-        hiddenActivationFunction = std::make_shared<Tanh>();
+        *hiddenActivationFunction = 2;
     }
     else {
-        hiddenActivationFunction = std::make_shared<ReLu>();
+        *hiddenActivationFunction = 3;
     }
 
     if (outputActivationName == "ReLu") {
-        outputActivationFunction = std::make_shared<ReLu>();
+        *outputActivationFunction = 0;
     }
     else if (outputActivationName == "Sigmoid") {
-        outputActivationFunction = std::make_shared<Sigmoid>();
+        *outputActivationFunction = 1;
     }
     else if (outputActivationName == "Tanh") {
-        outputActivationFunction = std::make_shared<Tanh>();
-    }
-    else if (outputActivationName == "SoftMax") {
-        outputActivationFunction = nullptr;
+        *outputActivationFunction = 2;
     }
     else {
-        outputActivationFunction = std::make_shared<ReLu>();
+        *outputActivationFunction = 0;
     }
 
     // Load hidden layer weights
@@ -315,7 +312,7 @@ std::string NeuralNetwork::getActivationFuncName() {
     if (outputActivationFunction == nullptr) {
         return "SoftMax";
     }
-    return outputActivationFunction->name();
+    return listFunctions[*outputActivationFunction]->name();
 }
 std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> NeuralNetwork::extractNetworkData() const {
 
@@ -331,9 +328,9 @@ std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> NeuralNetw
     Eigen::VectorXd hiddenOutput;
     if (hiddenSize > 0) {
         // Hidden layer: compute activations
-        Eigen::VectorXd hiddenInput = hiddenWeights * input + Eigen::VectorXd::Constant(hiddenSize, bias);
+        Eigen::VectorXd hiddenInput = hiddenWeights * input + Eigen::VectorXd::Constant(hiddenSize, *bias);
         hiddenOutput = hiddenInput.unaryExpr([this](double x) {
-            return hiddenActivationFunction->function(x);
+            return listFunctions[*hiddenActivationFunction]->function(x);
             });
 
         Eigen::MatrixXd hiddenActivations = hiddenOutput; // Store hidden layer activations
@@ -341,9 +338,9 @@ std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> NeuralNetw
     }
 
     // Output layer: compute activations
-    Eigen::VectorXd outputInput = (hiddenSize > 0 ? outputWeights * hiddenOutput : outputWeights * input) + Eigen::VectorXd::Constant(outputSize, bias);
+    Eigen::VectorXd outputInput = (hiddenSize > 0 ? outputWeights * hiddenOutput : outputWeights * input) + Eigen::VectorXd::Constant(outputSize, *bias);
     Eigen::VectorXd finalOutput = outputInput.unaryExpr([this](double x) {
-        return outputActivationFunction ? outputActivationFunction->function(x) : x;
+        return listFunctions[*outputActivationFunction]->function(x);
         });
 
     if (!outputActivationFunction) {

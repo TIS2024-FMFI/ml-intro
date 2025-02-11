@@ -29,6 +29,7 @@ public:
 
     Label(vec3 position, float weight);
 
+    static float FontSize;
     static void InitializeBuffers();
     static void AddLabel(const Label& label);
     static void UploadData();
