@@ -37,6 +37,13 @@ public:
 	void setText(bool doRender) { renderText = doRender; };
 	bool isEnabled() { return renderText; }
 	void renderLabels();
+
+	vec3 negative = vec3(1, 0, 0);
+	vec3 positive = vec3(0, 1, 0);
+	float layerSpacing = 2.0f;
+	float nodeSpacing = 1.0f;
+	bool squareRender = false;
+
 private:
 	Renderer();
 	~Renderer() {}
@@ -54,7 +61,6 @@ private:
 
 	bool initialized = false;
 	bool renderText = false;
-	bool squareRender = false;
 
 	//temp
 	//vector<pair<vec3, vec3>> edges;

@@ -6,6 +6,9 @@ GLuint Edge::edgeVBO = 0;
 std::vector<float> Edge::edgeData;
 bool Edge::initialized = false;
 int Edge::vertCount = 0;
+vec3* Edge::negCol = nullptr;
+vec3* Edge::posCol = nullptr;
+float Edge::LineSize = 1;
 
 Edge::Edge(vec3 posA, vec3 posB) : posA(posA), posB(posB) {
     Edge::AddEdge(*this);
@@ -67,6 +70,7 @@ void Edge::ClearEdges() {
 
 void Edge::RenderEdges(Camera* cam) {
     if (!initialized) return;
+    glLineWidth(LineSize);
 
     auto now = chrono::system_clock::now();
     auto duration = now.time_since_epoch();
@@ -81,6 +85,9 @@ void Edge::RenderEdges(Camera* cam) {
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(cam->GetViewMatrix()));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(cam->GetProjMatrix()));
     glUniform1f(glGetUniformLocation(shaderProgram, "t"), t);
+
+    glUniform3f(glGetUniformLocation(shaderProgram, "negCol"), negCol->x, negCol->y, negCol->z);
+    glUniform3f(glGetUniformLocation(shaderProgram, "posCol"), posCol->x, posCol->y, posCol->z);
 
 
     glBindVertexArray(edgeVAO);

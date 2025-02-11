@@ -3,28 +3,19 @@
 
 AppManager::AppManager()
 {
-	gui = new ImGuiApp(*this, GetModuleHandle(nullptr));
+	gui = new ImGuiApp(*this);
 
 	networks[1] = std::make_unique<NeuralNetwork>( 2      , 0  , 1 , &gui->activationFunctionHidden, &gui->activationFunctionOutput, &gui->bias, &gui->learningRate);
 	networks[2] = std::make_unique<NeuralNetwork>( 3      , 5  , 7 , &gui->activationFunctionHidden, &gui->activationFunctionOutput, &gui->bias, &gui->learningRate);
 	networks[3] = std::make_unique<NeuralNetwork>( 28 * 28, 128, 10, &gui->activationFunctionHidden, &gui->activationFunctionOutput, &gui->bias, &gui->learningRate);
+
+	gui->Run();
 }
 
 AppManager::~AppManager()
 {
 	delete gui;
 }
-
-void AppManager::run()
-{
-	if (!gui->Initialize()) {
-		MessageBox(nullptr, _T("Failed to initialize ImGui application"), _T("Error"), MB_OK | MB_ICONERROR);
-		return;
-	}
-
-	gui->Run();
-}
-
 
 
 void AppManager::runNetwork()

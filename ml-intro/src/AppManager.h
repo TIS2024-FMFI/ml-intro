@@ -17,8 +17,6 @@ public:
 	AppManager();
 	~AppManager();
 
-	void run();
-
 	void runNetwork();
 	void saveNetwork();
 	void loadNetwork();

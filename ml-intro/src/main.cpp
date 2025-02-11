@@ -8,7 +8,6 @@
 int main(void)
 {
     AppManager app = AppManager();
-    app.run();
 
     // TESTING NN SCENAR1
     /*NeuralNetwork nn(2, 0, 1,nullptr, nullptr, [](double x) { return Sigmoid().function(x); }, [](double x) { return Sigmoid().derivative(x); });;

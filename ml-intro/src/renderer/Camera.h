@@ -11,6 +11,8 @@
 # define PI           3.14159265358979323846
 //https://github.com/uysalaltas/Pixel-Engine/blob/main/Pixel/Camera.h
 
+using namespace glm;
+
 class Camera
 {
 public:
@@ -57,19 +59,46 @@ public:
         UpdateViewMatrix();
     }
 
-    void MoveCamera(glm::vec2 delta) {
-        glm::vec3 eye = m_eye - GetRightVector() * delta.x;
-        eye += GetUpVector() * delta.y;
-        eye = glm::normalize(eye) * distToTarget;
-        SetCameraView(eye, glm::vec3(0));
+    void ProcessMouseDelta(glm::vec2 delta) {
+        delta *= sensitivity;
+        if (isFreeCam) {
+            vec3 direction = normalize(m_lookAt - m_eye);
+            vec3 right = normalize(cross(direction, m_upVector));
+
+            mat4 horizontalRotation = rotate(mat4(1.0f), radians(-delta.x), m_upVector);
+            mat4 verticalRotation = rotate(mat4(1.0f), radians(-delta.y), right);
+
+            vec4 rotatedDirection = verticalRotation * horizontalRotation * vec4(direction, 1.0f);
+            SetCameraView(m_eye,  m_eye + vec3(rotatedDirection));
+        }
+        else {
+            glm::vec3 eye = m_eye - GetRightVector() * delta.x;
+            eye += GetUpVector() * delta.y;
+            eye = glm::normalize(eye) * distToTarget;
+            SetCameraView(eye, glm::vec3(0));
+        }
     }
 
     void ProcessMouseScroll(float y) {
-        distToTarget -= y * 0.1;
+        if (isFreeCam) return;
+        distToTarget -= y * scrSpeed;
         distToTarget = glm::clamp(distToTarget, 1.0f, 25.0f);
-        SetCameraView(glm::normalize(m_eye) * distToTarget, glm::vec3(0));
+        SetCameraView(glm::normalize(m_eye) * distToTarget, m_lookAt);
     }
 
+    void ProcessKeyboardInput(vec2 dir) {
+        if (!isFreeCam) return;
+        dir *= camSpeed;
+        vec3 offset = GetViewDir() * dir.y + GetRightVector() * dir.x;
+        m_eye += offset;
+        m_lookAt += offset;
+        UpdateViewMatrix();
+    }
+
+    bool isFreeCam = false;
+    float sensitivity = 1;
+    float scrSpeed = 0.2;
+    float camSpeed = 0.04;
 private:
     glm::mat4x4 m_viewMatrix;
     glm::mat4x4 m_projMatrix;

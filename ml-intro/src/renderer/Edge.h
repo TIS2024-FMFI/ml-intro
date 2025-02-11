@@ -16,6 +16,9 @@ public:
     vec3 posB;
     float weight;
     static GLuint shaderProgram;
+    static vec3* negCol;
+    static vec3* posCol;
+    static float LineSize;
 
     Edge(vec3 posA, vec3 posB);
 

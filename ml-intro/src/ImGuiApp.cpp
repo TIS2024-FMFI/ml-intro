@@ -2,208 +2,113 @@
 #include <iostream>
 #include "AppManager.h"
 
-ImGuiApp::ImGuiApp(AppManager& appManager, HINSTANCE hInstance) : appManager(&appManager), hInstance(hInstance), hwnd(nullptr) {}
-
-ImGuiApp::~ImGuiApp() {
-    if (ImGui::GetCurrentContext()) {
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplWin32_Shutdown();
-        ImGui::DestroyContext();
-    }
-
-    if (g_hRC) {
-        wglMakeCurrent(nullptr, nullptr);
-        wglDeleteContext(g_hRC);
-    }
-
-    if (g_MainWindow.hDC) {
-        ReleaseDC(hwnd, g_MainWindow.hDC);
-    }
-
-    if (hwnd && IsWindow(hwnd)) {
-        DestroyWindow(hwnd);
-    }
-
-    if (wc.lpszClassName) {
-        UnregisterClass(wc.lpszClassName, wc.hInstance); // Unregister class after destroying the window
-    }
-
-    CleanupDeviceWGL(hwnd, &g_MainWindow);
-}
-
-bool ImGuiApp::Initialize() {
-    wc = { sizeof(wc), CS_OWNDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"ImGui Example", nullptr };
-    RegisterClassExW(&wc);
-    hwnd = CreateWindowW(wc.lpszClassName, L"ML for Students", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, nullptr, nullptr, wc.hInstance, nullptr);
-
-    if (!hwnd) {
-        MessageBox(nullptr, L"Failed to create window", L"Error", MB_OK | MB_ICONERROR);
-        return false;
-    }
-
-
-    // Initialize OpenGL
-    if (!CreateDeviceWGL(hwnd, &g_MainWindow))
-    {
-        CleanupDeviceWGL(hwnd, &g_MainWindow);
-        DestroyWindow(hwnd);
-        UnregisterClassW(wc.lpszClassName, wc.hInstance);
-        return false;
-    }
-
-    wglMakeCurrent(g_MainWindow.hDC, g_hRC);
-
-    if (!glfwInit()) {
-        return false;
-    }
-
-    // initialize GLAD
-    if (!gladLoadGL()) {
-        std::cerr << "Failed to initialize GLAD" << std::endl;
-        return false;
-    }
-
-    // Show the window
-    ::ShowWindow(hwnd, SW_SHOWDEFAULT);
-    ::UpdateWindow(hwnd);
-
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
+ImGuiApp::ImGuiApp(AppManager& appManager) : appManager(&appManager)
+{
+    const char* glsl_version = "#version 330";
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;    // Enable Gamepad Controls
+    darkTheme ? ImGui::StyleColorsDark() : ImGui::StyleColorsLight();
 
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowPadding.x = 3;
+    style.WindowPadding.y = 3;
 
     // Setup Platform/Renderer backends
-    ImGui_ImplWin32_InitForOpenGL(hwnd);
-    ImGui_ImplOpenGL3_Init();
-
-    ShowWindow(hwnd, SW_SHOWDEFAULT);
-    UpdateWindow(hwnd);
-
+    ImGui_ImplGlfw_InitForOpenGL(myWindow.window, true);
+    ImGui_ImplOpenGL3_Init(glsl_version);
 
     frameBuffer = new FrameBuffer(rendererSize.x, rendererSize.y);
     renderer = &Renderer::getInstance();
     renderer->Init(frameBuffer, &camera);
+}
 
-    appManager->renderNewScene();
-    return true;
+ImGuiApp::~ImGuiApp() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 }
 
 void ImGuiApp::Run() {
-    MSG msg;
-    ZeroMemory(&msg, sizeof(msg));
-    while (running) {
-        while (PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-            if (msg.message == WM_QUIT)
-                running = false;
+    appManager->predictCurrentGuiInput();
+    appManager->renderNewScene();
+    while (!glfwWindowShouldClose(myWindow.window)) {
+        InitializeNewFrame();
+
+        myRendererFrame();
+
+        myControlPanelFrame();
+
+        if (isRenderDebugOpen) {
+            myRendererDebugPanel();
         }
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplWin32_NewFrame();
-        ImGui::NewFrame();
-
-        Render();
-
         ImGui::Render();
-        ImVec2 displaySize = ImGui::GetIO().DisplaySize;
-        glViewport(0, 0, (int)displaySize.x, (int)displaySize.y);
-        glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
-        glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        SwapBuffers(GetDC(hwnd));
+        ImGuiIO& io = ImGui::GetIO();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
+
+        glfwSwapBuffers(myWindow.window);
+        glfwPollEvents();
     }
 }
 
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-LRESULT WINAPI ImGuiApp::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
-        return true;
-
-    switch (msg) {
-    case WM_SIZE:
-        if (wParam != SIZE_MINIMIZED)
-            glViewport(0, 0, (int)LOWORD(lParam), (int)HIWORD(lParam));
-        return 0;
-    case WM_SYSCOMMAND:
-        if ((wParam & 0xfff0) == SC_KEYMENU)
-            return 0;
-        break;
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        return 0;
-    }
-    return DefWindowProc(hWnd, msg, wParam, lParam);
-}
-
-bool ImGuiApp::CreateDeviceWGL(HWND hWnd, WGL_WindowData* data)
+void ImGuiApp::InitializeNewFrame()
 {
-    HDC hDc = ::GetDC(hWnd);
-    PIXELFORMATDESCRIPTOR pfd = { 0 };
-    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 32;
-    pfd.cDepthBits = 24;
-    pfd.cStencilBits = 8;
-    pfd.iLayerType = PFD_MAIN_PLANE;
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
 
-    const int pf = ::ChoosePixelFormat(hDc, &pfd);
-    if (pf == 0)
-        return false;
-    if (::SetPixelFormat(hDc, pf, &pfd) == FALSE)
-        return false;
-    ::ReleaseDC(hWnd, hDc);
+    // Create the docking environment
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+        ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_MenuBar;
 
-    data->hDC = ::GetDC(hWnd);
-    if (!g_hRC)
-        g_hRC = wglCreateContext(data->hDC);
 
-    return true;
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::GetStyle().WindowRounding = 0.0f;
+
+    if (ImGui::Begin("InvisibleWindowDock", nullptr, windowFlags)) {
+
+        myMenuBar();
+
+        ImGuiID dockSpaceId = ImGui::GetID("InvisibleWindowDock");
+        ImGui::DockSpace(dockSpaceId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+
+        static auto first_time = true;
+        if (first_time)
+        {
+            first_time = false;
+
+            ImGui::DockBuilderRemoveNode(dockSpaceId); // clear any previous layout
+            ImGui::DockBuilderAddNode(dockSpaceId, ImGuiDockNodeFlags_DockSpace | ImGuiDockNodeFlags_NoUndocking);
+            ImGui::DockBuilderSetNodeSize(dockSpaceId, ImGui::GetIO().DisplaySize);
+
+            ImGuiID left_dock_id;
+            ImGuiID right_dock_id;
+            ImGui::DockBuilderSplitNode(dockSpaceId, ImGuiDir_Right, 0.2f, &right_dock_id, &left_dock_id);
+
+            ImGui::DockBuilderDockWindow("Network Control Panel", right_dock_id);
+            ImGui::DockBuilderDockWindow("Renderer", left_dock_id);
+            ImGui::DockBuilderFinish(dockSpaceId);
+        }
+    }ImGui::End();
 }
 
-void ImGuiApp::CleanupDeviceWGL(HWND hWnd, WGL_WindowData* data)
-{
-    if (g_hRC) {
-        wglMakeCurrent(nullptr, nullptr);
-        wglDeleteContext(g_hRC);
-        g_hRC = nullptr;
-    }
-
-    if (data->hDC) {
-        ReleaseDC(hWnd, data->hDC);
-        data->hDC = nullptr;
-    }
-}
-
-void ImGuiApp::Render() {
-    ImVec2 displaySize = ImGui::GetIO().DisplaySize;
-
-    ImGui::SetNextWindowPos(ImVec2(0, 0));
-    ImGui::SetNextWindowSize(displaySize);
-
-    ImGui::Begin("Main Scene", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
-
-    RenderMenuBar();
-
-    myRendererFrame();
-
-    ImGui::SameLine();
-
-    myControllPanelFrame();
-
-    ImGui::End();
-}
-
-void ImGuiApp::RenderMenuBar() {
+void ImGuiApp::myMenuBar() {
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("Scenarios")) {
             if (ImGui::MenuItem("Scenario 1", nullptr, currentScenario == 1)) {
@@ -213,7 +118,7 @@ void ImGuiApp::RenderMenuBar() {
             }
             if (ImGui::MenuItem("Scenario 2", nullptr, currentScenario == 2)) { 
                 currentScenario = 2;
-                networkInputVector = { networkInputVector[0], networkInputVector[1], networkInputVector[2] };
+                networkInputVector = { networkInputVector[0], networkInputVector[1], 0 };
                 renderer->PlaneRender(); appManager->renderNewScene();
             }
             if (ImGui::MenuItem("Scenario 3", nullptr, currentScenario == 3)) { 
@@ -235,17 +140,10 @@ void ImGuiApp::RenderMenuBar() {
                 renderer->setText(!renderer->isEnabled()); 
                 renderer->renderLabels(); 
             };
-            if (renderer->isSquareRender()) {
-                if (ImGui::MenuItem("set Plane Render")) {
-                    renderer->PlaneRender();
-                    appManager->renderNewScene();
-                }
-            }
-            else {
-                if (ImGui::MenuItem("set Square Render")) {
-                    renderer->SquareRender();
-                    appManager->renderNewScene();
-                }
+            if (ImGui::MenuItem("Renderer debug", nullptr, &isRenderDebugOpen));
+            if (ImGui::MenuItem(darkTheme ? "Light Theme" : "Dark Theme")) {
+                darkTheme ? ImGui::StyleColorsLight() : ImGui::StyleColorsDark();
+                darkTheme = !darkTheme;
             }
             ImGui::EndMenu();
         }
@@ -255,31 +153,36 @@ void ImGuiApp::RenderMenuBar() {
 }
 
 void ImGuiApp::myRendererFrame() {
+    ImGuiWindowClass window_class1;
+    window_class1.DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoDockingOverMe;
+    window_class1.DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoDockingOverOther;
+    window_class1.DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoTabBar;
+
     static ImVec2 lastRendererScale = ImVec2(0, 0);
-    ImVec2 space = ImGui::GetContentRegionAvail();
-    ImGui::BeginChild("Renderer", ImVec2(space.x / 2, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
+    ImGui::SetNextWindowClass(&window_class1);
+    if (ImGui::Begin("Renderer", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar)) {
 
-    rendererSize = ImGui::GetContentRegionAvail();
-    MouseCameraHandeler();
-    if (rendererSize.x != lastRendererScale.x || rendererSize.y != lastRendererScale.y) {
-        frameBuffer->RescaleFrameBuffer(rendererSize.x, rendererSize.y);
-        lastRendererScale = rendererSize;
-    }
-    glViewport(0, 0, rendererSize.x, rendererSize.y);
-    renderer->renderScene();
+        MouseCameraHandeler();
+        rendererSize = ImGui::GetContentRegionAvail();
+        if (rendererSize.x != lastRendererScale.x || rendererSize.y != lastRendererScale.y) {
+            frameBuffer->RescaleFrameBuffer(rendererSize.x, rendererSize.y);
+            lastRendererScale = rendererSize;
+        }
+        glViewport(0, 0, rendererSize.x, rendererSize.y);
+        renderer->renderScene();
 
-    ImGui::Image(
-        (ImTextureID)renderer->getFrameTexture(),
-        rendererSize,
-        ImVec2(0, 1),
-        ImVec2(1, 0)
-    );
+        ImGui::Image(
+            (ImTextureID)renderer->getFrameTexture(),
+            rendererSize,
+            ImVec2(0, 1),
+            ImVec2(1, 0)
+        );
 
-    ImGui::EndChild();
+    }ImGui::End();
 }
 
-void ImGuiApp::myControllPanelFrame() {
-    ImGui::BeginChild("Controls", ImVec2(0, 0));
+void ImGuiApp::myControlPanelFrame() {
+    ImGui::Begin("Network Control Panel", NULL);
 
     std::unique_ptr<Scenario> scenario = ScenarioFactory::create(currentScenario);
 
@@ -310,7 +213,7 @@ void ImGuiApp::myControllPanelFrame() {
         appManager->loadNetwork();
     }
 
-    ImGui::EndChild();
+    ImGui::End();
 }
 
 void ImGuiApp::MouseCameraHandeler()
@@ -326,7 +229,7 @@ void ImGuiApp::MouseCameraHandeler()
         }
         else if (isDragging)
         {
-            camera.MoveCamera(vec2(io.MouseDelta.x, io.MouseDelta.y) * 0.05f);
+            camera.ProcessMouseDelta(vec2(io.MouseDelta.x, io.MouseDelta.y) * 0.05f);
         }
     }
     else if (isDragging)
@@ -337,4 +240,38 @@ void ImGuiApp::MouseCameraHandeler()
     if (isDragging || ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) {
         camera.ProcessMouseScroll(io.MouseWheel);
     }
+    if (ImGui::IsKeyDown(ImGuiKey_W)) camera.ProcessKeyboardInput(vec2(0, 1));
+    if (ImGui::IsKeyDown(ImGuiKey_A)) camera.ProcessKeyboardInput(vec2(-1,0));
+    if (ImGui::IsKeyDown(ImGuiKey_S)) camera.ProcessKeyboardInput(vec2(0,-1));
+    if (ImGui::IsKeyDown(ImGuiKey_D)) camera.ProcessKeyboardInput(vec2(1, 0));
+}
+
+void ImGuiApp::myRendererDebugPanel() {
+    if(ImGui::Begin("Renderer Debug Panel", &isRenderDebugOpen)) {
+        if (ImGui::CollapsingHeader("Camera Settings")) {
+            ImGui::Checkbox("Camera Free Cam", &camera.isFreeCam);
+            ImGui::SliderFloat("Sensitivity", &camera.sensitivity, 0, 5);
+            ImGui::SliderFloat("Scroll Speed", &camera.scrSpeed, 0, 5);
+            ImGui::SliderFloat("Camera Speed", &camera.camSpeed, 0, 1);
+        }
+        if (ImGui::CollapsingHeader("Renderer Settings")) {
+            ImGui::ColorEdit3("Background Color", &frameBuffer->bcg.x);
+            ImGui::ColorEdit3("Negative Color", &renderer->negative.x);
+            ImGui::ColorEdit3("Positive Color", &renderer->positive.x);
+            ImGui::SliderFloat("Vertex Size", &Node::PointSize, 0, 10);
+            ImGui::SliderFloat("Edge Size", &Edge::LineSize, 0, 10);
+            if (ImGui::SliderFloat("FontSize", &Label::FontSize, 0, 4)) {
+                Label::ClearLabels();
+                renderer->renderLabels();
+            }
+            if (ImGui::Checkbox("Square Render", &renderer->squareRender)) {
+                appManager->renderNewScene();
+            }
+            if (ImGui::SliderFloat("Node Spacing", &renderer->nodeSpacing, 0, 10) ||
+                ImGui::SliderFloat("Layer Spacing", &renderer->layerSpacing, 0, 10)) 
+            {
+                appManager->renderNewScene();
+            }
+        }
+    }ImGui::End();
 }

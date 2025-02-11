@@ -21,7 +21,7 @@ int Label::vertexCount = 0;
 int Label::rectVxCount = 0;
 vec2 Label::atlasSize = vec2(0, 0);
 float Label::scale = 0.002f;
-
+float Label::FontSize = 1;
 
 Label::Label(vec3 position, float weight) : pos(position), weight(weight) {
     std::ostringstream stream;
@@ -142,6 +142,7 @@ void Label::GenerateFontAtlas(const string& fontPath) {
 
 
 void Label::AddLabel(const Label& label) {
+    float scale = Label::scale * FontSize;
     float x = 0;
     for (const char& c : label.text) {
         Character ch = characters[c];
