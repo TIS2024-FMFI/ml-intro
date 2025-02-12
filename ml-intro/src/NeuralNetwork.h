@@ -1,6 +1,7 @@
 #pragma once
 #ifndef NEURALNETWORK_H
 #define NEURALNETWORK_H
+#define EIGEN_USE_THREADS
 
 #include "functions.cpp"
 #include <Eigen/Dense>

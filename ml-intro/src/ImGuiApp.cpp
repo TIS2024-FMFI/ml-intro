@@ -2,13 +2,14 @@
 #include <iostream>
 #include "AppManager.h"
 #include "openWindow.h"
+#include "myGui/CustomLightStyle.h"
 
 
 ImGuiApp::ImGuiApp(AppManager& appManager) : appManager(&appManager)
 {
     const char* glsl_version = "#version 330";
     ImGui::CreateContext();
-    darkTheme ? ImGui::StyleColorsDark() : ImGui::StyleColorsLight();
+    darkTheme ? ImGui::StyleColorsDark() : SetSoftLightTheme();
 
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -144,7 +145,7 @@ void ImGuiApp::myMenuBar() {
             };
             if (ImGui::MenuItem("Renderer debug", nullptr, &isRenderDebugOpen));
             if (ImGui::MenuItem(darkTheme ? "Light Theme" : "Dark Theme")) {
-                darkTheme ? ImGui::StyleColorsLight() : ImGui::StyleColorsDark();
+                darkTheme ? SetSoftLightTheme() : ImGui::StyleColorsDark();
                 darkTheme = !darkTheme;
             }
             ImGui::EndMenu();
@@ -199,8 +200,10 @@ void ImGuiApp::myControlPanelFrame() {
         scenario->customDoubleSlider("Bias", bias, -1, 1);
         scenario->customDoubleSlider("Learning Rate", learningRate, 0, 0.5);
         scenario->customMultiSelector("Activation Function (output layer)", outputLayerFunctOptions, activationFunctionOutput);
-        scenario->customMultiSelector("Activation Function (hidden layer)", hiddenLayerFunctOptions, activationFunctionHidden);
-        scenario->customIntSlider("epochs", epochs, 10, 100);
+        if (currentScenario != 1) {
+            scenario->customMultiSelector("Activation Function (hidden layer)", hiddenLayerFunctOptions, activationFunctionHidden);
+        }
+        scenario->customIntSlider("epochs", epochs, 1, 100);
     }
 
     
