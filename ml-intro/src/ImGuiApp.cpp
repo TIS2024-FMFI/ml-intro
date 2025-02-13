@@ -212,11 +212,11 @@ void ImGuiApp::myControlPanelFrame() {
         appManager->updateCurrentScene();
     }
     ImGui::SameLine();
-    if (ImGui::Button("Save")) {
+    if (ImGui::Button("Save NN")) {
         appManager->saveNetwork();
     }
     ImGui::SameLine();
-    if (ImGui::Button("Load")) {
+    if (ImGui::Button("Load NN")) {
         appManager->loadNetwork();
     }
     ImGui::SameLine();
@@ -227,6 +227,16 @@ void ImGuiApp::myControlPanelFrame() {
     }
     if (ImGui::IsItemHovered()) {
         ImGui::SetTooltip("sets all the weights to random values");
+    }
+    if(currentScenario !=3){
+        ImGui::SameLine();
+        if (ImGui::Button("Save TrainingSet")) {
+            appManager->saveTrainingSet();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Load TrainingSet")) {
+            appManager->loadTrainingSet();
+        }
     }
 
     ImGui::End();

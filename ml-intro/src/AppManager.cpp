@@ -165,6 +165,34 @@ void AppManager::loadNetwork()
 
 }
 
+void AppManager::saveTrainingSet()
+{
+	try {
+		std::string filepath = saveFileDialog();
+		getCurrentNetwork()->saveTrainingSet(filepath);
+
+	}
+	catch (const std::exception& e) {
+		std::cerr << "Error: " << e.what() << std::endl;
+	}
+}
+
+void AppManager::loadTrainingSet()
+{
+	try {
+		std::string filepath = openFileDialog();
+		getCurrentNetwork()->loadTrainingSet(filepath);
+
+	}
+	catch (const std::exception& e) {
+		std::cerr << "Error: " << e.what() << std::endl;
+	}
+
+}
+
+
+
+
 // TODO
 Eigen::VectorXd AppManager::setNetworkInput()
 {
@@ -186,6 +214,7 @@ void AppManager::tellOutput(int output)
 		double outputValue = static_cast<double>(output);
 
 		nN1->train(inputs, Eigen::VectorXd::Constant(1, outputValue));
+		nN1->changeTrainingSet(inputs, Eigen::VectorXd::Constant(1, outputValue));
 		Eigen::VectorXd prediction = nN1->predict(inputs);
 		double normalizedPrediction = prediction[0];
 		if (nN1->getActivationFuncName() == "Tanh") {
@@ -205,7 +234,7 @@ void AppManager::tellOutput(int output)
 		if (output >= 0 && output < 7) {
 			outputVector[output] = 1.0;
 		}
-
+		nN2->changeTrainingSet(inputs, outputVector);
 		nN2->train(inputs, outputVector);
 		Eigen::VectorXd prediction = nN2->predict(inputs);
 		result = static_cast<int>(std::distance(prediction.data(), std::max_element(prediction.data(), prediction.data() + 7)));
