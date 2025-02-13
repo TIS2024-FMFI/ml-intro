@@ -173,7 +173,6 @@
     <ClCompile Include="src\openWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\Desktop\CustomLightStyle.h" />
     <ClInclude Include="src\AppManager.h" />
     <ClInclude Include="src\FileDialog.h" />
     <ClInclude Include="src\ImGuiApp.h" />

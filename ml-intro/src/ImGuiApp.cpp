@@ -244,27 +244,38 @@ void ImGuiApp::myControlPanelFrame() {
 
 void ImGuiApp::MouseCameraHandeler()
 {
-    ImGuiIO& io = ImGui::GetIO();
     static bool isDragging = false;
+    static POINT dragStartPos;
+
+    POINT mousePos;
+    if (!GetCursorPos(&mousePos)) {
+        mousePos.x = mousePos.y = 0;
+    }
 
     if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
     {
-        if (!isDragging && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
+        if (!isDragging && !ImGui::IsAnyItemActive() &&
+            ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
         {
+            ShowCursor(FALSE);
+            dragStartPos = mousePos;
             isDragging = true;
         }
-        else if (isDragging)
-        {
-            camera.ProcessMouseDelta(vec2(io.MouseDelta.x, io.MouseDelta.y) * 0.05f);
+        else if (isDragging) {
+            camera.ProcessMouseDelta(vec2(mousePos.x - dragStartPos.x, mousePos.y - dragStartPos.y) * .05f);
+            std::cout << mousePos.x - dragStartPos.x << " & " << mousePos.y - dragStartPos.y << std::endl;
+            SetCursorPos(dragStartPos.x, dragStartPos.y);
         }
     }
     else if (isDragging)
     {
+        SetCursorPos(dragStartPos.x, dragStartPos.y);
         isDragging = false;
+        ShowCursor(TRUE);
     }
 
     if (isDragging || ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) {
-        camera.ProcessMouseScroll(io.MouseWheel);
+        camera.ProcessMouseScroll(ImGui::GetIO().MouseWheel);
     }
     if (ImGui::IsKeyDown(ImGuiKey_W)) camera.ProcessKeyboardInput(vec2(0, 1));
     if (ImGui::IsKeyDown(ImGuiKey_A)) camera.ProcessKeyboardInput(vec2(-1,0));
