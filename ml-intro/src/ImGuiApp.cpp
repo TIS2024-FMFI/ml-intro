@@ -263,7 +263,6 @@ void ImGuiApp::MouseCameraHandeler()
         }
         else if (isDragging) {
             camera.ProcessMouseDelta(vec2(mousePos.x - dragStartPos.x, mousePos.y - dragStartPos.y) * .05f);
-            std::cout << mousePos.x - dragStartPos.x << " & " << mousePos.y - dragStartPos.y << std::endl;
             SetCursorPos(dragStartPos.x, dragStartPos.y);
         }
     }
