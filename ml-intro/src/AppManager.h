@@ -20,6 +20,8 @@ public:
 	void runNetwork();
 	void saveNetwork();
 	void loadNetwork();
+	void saveTrainingSet();
+	void loadTrainingSet();
 	Eigen::VectorXd setNetworkInput();
 
 	void tellOutput(int output); 

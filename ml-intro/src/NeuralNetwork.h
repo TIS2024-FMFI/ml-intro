@@ -1,6 +1,7 @@
 #pragma once
 #ifndef NEURALNETWORK_H
 #define NEURALNETWORK_H
+#define EIGEN_USE_THREADS
 
 #include "functions.cpp"
 #include <Eigen/Dense>
@@ -11,6 +12,7 @@
 #include <fstream>
 #include "json.hpp"
 #include <chrono>
+#include "trainingSet.h"
 
 class NeuralNetwork {
 private:
@@ -29,7 +31,7 @@ private:
     // Weights and biases represented as matrices/vectors
     Eigen::MatrixXd hiddenWeights;
     Eigen::MatrixXd outputWeights;
-
+    std::pair<std::vector<Eigen::VectorXd>, std::vector<Eigen::VectorXd>> trainingSet;
 
     // Helper to compute layer outputs
     Eigen::VectorXd computeLayerOutput(const Eigen::MatrixXd& weights, const Eigen::VectorXd& biases,
@@ -69,15 +71,21 @@ public:
     // Save and load network state
     void saveNetwork(const std::string& filename);
     void loadNetwork(const std::string& filename);
+    void saveTrainingSet(const std::string& filename);
+    void loadTrainingSet(const std::string& filename);
 
     // Utility function for softmax
     Eigen::VectorXd softmax(const Eigen::VectorXd& logits) const;
 
     std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> extractNetworkData() const;
 
+    void changeTrainingSet(const Eigen::VectorXd& inputs, const Eigen::VectorXd& targets);
+
     int getInputSize() { return inputSize; }
     int getHiddenSize() { return hiddenSize; }
     int getOutputSize() { return outputSize; }
+    std::pair<std::vector<Eigen::VectorXd>, std::vector<Eigen::VectorXd>> getTrainingSet() { return trainingSet; }
+
 };
 
 #endif // NEURALNETWORK_H

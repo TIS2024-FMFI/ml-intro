@@ -25,6 +25,18 @@ NeuralNetwork::NeuralNetwork(int inputSize, int hiddenSize, int outputSize,
 
 
     lastInput = Eigen::VectorXd::Zero(inputSize);
+    std::vector<Eigen::VectorXd> tSet = generateTrainingSet1(50);
+    std::vector<Eigen::VectorXd> targets = generateTargets1(tSet);
+    if (inputSize == 3) {
+        tSet = generateTrainingSet2(50);
+        targets = generateTargets2(tSet);
+    }
+    
+    trainingSet.first = tSet;
+    trainingSet.second = targets;
+    if (outputSize == 10) {
+        trainingSet = loadFixedTrainingSet();
+    }
 }
 
 // Predict output for given inputs
@@ -133,7 +145,7 @@ void NeuralNetwork::fit(const std::vector<Eigen::VectorXd>& trainingData,
 
         // Print accuracy for each epoch
         double accuracy = (static_cast<double>(correctPredictions) / trainingData.size()) * 100.0;
-        std::cout << "Epoch " << epoch + 1 << ": Accuracy: " << accuracy << "%" << std::endl;
+        //std::cout << "Epoch " << epoch + 1 << ": Accuracy: " << accuracy << "%" << std::endl;
     }
 }
 
@@ -343,7 +355,7 @@ std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> NeuralNetw
         return listFunctions[*outputActivationFunction]->function(x);
         });
 
-    if (!outputActivationFunction) {
+    if (*outputActivationFunction == 3) {
         finalOutput = softmax(finalOutput);
     }
 
@@ -362,5 +374,136 @@ std::pair<std::vector<Eigen::MatrixXd>, std::vector<Eigen::MatrixXd>> NeuralNetw
 
     return { layers, weights };
 }
+
+void NeuralNetwork::changeTrainingSet(const Eigen::VectorXd& inputs, const Eigen::VectorXd& targets) {
+    // 1. Remove the first element in both vectors (if they are not empty)
+    if (!trainingSet.first.empty()) {
+        trainingSet.first.erase(trainingSet.first.begin());
+    }
+    if (!trainingSet.second.empty()) {
+        trainingSet.second.erase(trainingSet.second.begin());
+    }
+
+    // 2. Add (push_back) the new element at the end of both vectors
+    trainingSet.first.push_back(inputs);
+    trainingSet.second.push_back(targets);
+}
+
+void NeuralNetwork::saveTrainingSet(const std::string& filename)
+{
+    nlohmann::json j;
+
+    // Serialize the 'inputs' (trainingSet.first)
+    // Each Eigen::VectorXd is stored as a JSON array of doubles
+    for (const auto& vec : trainingSet.first) {
+        std::vector<double> data(vec.size());
+        for (int i = 0; i < vec.size(); ++i) {
+            data[i] = vec(i);
+        }
+        j["trainingSet"]["inputs"].push_back(data);
+    }
+
+    // Serialize the 'targets' (trainingSet.second)
+    for (const auto& vec : trainingSet.second) {
+        std::vector<double> data(vec.size());
+        for (int i = 0; i < vec.size(); ++i) {
+            data[i] = vec(i);
+        }
+        j["trainingSet"]["targets"].push_back(data);
+    }
+
+    // Write to file
+    std::ofstream file(filename);
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open file for saving training set: " + filename);
+    }
+
+    file << j.dump(4); // Pretty print with 4-space indentation
+    file.close();
+
+    std::cout << "Training set saved to " << filename << std::endl;
+}
+
+
+void NeuralNetwork::loadTrainingSet(const std::string& filename)
+{
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open file for loading training set: " + filename);
+    }
+
+    nlohmann::json j;
+    file >> j;
+    file.close();
+
+    // Basic structure check
+    if (!j.contains("trainingSet") ||
+        !j["trainingSet"].contains("inputs") ||
+        !j["trainingSet"].contains("targets"))
+    {
+        throw std::runtime_error("JSON file does not contain valid training set data.");
+    }
+
+    // Prepare temporary containers
+    std::vector<Eigen::VectorXd> tempInputs;
+    std::vector<Eigen::VectorXd> tempTargets;
+
+    // Parse and validate 'inputs'
+    for (auto& arr : j["trainingSet"]["inputs"])
+    {
+        // Check size
+        if (arr.size() != static_cast<size_t>(inputSize)) {
+            throw std::runtime_error(
+                "Input vector size mismatch. Expected "
+                + std::to_string(inputSize)
+                + ", got "
+                + std::to_string(arr.size()) + "."
+            );
+        }
+
+        // Convert JSON array to Eigen::VectorXd and range check
+        Eigen::VectorXd vec(arr.size());
+        for (int i = 0; i < static_cast<int>(arr.size()); ++i) {
+            double val = arr[i].get<double>();
+            // Check range [0.0, 1.0]
+            if (val < 0.0 || val > 1.0) {
+                throw std::runtime_error(
+                    "Input value out of range [0.0, 1.0]: " + std::to_string(val)
+                );
+            }
+            vec(i) = val;
+        }
+        tempInputs.push_back(vec);
+    }
+
+    // Parse and validate 'targets'
+    for (auto& arr : j["trainingSet"]["targets"]) {
+        // Check size
+        if (arr.size() != static_cast<size_t>(outputSize)) {
+            throw std::runtime_error(
+                "Target vector size mismatch. Expected "
+                + std::to_string(outputSize)
+                + ", got "
+                + std::to_string(arr.size()) + "."
+            );
+        }
+
+        // Convert JSON array to Eigen::VectorXd
+        Eigen::VectorXd vec(arr.size());
+        for (int i = 0; i < static_cast<int>(arr.size()); ++i) {
+            vec(i) = arr[i].get<double>();
+        }
+        tempTargets.push_back(vec);
+    }
+
+    // If we got here, validation passed. Assign to the class member.
+    trainingSet.first = std::move(tempInputs);
+    trainingSet.second = std::move(tempTargets);
+
+    std::cout << "Training set loaded from " << filename << std::endl;
+}
+
+
+
 
 

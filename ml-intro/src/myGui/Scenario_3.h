@@ -6,7 +6,7 @@ public:
     bool customInputBlock(string name, vector<float>& networkInput) override {
         bool isChanged = false;
         if (ImGui::CollapsingHeader(name.c_str())) {
-            isChanged = myBitmapEditor(ImVec2(20 * 28, 20 * 28), ImVec2(28, 28), networkInput);
+            isChanged = myBitmapEditor(ImVec2(10 * 28, 10 * 28), ImVec2(28, 28), networkInput);
             if (ImGui::Button("Clear")) {
                 networkInput = std::vector<float>(networkInput.size(), 0);
                 isChanged = true;

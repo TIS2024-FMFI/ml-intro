@@ -2,13 +2,14 @@
 #include <iostream>
 #include "AppManager.h"
 #include "openWindow.h"
+#include "myGui/CustomLightStyle.h"
 
 
 ImGuiApp::ImGuiApp(AppManager& appManager) : appManager(&appManager)
 {
     const char* glsl_version = "#version 330";
     ImGui::CreateContext();
-    darkTheme ? ImGui::StyleColorsDark() : ImGui::StyleColorsLight();
+    darkTheme ? ImGui::StyleColorsDark() : SetSoftLightTheme();
 
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -144,7 +145,7 @@ void ImGuiApp::myMenuBar() {
             };
             if (ImGui::MenuItem("Renderer debug", nullptr, &isRenderDebugOpen));
             if (ImGui::MenuItem(darkTheme ? "Light Theme" : "Dark Theme")) {
-                darkTheme ? ImGui::StyleColorsLight() : ImGui::StyleColorsDark();
+                darkTheme ? SetSoftLightTheme() : ImGui::StyleColorsDark();
                 darkTheme = !darkTheme;
             }
             ImGui::EndMenu();
@@ -199,8 +200,10 @@ void ImGuiApp::myControlPanelFrame() {
         scenario->customDoubleSlider("Bias", bias, -1, 1);
         scenario->customDoubleSlider("Learning Rate", learningRate, 0, 0.5);
         scenario->customMultiSelector("Activation Function (output layer)", outputLayerFunctOptions, activationFunctionOutput);
-        scenario->customMultiSelector("Activation Function (hidden layer)", hiddenLayerFunctOptions, activationFunctionHidden);
-        scenario->customIntSlider("epochs", epochs, 10, 100);
+        if (currentScenario != 1) {
+            scenario->customMultiSelector("Activation Function (hidden layer)", hiddenLayerFunctOptions, activationFunctionHidden);
+        }
+        scenario->customIntSlider("epochs", epochs, 1, 100);
     }
 
     
@@ -209,11 +212,11 @@ void ImGuiApp::myControlPanelFrame() {
         appManager->updateCurrentScene();
     }
     ImGui::SameLine();
-    if (ImGui::Button("Save")) {
+    if (ImGui::Button("Save NN")) {
         appManager->saveNetwork();
     }
     ImGui::SameLine();
-    if (ImGui::Button("Load")) {
+    if (ImGui::Button("Load NN")) {
         appManager->loadNetwork();
     }
     ImGui::SameLine();
@@ -225,33 +228,53 @@ void ImGuiApp::myControlPanelFrame() {
     if (ImGui::IsItemHovered()) {
         ImGui::SetTooltip("sets all the weights to random values");
     }
+    if(currentScenario !=3){
+        ImGui::SameLine();
+        if (ImGui::Button("Save TrainingSet")) {
+            appManager->saveTrainingSet();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Load TrainingSet")) {
+            appManager->loadTrainingSet();
+        }
+    }
 
     ImGui::End();
 }
 
 void ImGuiApp::MouseCameraHandeler()
 {
-    ImGuiIO& io = ImGui::GetIO();
     static bool isDragging = false;
+    static POINT dragStartPos;
+
+    POINT mousePos;
+    if (!GetCursorPos(&mousePos)) {
+        mousePos.x = mousePos.y = 0;
+    }
 
     if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
     {
-        if (!isDragging && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
+        if (!isDragging && !ImGui::IsAnyItemActive() &&
+            ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
         {
+            ShowCursor(FALSE);
+            dragStartPos = mousePos;
             isDragging = true;
         }
-        else if (isDragging)
-        {
-            camera.ProcessMouseDelta(vec2(io.MouseDelta.x, io.MouseDelta.y) * 0.05f);
+        else if (isDragging) {
+            camera.ProcessMouseDelta(vec2(mousePos.x - dragStartPos.x, mousePos.y - dragStartPos.y) * .05f);
+            SetCursorPos(dragStartPos.x, dragStartPos.y);
         }
     }
     else if (isDragging)
     {
+        SetCursorPos(dragStartPos.x, dragStartPos.y);
         isDragging = false;
+        ShowCursor(TRUE);
     }
 
     if (isDragging || ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) {
-        camera.ProcessMouseScroll(io.MouseWheel);
+        camera.ProcessMouseScroll(ImGui::GetIO().MouseWheel);
     }
     if (ImGui::IsKeyDown(ImGuiKey_W)) camera.ProcessKeyboardInput(vec2(0, 1));
     if (ImGui::IsKeyDown(ImGuiKey_A)) camera.ProcessKeyboardInput(vec2(-1,0));

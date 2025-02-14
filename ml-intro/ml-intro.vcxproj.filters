@@ -197,5 +197,8 @@
     <ClInclude Include="src\MyWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\myGui\CustomLightStyle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

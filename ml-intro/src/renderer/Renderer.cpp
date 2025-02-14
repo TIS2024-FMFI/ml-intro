@@ -57,8 +57,9 @@ void Renderer::generatePositions(vector<Eigen::MatrixXd> activations) {
 		int n = activations[layer].size();
 		int square = ceil(sqrt(n));
 		for (int i = 0; i < n; i++) {
-			float y = (squareRender ? (i % square) - (square-1) * .5f : i - (n-1)*.5f) * nodeSpacing;
-			float z = (squareRender ? (i / square) - (square-1) * .5f : 0) * nodeSpacing;
+			bool doSquares = squareRender && layer != nOfLayers - 1;
+			float y = (doSquares ? (i / square) - (square-1) * .5f : i - (n-1)*.5f) * -nodeSpacing;
+			float z = (doSquares ? (i % square) - (square-1) * .5f : 0) * nodeSpacing;
 			vertPos.back().push_back(vec3(x, y, z));
 		}
 	}
