@@ -69,9 +69,9 @@ void AppManager::runNetwork()
 				normalizedPrediction = (prediction[0] + 1.0) / 2.0;
 			}
 
-			std::cout << std::fixed << std::setprecision(3);
-			std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose() << " NORMALIZED: " << normalizedPrediction
-				<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
+			//std::cout << std::fixed << std::setprecision(3);
+			//std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose() << " NORMALIZED: " << normalizedPrediction
+			//	<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
 		}
 		break;
 	}
