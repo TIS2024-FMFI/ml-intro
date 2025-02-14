@@ -145,7 +145,7 @@ void NeuralNetwork::fit(const std::vector<Eigen::VectorXd>& trainingData,
 
         // Print accuracy for each epoch
         double accuracy = (static_cast<double>(correctPredictions) / trainingData.size()) * 100.0;
-        std::cout << "Epoch " << epoch + 1 << ": Accuracy: " << accuracy << "%" << std::endl;
+        //std::cout << "Epoch " << epoch + 1 << ": Accuracy: " << accuracy << "%" << std::endl;
     }
 }
 
