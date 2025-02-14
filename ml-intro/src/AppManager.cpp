@@ -40,8 +40,8 @@ void AppManager::runNetwork()
 	switch (currScenario) {
 	case 1: {
 		auto nN1 = getCurrentNetwork();
-		trainingData = generateTrainingSet1(50);
-		targets = generateTargets1(trainingData);
+		trainingData = nN1->getTrainingSet().first;
+		targets = nN1->getTrainingSet().second;
 
 		//std::cout << "======================================================================\n";
 		//std::cout << "Predictions before training:\n";
@@ -69,16 +69,16 @@ void AppManager::runNetwork()
 				normalizedPrediction = (prediction[0] + 1.0) / 2.0;
 			}
 
-			//std::cout << std::fixed << std::setprecision(3);
-			//std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose() << " NORMALIZED: " << normalizedPrediction
-			//	<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
+			std::cout << std::fixed << std::setprecision(3);
+			std::cout << "Input: " << trainingData[i].transpose() << " Prediction: " << prediction.transpose() << " NORMALIZED: " << normalizedPrediction
+				<< std::setprecision(0) << " Target: " << targets[i].transpose() << "\n";
 		}
 		break;
 	}
 	case 2: {
 		auto nN2 = getCurrentNetwork();
-		trainingData = generateTrainingSet2(50);
-		targets = generateTargets2(trainingData);
+		trainingData = nN2->getTrainingSet().first;
+		targets = nN2->getTrainingSet().second;
 
 		//std::cout << "======================================================================\n";
 		//std::cout << "Predictions before training:\n";

@@ -84,6 +84,8 @@ public:
     int getInputSize() { return inputSize; }
     int getHiddenSize() { return hiddenSize; }
     int getOutputSize() { return outputSize; }
+    std::pair<std::vector<Eigen::VectorXd>, std::vector<Eigen::VectorXd>> getTrainingSet() { return trainingSet; }
+
 };
 
 #endif // NEURALNETWORK_H
