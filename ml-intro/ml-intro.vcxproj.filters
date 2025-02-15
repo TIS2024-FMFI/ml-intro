@@ -99,6 +99,9 @@
     <ClCompile Include="src\myGui\ScenarioFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\myGui\InputCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vendor\ImGui\imconfig.h">
@@ -198,6 +201,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\myGui\CustomLightStyle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\myGui\InputCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

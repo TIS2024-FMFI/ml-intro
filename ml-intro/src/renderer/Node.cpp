@@ -8,9 +8,9 @@ bool Node::initialized = false;
 int Node::vertCount = 0;
 vec3* Node::negCol = nullptr;
 vec3* Node::posCol = nullptr;
-float Node::PointSize = 4;
+float Node::PointSize = 3;
 
-Node::Node(vec3 position) : pos(position) {
+Node::Node(vec3 position, float isInputLayerNode) : pos(position), isInputLayerNode(isInputLayerNode){
     Node::AddNode(*this);
 }
 
@@ -23,11 +23,14 @@ void Node::InitializeBuffers() {
     glBindVertexArray(nodeVAO);
     glBindBuffer(GL_ARRAY_BUFFER, nodeVBO);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0); // Position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0); // Position
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(3 * sizeof(float))); // activation
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))); // activation
     glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(4 * sizeof(float))); // isInputLayer
+    glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -39,14 +42,14 @@ void Node::InitializeBuffers() {
 
 void Node::AddNode(const Node& node) {
     nodeData.insert(nodeData.end(), {
-            node.pos.x, node.pos.y, node.pos.z, 0
+            node.pos.x, node.pos.y, node.pos.z, 0, node.isInputLayerNode
         });
     vertCount++;
 }
 
 void Node::UpdateValues(vector<float> values) {
     for (int i = 0; i < vertCount; i++) {
-        nodeData[i * 4 + 3] = values[i];
+        nodeData[i * 5 + 3] = values[i];
     }
 }
 

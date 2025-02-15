@@ -197,7 +197,9 @@ void ImGuiApp::myControlPanelFrame() {
         scenario->customOutputBlock("Output", output);
         int out = scenario->customPickOutputBlock("Pick Output");
         if (out != -1) appManager->tellOutput(out); // one day you will be nicer
-        scenario->customDoubleSlider("Bias", bias, -1, 1);
+        if (scenario->customDoubleSlider("Bias", bias, -1, 1)) {
+            appManager->updateCurrentScene();
+        }
         scenario->customDoubleSlider("Learning Rate", learningRate, 0, 0.5);
         scenario->customMultiSelector("Activation Function (output layer)", outputLayerFunctOptions, activationFunctionOutput);
         if (currentScenario != 1) {
@@ -229,7 +231,6 @@ void ImGuiApp::myControlPanelFrame() {
         ImGui::SetTooltip("sets all the weights to random values");
     }
     if(currentScenario !=3){
-        ImGui::SameLine();
         if (ImGui::Button("Save TrainingSet")) {
             appManager->saveTrainingSet();
         }

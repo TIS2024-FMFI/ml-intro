@@ -71,11 +71,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)vendor\glad\include\;$(ProjectDir)vendor\glfw-3.4.bin.WIN64\include\;$(ProjectDir)vendor\glm-1.0.1\;$(ProjectDir)vendor\ImGui\;$(ProjectDir)vendor\freetype-2.13.3\include\;$(ProjectDir)vendor\ImGui\misc;$(ProjectDir)vendor\ImGui\backends;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)vendor\glad\include\;$(ProjectDir)vendor\glfw-3.4.bin.WIN64\include\;$(ProjectDir)vendor\glm-1.0.1\;$(ProjectDir)vendor\ImGui\;$(ProjectDir)vendor\freetype-2.13.3\include\;$(ProjectDir)vendor\openCV\opencv\build\include\;$(ProjectDir)vendor\ImGui\backends\</IncludePath>
     <LibraryPath>$(ProjectDir)vendor\glfw-3.4.bin.WIN64\lib-vc2022\;$(ProjectDir)vendor\freetype-2.13.3\release static\vs2015-2022\win64\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)vendor\glad\include\;$(ProjectDir)vendor\glfw-3.4.bin.WIN64\include\;$(ProjectDir)vendor\glm-1.0.1\;$(ProjectDir)vendor\ImGui\;$(ProjectDir)vendor\freetype-2.13.3\include\;$(ProjectDir)vendor\ImGui\backends;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)vendor\glad\include\;$(ProjectDir)vendor\glfw-3.4.bin.WIN64\include\;$(ProjectDir)vendor\glm-1.0.1\;$(ProjectDir)vendor\ImGui\;$(ProjectDir)vendor\freetype-2.13.3\include\;$(ProjectDir)vendor\openCV\opencv\build\include\;$(ProjectDir)vendor\ImGui\backends\</IncludePath>
     <LibraryPath>$(ProjectDir)vendor\glfw-3.4.bin.WIN64\lib-vc2022\;$(ProjectDir)vendor\freetype-2.13.3\release static\vs2015-2022\win64\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -118,8 +118,12 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;gdi32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;gdi32.lib;freetype.lib;opencv_world4100d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\openCV\opencv\build\x64\vc16\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /D "$(ProjectDir)resources\extra\opencv_world4100d.dll" "$(TargetDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -137,8 +141,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;gdi32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;gdi32.lib;freetype.lib;opencv_world4100.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\openCV\opencv\build\x64\vc16\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /D "$(ProjectDir)resources\extra\opencv_world4100.dll" "$(TargetDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -150,6 +158,7 @@
     <ClCompile Include="src\ImGuiApp.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\myGui\CustomImGui.cpp" />
+    <ClCompile Include="src\myGui\InputCamera.cpp" />
     <ClCompile Include="src\myGui\ScenarioFactory.cpp" />
     <ClCompile Include="src\myGui\Scenario_1.h" />
     <ClCompile Include="src\renderer\Edge.cpp" />
@@ -178,6 +187,7 @@
     <ClInclude Include="src\ImGuiApp.h" />
     <ClInclude Include="src\myGui\CustomImGui.h" />
     <ClInclude Include="src\myGui\CustomLightStyle.h" />
+    <ClInclude Include="src\myGui\InputCamera.h" />
     <ClInclude Include="src\myGui\Scenario.h" />
     <ClInclude Include="src\myGui\ScenarioFactory.h" />
     <ClInclude Include="src\myGui\Scenario_2.h" />

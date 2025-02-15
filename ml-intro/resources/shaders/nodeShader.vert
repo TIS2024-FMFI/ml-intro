@@ -1,8 +1,10 @@
 #version 330 core
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in float activation;
+layout (location = 2) in float isInputLayer;
 
 out vec4 vertexColor;
+out float isSquareNode;
 
 uniform mat4 view;
 uniform mat4 projection;
@@ -19,4 +21,5 @@ void main() {
     gl_PointSize = pointSize / -viewSpacePos.z;
     vec3 col = negCol * clamp(-activation, 0., 1.) + posCol * clamp(activation, 0., 1.);
     vertexColor = vec4(col, 1.0);
+    isSquareNode = isInputLayer;
 }

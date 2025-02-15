@@ -5,6 +5,7 @@ class Scenario_3 : public Scenario {
 public:
     bool customInputBlock(string name, vector<float>& networkInput) override {
         bool isChanged = false;
+        InputCamera::CloseCamera();
         if (ImGui::CollapsingHeader(name.c_str())) {
             isChanged = myBitmapEditor(ImVec2(10 * 28, 10 * 28), ImVec2(28, 28), networkInput);
             if (ImGui::Button("Clear")) {
