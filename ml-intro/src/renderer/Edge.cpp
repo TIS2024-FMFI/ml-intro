@@ -8,7 +8,7 @@ bool Edge::initialized = false;
 int Edge::vertCount = 0;
 vec3* Edge::negCol = nullptr;
 vec3* Edge::posCol = nullptr;
-float Edge::LineSize = 1;
+float Edge::LineSize = 5;
 
 Edge::Edge(vec3 posA, vec3 posB) : posA(posA), posB(posB) {
     Edge::AddEdge(*this);

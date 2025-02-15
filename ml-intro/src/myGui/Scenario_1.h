@@ -6,8 +6,27 @@ public:
     bool customInputBlock(string name, vector<float>& networkInput) override {
         bool wasChanged = false;
         if (ImGui::CollapsingHeader(name.c_str())) {
-            wasChanged = GradientColorPicker(networkInput);
-            ImGui::SameLine();
+            static bool useCamera = false;
+            if (ImGui::Button(useCamera ? "Simulate Input" : "Camera Input", ImVec2(150, 25))) {
+                useCamera = !useCamera;
+                InputCamera::SetDefault();
+            }
+            if (useCamera) {
+                auto camOutput = InputCamera::CameraSelectorUI();
+                if (camOutput.size() != 0) {
+                    wasChanged = true;
+                    networkInput = { camOutput[0], camOutput[1] };
+                }
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+                ImGui::Text("This Network supports only vec2 input.");
+                ImGui::Text("blue channel is ignored!");
+                ImGui::PopStyleColor();
+            }
+            else {
+                InputCamera::CloseCamera();
+                wasChanged = GradientColorPicker(networkInput);
+                ImGui::SameLine();
+            }
             ImGui::Text("Selected Color: ");
             ImGui::SameLine();
             ImGui::ColorButton("##Preview", ImVec4(networkInput[0], networkInput[1], 0.0f, 1.0f));

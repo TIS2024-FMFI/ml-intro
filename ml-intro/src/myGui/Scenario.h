@@ -3,6 +3,7 @@
 #include "CustomImGui.h"
 #include <iostream>
 #include <ranges>
+#include "InputCamera.h"
 
 class Scenario {
 public:
@@ -11,24 +12,26 @@ public:
     virtual int  customPickOutputBlock(string name) = 0;
     virtual ~Scenario() = default;
 
-    void customFloatSlider(string name, float& value, float min, float max) {
+    bool customFloatSlider(string name, float& value, float min, float max) {
         if (ImGui::CollapsingHeader(name.c_str())) {
-            ImGui::SliderFloat((name + "##slider").c_str(), &value, min, max);
+            return ImGui::SliderFloat((name + "##slider").c_str(), &value, min, max);
         }
     }
 
-    void customDoubleSlider(string name, double& value, double min, double max) {
+    bool customDoubleSlider(string name, double& value, double min, double max) {
         if (ImGui::CollapsingHeader(name.c_str())) {
             float tempFloat = static_cast<float>(value);
             if (ImGui::SliderFloat((name + "##slider").c_str(), &tempFloat, min, max)) {
                 value = static_cast<double>(tempFloat);
+                return true;
             }
         }
+        return false;
     }
 
-    void customIntSlider(string name, int& value, int min, int max) {
+    bool customIntSlider(string name, int& value, int min, int max) {
         if (ImGui::CollapsingHeader(name.c_str())) {
-            ImGui::SliderInt((name + "##slider").c_str(), &value, min, max);
+            return ImGui::SliderInt((name + "##slider").c_str(), &value, min, max);
         }
     }
 

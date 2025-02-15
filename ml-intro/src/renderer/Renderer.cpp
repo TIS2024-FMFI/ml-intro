@@ -68,9 +68,10 @@ void Renderer::generatePositions(vector<Eigen::MatrixXd> activations) {
 void Renderer::createVertices() {
 	Node::InitializeBuffers();
 	Node::ClearNodes();
-	for (auto layer : vertPos) {
+	for (int i = 0; i < vertPos.size(); i++) {
+		auto layer = vertPos[i];
 		for (vec3 vertex : layer) {
-			Node::Node(vertex);
+			Node::Node(vertex, i == 0);
 		}
 	}
 }

@@ -5,7 +5,28 @@ class Scenario_2 : public Scenario {
 public:
     bool customInputBlock(string name, vector<float>& networkInput) override {
         if (ImGui::CollapsingHeader((name).c_str())) {
-            return ImGui::ColorEdit3((name + "##vec3").c_str(), networkInput.data());
+            static bool useCamera = false;
+            if (ImGui::Button(useCamera ? "Simulate Input" : "Camera Input", ImVec2(150, 20))) {
+                useCamera = !useCamera;
+                InputCamera::SetDefault();
+            }
+
+            if (useCamera) {
+                auto camOutput = InputCamera::CameraSelectorUI();
+                ImGui::Text("Selected Color: ");
+                ImGui::SameLine();
+                if (camOutput.size() == 0) {
+                    ImGui::ColorButton("##Preview", ImVec4(networkInput[0], networkInput[1], networkInput[2], 1.0f));
+                    return false;
+                }
+                networkInput = camOutput;
+                ImGui::ColorButton("##Preview", ImVec4(networkInput[0], networkInput[1], networkInput[2], 1.0f));
+                return true;
+            }
+            else {
+                InputCamera::CloseCamera();
+                return ImGui::ColorEdit3((name + "##vec3").c_str(), networkInput.data());
+            }
         }
         return false;
     }

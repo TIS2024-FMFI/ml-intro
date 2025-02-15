@@ -13,8 +13,9 @@ class Node {
 public:
     vec3 pos;
     float activation;
+    float isInputLayerNode;
 
-    Node(vec3 position);
+    Node(vec3 position, float isInputLayerNode);
 
     static vec3* negCol;
     static vec3* posCol;
